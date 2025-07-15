@@ -1,0 +1,630 @@
+{% extends "monitor/base.html" %}
+
+{% block title %}系統健康監控 - {{ super() }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.css">
+<style>
+    .health-card {
+        border-left: 5px solid #6c757d;
+        transition: all 0.3s;
+    }
+    .health-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .health-card.green { border-left-color: #28a745; }
+    .health-card.yellow { border-left-color: #ffc107; }
+    .health-card.red { border-left-color: #dc3545; }
+    .health-card.blue { border-left-color: #007bff; }
+
+    .metric-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 10px solid #f8f9fa;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .metric-label {
+        font-size: 0.85rem;
+        position: absolute;
+        bottom: -30px;
+        left: 0;
+        right: 0;
+        text-align: center;
+    }
+    
+    .health-check-item {
+        padding: 10px 15px;
+        border-left: 4px solid #dee2e6;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+    }
+    .health-check-item.success { border-left-color: #28a745; }
+    .health-check-item.warning { border-left-color: #ffc107; }
+    .health-check-item.danger { border-left-color: #dc3545; }
+    
+    .system-status-badge {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .resource-chart {
+        height: 300px;
+    }
+    
+    .alert-history-item {
+        border-left: 3px solid #dee2e6;
+        padding: 10px 15px;
+        margin-bottom: 5px;
+    }
+    .alert-history-item.error { border-left-color: #dc3545; }
+    .alert-history-item.warning { border-left-color: #ffc107; }
+    .alert-history-item.info { border-left-color: #0dcaf0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-heartbeat me-2 text-danger"></i>
+            系統健康監控
+        </h2>
+        
+        <div>
+            <span class="badge bg-success system-status-badge" id="system-status-badge">系統狀態良好</span>
+        </div>
+    </div>
+    
+    <!-- 系統狀態總覽卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card health-card green mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">整體系統健康度</h5>
+                    <div id="overall-health-gauge" class="mb-3"></div>
+                    <p class="card-text" id="health-status-text">系統運行良好，無異常</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card mb-3">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">關鍵健康指標</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" id="refresh-health">
+                            <i class="fas fa-sync-alt me-1"></i>重新檢測
+                        </button>
+                        <button class="btn btn-sm btn-outline-dark ms-2" id="export-report">
+                            <i class="fas fa-file-download me-1"></i>匯出報告
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="metric-circle" style="border-color: #28a745">
+                                <div>
+                                    <div class="metric-value" id="uptime-value">--</div>
+                                </div>
+                                <div class="metric-label">系統運行時間</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="metric-circle" style="border-color: #007bff">
+                                <div>
+                                    <div class="metric-value" id="response-time">--</div>
+                                </div>
+                                <div class="metric-label">平均響應時間</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="metric-circle" style="border-color: #ffc107">
+                                <div>
+                                    <div class="metric-value" id="error-rate">--</div>
+                                </div>
+                                <div class="metric-label">錯誤率</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="metric-circle" style="border-color: #dc3545">
+                                <div>
+                                    <div class="metric-value" id="active-users">--</div>
+                                </div>
+                                <div class="metric-label">活躍連接</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 詳細健康檢查結果 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        系統檢查項目
+                    </h5>
+                </div>
+                <div class="card-body" id="health-checks-container">
+                    <div class="health-check-item success">
+                        <div class="d-flex justify-content-between">
+                            <strong>數據庫連線</strong>
+                            <span><i class="fas fa-check-circle text-success"></i></span>
+                        </div>
+                        <p class="small text-muted mb-0">數據庫連接正常，響應時間: 5ms</p>
+                    </div>
+                    
+                    <div class="health-check-item success">
+                        <div class="d-flex justify-content-between">
+                            <strong>磁碟空間</strong>
+                            <span><i class="fas fa-check-circle text-success"></i></span>
+                        </div>
+                        <p class="small text-muted mb-0">可用空間充足: 75.4 GB (65%)</p>
+                    </div>
+                    
+                    <div class="health-check-item warning">
+                        <div class="d-flex justify-content-between">
+                            <strong>記憶體使用</strong>
+                            <span><i class="fas fa-exclamation-circle text-warning"></i></span>
+                        </div>
+                        <p class="small text-muted mb-0">記憶體使用率較高: 78%</p>
+                    </div>
+                    
+                    <div class="health-check-item success">
+                        <div class="d-flex justify-content-between">
+                            <strong>爬蟲服務</strong>
+                            <span><i class="fas fa-check-circle text-success"></i></span>
+                        </div>
+                        <p class="small text-muted mb-0">爬蟲服務運行正常</p>
+                    </div>
+                    
+                    <div class="health-check-item success">
+                        <div class="d-flex justify-content-between">
+                            <strong>分析引擎</strong>
+                            <span><i class="fas fa-check-circle text-success"></i></span>
+                        </div>
+                        <p class="small text-muted mb-0">分析引擎工作正常</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        系統警示歷史
+                    </h5>
+                </div>
+                <div class="card-body" id="alert-history">
+                    <div class="alert-history-item warning">
+                        <div class="d-flex justify-content-between">
+                            <strong>記憶體使用率警告</strong>
+                            <small>今天 14:25</small>
+                        </div>
+                        <p class="small mb-0">系統記憶體使用率超過75%</p>
+                    </div>
+                    
+                    <div class="alert-history-item info">
+                        <div class="d-flex justify-content-between">
+                            <strong>系統自動重啟</strong>
+                            <small>昨天 23:15</small>
+                        </div>
+                        <p class="small mb-0">排程系統維護已完成</p>
+                    </div>
+                    
+                    <div class="alert-history-item error">
+                        <div class="d-flex justify-content-between">
+                            <strong>爬蟲服務錯誤</strong>
+                            <small>2天前</small>
+                        </div>
+                        <p class="small mb-0">Yahoo財經爬蟲連續3次請求失敗</p>
+                    </div>
+                    
+                    <div class="alert-history-item warning">
+                        <div class="d-flex justify-content-between">
+                            <strong>數據庫負載較高</strong>
+                            <small>3天前</small>
+                        </div>
+                        <p class="small mb-0">數據庫平均查詢時間增加至125ms</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 資源使用圖表 -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="fas fa-chart-area me-2"></i>
+                系統資源使用趨勢
+                <div class="float-end">
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary active" data-time="1h">1小時</button>
+                        <button type="button" class="btn btn-outline-secondary" data-time="6h">6小時</button>
+                        <button type="button" class="btn btn-outline-secondary" data-time="24h">24小時</button>
+                        <button type="button" class="btn btn-outline-secondary" data-time="7d">7天</button>
+                    </div>
+                </div>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-center mb-3">CPU 使用率</h5>
+                    <div id="cpu-chart" class="resource-chart"></div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-center mb-3">記憶體使用率</h5>
+                    <div id="memory-chart" class="resource-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 服務健康狀態表 -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="fas fa-server me-2"></i>
+                服務狀態
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>服務名稱</th>
+                            <th>狀態</th>
+                            <th>正常運行時間</th>
+                            <th>最後檢查</th>
+                            <th>資源使用</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="services-table">
+                        <tr>
+                            <td><i class="fas fa-database me-2"></i> 數據庫服務</td>
+                            <td><span class="badge bg-success">正常</span></td>
+                            <td>14天 3小時</td>
+                            <td>5分鐘前</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-success" style="width: 45%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">詳情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-spider me-2"></i> 爬蟲服務</td>
+                            <td><span class="badge bg-success">正常</span></td>
+                            <td>5天 7小時</td>
+                            <td>2分鐘前</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-warning" style="width: 72%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">詳情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-brain me-2"></i> 分析引擎</td>
+                            <td><span class="badge bg-success">正常</span></td>
+                            <td>5天 7小時</td>
+                            <td>2分鐘前</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-info" style="width: 35%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">詳情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-hdd me-2"></i> 緩存服務</td>
+                            <td><span class="badge bg-warning">警告</span></td>
+                            <td>8小時 23分鐘</td>
+                            <td>剛剛</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-danger" style="width: 88%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">詳情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-tasks me-2"></i> 排程任務</td>
+                            <td><span class="badge bg-success">正常</span></td>
+                            <td>14天 3小時</td>
+                            <td>10分鐘前</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">詳情</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 系統健康度儀表盤
+        const options = {
+            series: [85],
+            chart: {
+                height: 200,
+                type: 'radialBar',
+                offsetY: -10
+            },
+            plotOptions: {
+                radialBar: {
+                    startAngle: -135,
+                    endAngle: 135,
+                    dataLabels: {
+                        name: {
+                            fontSize: '16px',
+                            color: undefined,
+                            offsetY: 120
+                        },
+                        value: {
+                            offsetY: 76,
+                            fontSize: '22px',
+                            color: undefined,
+                            formatter: function (val) {
+                                return val + "%";
+                            }
+                        }
+                    }
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    shadeIntensity: 0.15,
+                    inverseColors: false,
+                    opacityFrom: 1,
+                    opacityTo: 1,
+                    stops: [0, 50, 65, 91]
+                },
+            },
+            stroke: {
+                dashArray: 4
+            },
+            labels: ['系統健康度'],
+            colors: ['#28a745'],
+        };
+
+        const chart = new ApexCharts(document.querySelector("#overall-health-gauge"), options);
+        chart.render();
+        
+        // CPU使用率圖表
+        const cpuOptions = {
+            series: [{
+                name: 'CPU使用率',
+                data: generateRandomData(24)
+            }],
+            chart: {
+                height: 300,
+                type: 'area',
+                toolbar: {
+                    show: false,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: generateTimeCategories(24),
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yy HH:mm'
+                },
+            },
+            colors: ['#007bff'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            yaxis: {
+                min: 0,
+                max: 100,
+                title: {
+                    text: 'CPU使用率 (%)'
+                }
+            }
+        };
+
+        const cpuChart = new ApexCharts(document.querySelector("#cpu-chart"), cpuOptions);
+        cpuChart.render();
+        
+        // 記憶體使用率圖表
+        const memOptions = {
+            series: [{
+                name: '記憶體使用率',
+                data: generateRandomData(24, 40, 90)
+            }],
+            chart: {
+                height: 300,
+                type: 'area',
+                toolbar: {
+                    show: false,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: generateTimeCategories(24),
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yy HH:mm'
+                },
+            },
+            colors: ['#6f42c1'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                    stops: [0, 100]
+                }
+            },
+            yaxis: {
+                min: 0,
+                max: 100,
+                title: {
+                    text: '記憶體使用率 (%)'
+                }
+            }
+        };
+
+        const memChart = new ApexCharts(document.querySelector("#memory-chart"), memOptions);
+        memChart.render();
+        
+        // 產生隨機數據
+        function generateRandomData(count, min = 10, max = 90) {
+            return Array.from({length: count}, () => 
+                Math.floor(Math.random() * (max - min + 1)) + min
+            );
+        }
+        
+        // 產生時間類別
+        function generateTimeCategories(count) {
+            const now = new Date();
+            return Array.from({length: count}, (_, i) => {
+                const time = new Date(now.getTime() - (count - i) * 3600000);
+                return time.getTime();
+            });
+        }
+        
+        // 實時更新資料
+        let counter = 0;
+        const updateInterval = 5000; // 5秒更新一次
+        
+        function updateCharts() {
+            counter++;
+            
+            // 更新CPU圖表
+            cpuChart.updateSeries([{
+                data: [...cpuOptions.series[0].data.slice(1), 
+                      Math.floor(Math.random() * 60) + 20]
+            }]);
+            
+            // 更新記憶體圖表
+            memChart.updateSeries([{
+                data: [...memOptions.series[0].data.slice(1), 
+                      Math.floor(Math.random() * 30) + 60]
+            }]);
+            
+            // 每12次更新（1分鐘）更新健康檢查項目
+            if (counter % 12 === 0) {
+                updateHealthChecks();
+            }
+        }
+        
+        // 初始化健康指標
+        document.getElementById('uptime-value').textContent = '5天7小時';
+        document.getElementById('response-time').textContent = '45ms';
+        document.getElementById('error-rate').textContent = '0.3%';
+        document.getElementById('active-users').textContent = '27';
+        
+        // 設置更新定時器
+        setInterval(updateCharts, updateInterval);
+        
+        // 健康檢查更新
+        function updateHealthChecks() {
+            // 模擬獲取最新健康檢查數據
+            // 實際應用中應該從API獲取
+            
+            // 更新系統整體健康度
+            const newHealth = Math.floor(Math.random() * 15) + 85;
+            chart.updateSeries([newHealth]);
+            
+            if (newHealth >= 90) {
+                document.getElementById('health-status-text').textContent = '系統運行良好，無異常';
+                document.getElementById('system-status-badge').className = 'badge bg-success system-status-badge';
+                document.getElementById('system-status-badge').textContent = '系統狀態良好';
+            } else if (newHealth >= 70) {
+                document.getElementById('health-status-text').textContent = '系統運行正常，有輕微警告';
+                document.getElementById('system-status-badge').className = 'badge bg-warning system-status-badge';
+                document.getElementById('system-status-badge').textContent = '系統警告';
+            } else {
+                document.getElementById('health-status-text').textContent = '系統存在異常，請檢查';
+                document.getElementById('system-status-badge').className = 'badge bg-danger system-status-badge';
+                document.getElementById('system-status-badge').textContent = '系統異常';
+            }
+        }
+        
+        // 處理刷新按鈕
+        document.getElementById('refresh-health').addEventListener('click', function() {
+            // 顯示刷新動畫
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 檢測中...';
+            this.disabled = true;
+            
+            // 模擬API請求延遲
+            setTimeout(() => {
+                updateHealthChecks();
+                this.innerHTML = '<i class="fas fa-sync-alt me-1"></i>重新檢測';
+                this.disabled = false;
+            }, 1500);
+        });
+        
+        // 處理匯出報告按鈕
+        document.getElementById('export-report').addEventListener('click', function() {
+            alert('報告已生成，正在下載...');
+        });
+    });
+</script>
+{% endblock %}

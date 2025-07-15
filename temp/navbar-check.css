@@ -1,0 +1,201 @@
+/* 強制修復導航欄高度問題 - 全局生效 */
+
+/* 重置body佈局 */
+body {
+    display: block !important;
+    flex-direction: unset !important;
+    min-height: unset !important;
+}
+
+/* 重置所有導航欄相關的高度和padding */
+.navbar, 
+.navbar.navbar-expand-lg, 
+.navbar-dark, 
+.bg-primary {
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    line-height: 1.1 !important;
+    box-sizing: border-box !important;
+}
+
+/* 導航欄內容器 */
+.navbar .container {
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+}
+
+/* 品牌標誌 */
+.navbar-brand {
+    font-size: 0.95rem !important;
+    padding: 0.1rem 0 !important;
+    margin-right: 1rem !important;
+    line-height: 1.1 !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.navbar-brand i {
+    font-size: 0.85rem !important;
+    margin-right: 0.3rem !important;
+}
+
+/* 切換按鈕 */
+.navbar-toggler {
+    padding: 0.1rem 0.3rem !important;
+    font-size: 0.75rem !important;
+    border-width: 1px !important;
+    height: 28px !important;
+}
+
+/* 導航列表 */
+.navbar-nav {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.navbar-nav .nav-item {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.15rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    line-height: 1.1 !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.navbar-nav .nav-link i {
+    font-size: 0.7rem !important;
+    margin-right: 0.25rem !important;
+}
+
+/* 下拉選單 */
+.navbar-nav .dropdown-toggle {
+    padding: 0.15rem 0.5rem !important;
+    font-size: 0.8rem !important;
+}
+
+.dropdown-menu {
+    font-size: 0.75rem !important;
+    padding: 0.15rem 0 !important;
+    margin-top: 0.1rem !important;
+}
+
+.dropdown-item {
+    padding: 0.15rem 0.6rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.1 !important;
+}
+
+.dropdown-item i {
+    font-size: 0.65rem !important;
+    margin-right: 0.25rem !important;
+}
+
+/* 搜索表單 */
+.navbar .d-flex {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.navbar .form-control {
+    padding: 0.1rem 0.3rem !important;
+    font-size: 0.75rem !important;
+    height: 26px !important;
+    line-height: 1.1 !important;
+}
+
+.navbar .btn {
+    padding: 0.1rem 0.3rem !important;
+    font-size: 0.75rem !important;
+    height: 26px !important;
+    line-height: 1.1 !important;
+}
+
+/* 主內容區調整 */
+main.container, 
+main.py-3,
+.container.my-4 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* 頁尾調整 */
+footer.bg-dark, 
+footer.footer {
+    padding: 1rem 0 !important;
+    margin-top: 1rem !important;
+}
+
+/* 賽博朋克切換按鈕位置調整 */
+#cyberpunk-toggle {
+    top: 45px !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 992px) {
+    .navbar {
+        min-height: auto !important;
+        max-height: auto !important;
+    }
+    
+    .navbar-collapse {
+        margin-top: 0.2rem !important;
+        padding-top: 0.2rem !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    .navbar-nav {
+        padding: 0 !important;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.15rem 0 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 0.85rem !important;
+    }
+    
+    .navbar-nav .nav-link {
+        font-size: 0.75rem !important;
+    }
+    
+    .form-control, .btn {
+        font-size: 0.7rem !important;
+        height: 24px !important;
+    }
+}
+
+/* 強制優先級 - 防止其他樣式覆蓋 */
+body .navbar,
+body .navbar-expand-lg,
+html .navbar,
+html .navbar-expand-lg {
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 1rem !important;
+}
+
+/* 賽博朋克模式下保持緊湊 */
+body.cyberpunk-theme .navbar {
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 1rem !important;
+}

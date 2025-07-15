@@ -1,0 +1,63 @@
+# 應用配置文件
+# Insurance News Aggregator Configuration
+
+# 資料庫設定
+database:
+  url: "sqlite:///instance/insurance_news.db"
+  echo: false
+  pool_pre_ping: true
+
+# Flask 應用設定
+app:
+  secret_key: "your-secret-key-here-change-in-production"
+  debug: true
+  host: "127.0.0.1"
+  port: 5000
+
+# 日誌設定
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/app.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# 爬蟲設定
+crawler:
+  user_agent: "Mozilla/5.0 (compatible; InsuranceNewsBot/1.0)"
+  delay: 2  # 請求間隔秒數
+  timeout: 30
+  max_retries: 3
+  concurrent_requests: 5
+  # 時間限制設定
+  max_news_age_days: 7  # 只抓取不超過N天的新聞
+  enable_date_filter: true  # 是否啟用日期過濾
+
+# 分析設定
+analyzer:
+  language: "zh-TW"
+  max_keywords: 10
+  sentiment_threshold: 0.5
+
+# API 設定
+api:
+  version: "v1"
+  rate_limit: "100 per hour"
+  max_page_size: 100
+  default_page_size: 20
+
+# 監控設定
+monitoring:
+  enabled: true
+  check_interval: 300  # 5分鐘
+  alert_email: "admin@example.com"
+
+# 快取設定
+cache:
+  type: "simple"
+  default_timeout: 300
+
+# 安全設定
+security:
+  cors_enabled: true
+  allowed_origins: ["http://localhost:3000", "http://127.0.0.1:3000"]

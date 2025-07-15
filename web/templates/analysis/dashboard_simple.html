@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}分析儀表板 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 頁面標題 -->
+    <div class="row">
+        <div class="col-12">
+            <h1><i class="fas fa-chart-line"></i> 分析儀表板</h1>
+            <p class="text-muted">智能新聞分析系統</p>
+        </div>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">總新聞數量</h5>
+                    <h2>{{ total_news }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">正面情感</h5>
+                    <h2>{{ sentiment_stats.positive }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">中性情感</h5>
+                    <h2>{{ sentiment_stats.neutral }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">負面情感</h5>
+                    <h2>{{ sentiment_stats.negative }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析功能菜單 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-area fa-3x text-primary mb-3"></i>
+                    <h5>趨勢分析</h5>
+                    <p>分析新聞趨勢和熱門話題</p>
+                    <a href="/analysis/trends" class="btn btn-primary">進入分析</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags fa-3x text-success mb-3"></i>
+                    <h5>關鍵詞分析</h5>
+                    <p>提取和分析熱門關鍵詞</p>
+                    <a href="/analysis/keywords" class="btn btn-success">進入分析</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-smile fa-3x text-warning mb-3"></i>
+                    <h5>情感分析</h5>
+                    <p>分析新聞情感傾向</p>
+                    <a href="/analysis/sentiment" class="btn btn-warning">進入分析</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最近新聞 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-newspaper"></i> 最近新聞</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_news %}
+                        <div class="list-group">
+                            {% for article in recent_news %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ article.title }}</h6>
+                                    <small>{{ article.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1">{{ article.summary or (article.content[:100] + '...' if article.content else '無內容') }}</p>
+                                <small>來源: {{ article.source.name if article.source else '未知' }}</small>
+                                <div class="mt-2">
+                                    <a href="/analysis/article/{{ article.id }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-chart-bar"></i> 分析
+                                    </a>
+                                    <a href="/news/{{ article.id }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i> 查看
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>暫無新聞數據</p>
+                            <a href="/crawler/monitor" class="btn btn-primary">
+                                <i class="fas fa-spider"></i> 啟動爬蟲
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

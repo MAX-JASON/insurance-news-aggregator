@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}感謝您的反饋 - 台灣保險新聞聚合器{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-5">
+            <h1 class="display-4 mb-4">感謝您的反饋！</h1>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <p class="lead">您的反饋已成功提交，我們會認真考慮您的意見。</p>
+                <p>您的參與對我們改進系統非常重要。</p>
+            </div>
+            <div class="mt-4">
+                <a href="/" class="btn btn-primary btn-lg">返回首頁</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // 3秒後自動跳轉回首頁
+    setTimeout(function() {
+        window.location.href = "/";
+    }, 3000);
+</script>
+{% endblock %}

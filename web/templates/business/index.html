@@ -1,0 +1,379 @@
+{% extends "business/base.html" %}
+
+{% block title %}業務員工作台{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.feature-card {
+    background: rgba(0, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 255, 255, 0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 255, 255, 0.3);
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.08);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #00aaff, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cta-section {
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    margin: var(--spacing-xl) 0;
+}
+
+.pulse-button {
+    animation: buttonPulse 2s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7); }
+    50% { box-shadow: 0 0 0 20px rgba(0, 212, 255, 0); }
+}
+</style>
+{% endblock %}
+
+{% block business_content %}
+<div class="container">
+    <!-- 英雄區域 -->
+    <div class="hero-section">
+        <div>
+            <h1 class="display-4 mb-4 neon-text" data-typing>保險業務員專業工作台</h1>
+            <p class="lead mb-4" style="color: #00aaff;">賽博朋克風格 • 智能分析 • 高效管理</p>
+            <a href="{{ url_for('business.cyber_news') }}" class="btn-cyber-primary pulse-button">
+                <i class="fas fa-rocket me-2"></i>進入賽博新聞中心
+            </a>
+        </div>
+    </div>
+    
+    <!-- 功能特色 -->
+    <div class="feature-grid">
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <h3 class="neon-text mb-3">智能新聞聚合</h3>
+            <p style="color: #88ccff;">
+                AI驅動的保險新聞智能篩選，自動識別重要資訊，
+                為您的客戶量身推薦相關內容。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-info me-2">AI分析</span>
+                <span class="badge bg-success me-2">實時更新</span>
+                <span class="badge bg-warning">個性化</span>
+            </div>
+        </div>
+        
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-purple mb-3">客戶關係管理</h3>
+            <p class="text-secondary">
+                整合客戶資料與新聞內容，智能匹配業務機會，
+                提升客戶服務效率和成交率。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-primary me-2">CRM整合</span>
+                <span class="badge bg-success me-2">機會識別</span>
+                <span class="badge bg-info">自動提醒</span>
+            </div>
+        </div>
+        
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3 class="text-green mb-3">多元分享工具</h3>
+            <p class="text-secondary">
+                支援LINE、Email、PDF等多種分享方式，
+                一鍵分享專業內容給客戶。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-success me-2">多平台</span>
+                <span class="badge bg-info me-2">一鍵分享</span>
+                <span class="badge bg-warning">追蹤統計</span>
+            </div>
+        </div>
+        
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="text-orange mb-3">數據分析儀表板</h3>
+            <p class="text-secondary">
+                實時監控業務績效，分析客戶偏好，
+                提供數據驅動的決策支援。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-warning me-2">實時監控</span>
+                <span class="badge bg-info me-2">趨勢分析</span>
+                <span class="badge bg-success">績效追蹤</span>
+            </div>
+        </div>
+        
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="text-pink mb-3">AI智能助手</h3>
+            <p class="text-secondary">
+                24/7 AI助手協助分析客戶需求，
+                提供個性化商品推薦和話術建議。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-danger me-2">AI驅動</span>
+                <span class="badge bg-info me-2">24/7服務</span>
+                <span class="badge bg-success">智能推薦</span>
+            </div>
+        </div>
+        
+        <div class="feature-card glass-morphism">
+            <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3 class="text-cyan mb-3">行動辦公支援</h3>
+            <p class="text-secondary">
+                響應式設計，支援各種設備，
+                讓您隨時隨地高效工作。
+            </p>
+            <div class="mt-3">
+                <span class="badge bg-info me-2">響應式</span>
+                <span class="badge bg-success me-2">跨平台</span>
+                <span class="badge bg-warning">雲端同步</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CTA區域 -->
+    <div class="cta-section">
+        <h2 class="text-cyan mb-4">準備好體驗未來的業務工作方式了嗎？</h2>
+        <p class="text-secondary mb-4">
+            加入數千名成功業務員的行列，使用最先進的工具提升您的業績
+        </p>
+        
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('business.cyber_news') }}" class="neon-btn large">
+                <i class="fas fa-play me-2"></i>立即開始
+            </a>
+            <button class="neon-btn purple" onclick="showDemo()">
+                <i class="fas fa-video me-2"></i>觀看演示
+            </button>
+            <button class="neon-btn green" onclick="showFeatures()">
+                <i class="fas fa-list me-2"></i>功能詳解
+            </button>
+        </div>
+    </div>
+    
+    <!-- 快速統計 -->
+    <div class="row text-center mt-5">
+        <div class="col-md-3">
+            <div class="glass-card">
+                <h3 class="text-cyan" data-counter="2000">0</h3>
+                <p class="text-muted">每日新聞更新</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card">
+                <h3 class="text-green" data-counter="98">0</h3>
+                <p class="text-muted">客戶滿意度(%)</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card">
+                <h3 class="text-purple" data-counter="1500">0</h3>
+                <p class="text-muted">活躍用戶</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card">
+                <h3 class="text-orange" data-counter="24">0</h3>
+                <p class="text-muted">全天候服務</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cyberpunk-effects.js') }}"></script>
+<script>
+// 數字計數動畫
+function animateCounters() {
+    const counters = document.querySelectorAll('[data-counter]');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.dataset.counter);
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            counter.textContent = Math.floor(current);
+        }, 16);
+    });
+}
+
+// 演示功能
+function showDemo() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade show';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title text-info">
+                        <i class="fas fa-video me-2"></i>功能演示
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="ratio ratio-16x9 mb-3">
+                        <div class="bg-secondary d-flex align-items-center justify-content-center">
+                            <i class="fas fa-play-circle fa-5x text-info"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-white">賽博朋克新聞中心演示影片</h6>
+                    <p class="text-muted">展示如何使用智能新聞聚合、客戶管理等功能</p>
+                    <div class="d-grid gap-2">
+                        <button class="neon-btn" onclick="playDemo()">
+                            <i class="fas fa-play me-2"></i>播放演示
+                        </button>
+                        <a href="{{ url_for('business.cyber_news') }}" class="neon-btn purple">
+                            <i class="fas fa-rocket me-2"></i>直接體驗
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function showFeatures() {
+    const features = [
+        {
+            icon: 'fas fa-brain',
+            title: 'AI智能分析',
+            description: '深度學習算法分析新聞內容，自動分類和評分'
+        },
+        {
+            icon: 'fas fa-filter',
+            title: '智能篩選',
+            description: '根據客戶偏好和業務需求自動篩選相關新聞'
+        },
+        {
+            icon: 'fas fa-bell',
+            title: '即時提醒',
+            description: '重要新聞和業務機會的即時推送通知'
+        },
+        {
+            icon: 'fas fa-chart-pie',
+            title: '視覺化分析',
+            description: '豐富的圖表和統計幫助您了解市場趨勢'
+        }
+    ];
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal fade show';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title text-info">
+                        <i class="fas fa-list me-2"></i>核心功能
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        ${features.map(feature => `
+                            <div class="col-md-6 mb-3">
+                                <div class="glass-card h-100">
+                                    <div class="text-center mb-3">
+                                        <i class="${feature.icon} fa-2x text-cyan"></i>
+                                    </div>
+                                    <h6 class="text-white text-center">${feature.title}</h6>
+                                    <p class="text-muted small text-center">${feature.description}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('business.cyber_news') }}" class="neon-btn">
+                            <i class="fas fa-arrow-right me-2"></i>開始使用
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function playDemo() {
+    alert('演示影片播放功能（實際應用中可嵌入真實影片）');
+}
+
+// 頁面載入動畫
+document.addEventListener('DOMContentLoaded', () => {
+    // 延遲啟動計數動畫
+    setTimeout(animateCounters, 1000);
+    
+    // 初始化賽博朋克效果
+    if (window.CyberpunkEffects) {
+        window.cyberpunkEffects = new CyberpunkEffects();
+    }
+});
+</script>
+{% endblock %}

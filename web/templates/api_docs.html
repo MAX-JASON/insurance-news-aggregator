@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}API文檔 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-code me-2"></i>
+                API 文檔
+            </h2>
+            <div>
+                <span class="badge bg-success">v1.0</span>
+                <span class="badge bg-info">RESTful</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <!-- 側邊導航 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">API 目錄</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#overview" class="list-group-item list-group-item-action">概覽</a>
+                <a href="#authentication" class="list-group-item list-group-item-action">認證</a>
+                <a href="#news" class="list-group-item list-group-item-action">新聞 API</a>
+                <a href="#analysis" class="list-group-item list-group-item-action">分析 API</a>
+                <a href="#crawler" class="list-group-item list-group-item-action">爬蟲 API</a>
+                <a href="#examples" class="list-group-item list-group-item-action">使用範例</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- API概覽 -->
+        <section id="overview" class="mb-5">
+            <h3>API 概覽</h3>
+            <p>台灣保險新聞聚合器提供完整的 RESTful API，支援新聞獲取、分析和爬蟲監控等功能。</p>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h6>基礎信息</h6>
+                    <ul>
+                        <li><strong>基礎URL：</strong><code>http://localhost:5000/api/v1</code></li>
+                        <li><strong>格式：</strong>JSON</li>
+                        <li><strong>編碼：</strong>UTF-8</li>
+                        <li><strong>狀態檢查：</strong><a href="/api/v1/health" target="_blank">/api/v1/health</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 認證 -->
+        <section id="authentication" class="mb-5">
+            <h3>認證方式</h3>
+            <p>目前API為開放使用，未來將支援API Key和JWT認證。</p>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                開發階段暫不需要認證，生產環境將實施完整的安全機制。
+            </div>
+        </section>
+
+        <!-- 新聞API -->
+        <section id="news" class="mb-5">
+            <h3>新聞 API</h3>
+            
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        獲取新聞列表
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/news</code></p>
+                    <p>獲取新聞文章列表，支援分頁和篩選。</p>
+                    
+                    <h6>參數</h6>
+                    <ul>
+                        <li><code>page</code> - 頁碼 (預設: 1)</li>
+                        <li><code>per_page</code> - 每頁數量 (預設: 20)</li>
+                        <li><code>category</code> - 分類篩選</li>
+                        <li><code>source</code> - 來源篩選</li>
+                    </ul>
+                    
+                    <h6>回應範例</h6>
+                    <pre><code>{
+  "status": "success",
+  "data": {
+    "news": [...],
+    "pagination": {
+      "page": 1,
+      "pages": 10,
+      "total": 200
+    }
+  }
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        獲取單篇新聞
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/news/{id}</code></p>
+                    <p>獲取指定新聞的詳細內容。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分析API -->
+        <section id="analysis" class="mb-5">
+            <h3>分析 API</h3>
+            
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        趨勢分析
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/analysis/trends</code></p>
+                    <p>獲取新聞趨勢分析結果。</p>
+                    <a href="/api/v1/analysis/trends" class="btn btn-sm btn-outline-primary" target="_blank">測試API</a>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        關鍵詞分析
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/analysis/keywords</code></p>
+                    <p>獲取關鍵詞分析結果。</p>
+                    <a href="/api/v1/analysis/keywords" class="btn btn-sm btn-outline-primary" target="_blank">測試API</a>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        情感分析
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/analysis/sentiment</code></p>
+                    <p>獲取情感分析結果。</p>
+                    <a href="/api/v1/analysis/sentiment" class="btn btn-sm btn-outline-primary" target="_blank">測試API</a>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        文章分析
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/analysis/article/{id}</code></p>
+                    <p>獲取單篇文章的詳細分析結果。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 爬蟲API -->
+        <section id="crawler" class="mb-5">
+            <h3>爬蟲 API</h3>
+            
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-success me-2">GET</span>
+                        爬蟲狀態
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><code>GET /api/v1/crawler/status</code></p>
+                    <p>獲取爬蟲系統運行狀態。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 使用範例 -->
+        <section id="examples" class="mb-5">
+            <h3>使用範例</h3>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">JavaScript 範例</h6>
+                </div>
+                <div class="card-body">
+                    <pre><code>// 獲取新聞列表
+fetch('/api/v1/news')
+  .then(response => response.json())
+  .then(data => {
+    console.log('新聞列表:', data.data.news);
+  });
+
+// 獲取趨勢分析
+fetch('/api/v1/analysis/trends')
+  .then(response => response.json())
+  .then(data => {
+    console.log('趨勢分析:', data.data);
+  });</code></pre>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 平滑滾動到錨點
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+{% endblock %}

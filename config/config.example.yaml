@@ -1,0 +1,91 @@
+# 台灣保險新聞聚合器配置文件
+# Insurance News Aggregator Configuration
+
+# 應用設定
+app:
+  name: "台灣保險新聞聚合器"
+  version: "2.0.0"
+  host: "0.0.0.0"
+  port: 5000
+  debug: true
+
+# 資料庫設定
+database:
+  url: "sqlite:///data/insurance_news.db"
+  echo: false
+  pool_size: 10
+  max_overflow: 20
+
+# 新聞來源設定
+news_sources:
+  - name: "保險雲世代"
+    url: "https://www.insurance-times.com.tw"
+    selector: ".news-list .news-item"
+    enabled: true
+    
+  - name: "現代保險"
+    url: "https://www.rmim.com.tw"
+    selector: ".article-list .article"
+    enabled: true
+    
+  - name: "保險行銷"
+    url: "https://www.insurance-marketing.com.tw"
+    selector: ".news-container .news"
+    enabled: true
+
+# 爬蟲設定
+crawler:
+  interval: 3600  # 秒
+  timeout: 30
+  max_retries: 3
+  delay_between_requests: 2
+  user_agent: "InsuranceNewsBot/2.0"
+
+# 分析設定
+analyzer:
+  keywords:
+    - "保險"
+    - "理賠"
+    - "保費"
+    - "保單"
+    - "投保"
+    - "壽險"
+    - "產險"
+    - "車險"
+    - "健康險"
+    - "意外險"
+  
+  sentiment_analysis: true
+  trend_analysis: true
+  
+# API 設定
+api:
+  prefix: "/api/v2"
+  rate_limit: "100/hour"
+  cors_origins: ["*"]
+  
+# 緩存設定
+cache:
+  type: "redis"
+  url: "redis://localhost:6379/0"
+  timeout: 300
+
+# 日誌設定
+logging:
+  level: "INFO"
+  file: "logs/app.log"
+  max_size: "10MB"
+  backup_count: 5
+
+# 通知設定
+notifications:
+  email:
+    enabled: false
+    smtp_server: ""
+    port: 587
+    username: ""
+    password: ""
+  
+  webhook:
+    enabled: false
+    url: ""

@@ -1,0 +1,427 @@
+{% extends "business/base.html" %}
+
+{% block title %}個人化設定 - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+.preferences-container {
+    background: rgba(0, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.setting-section {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+}
+
+.setting-title {
+    color: #00ffff;
+    border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-control, .form-select {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    color: #00ffff;
+    border-radius: 8px;
+}
+
+.form-control:focus, .form-select:focus {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.btn-cyber-primary {
+    background: linear-gradient(135deg, #00ffff22 0%, #ff00ff22 100%);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    color: #00ffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-cyber-primary:hover {
+    background: linear-gradient(135deg, #00ffff44 0%, #ff00ff44 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    color: #ffffff;
+}
+
+.alert-cyber-success {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- 頁面標題 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-cog text-primary me-3"></i>個人化設定
+            </h1>
+            <p class="text-muted">自定義您的偏好設定，打造個人化業務體驗</p>
+        </div>
+        <div>
+            <a href="{{ url_for('business.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>返回儀表板
+            </a>
+        </div>
+    </div>
+
+    <!-- 設定已保存提示 -->
+    <div class="alert alert-success alert-dismissible fade" role="alert" id="saveSuccess" style="display: none;">
+        <i class="fas fa-check-circle me-2"></i>您的設定已成功保存！
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- 設定保存失敗提示 -->
+    <div class="alert alert-danger alert-dismissible fade" role="alert" id="saveError" style="display: none;">
+        <i class="fas fa-exclamation-circle me-2"></i>設定保存失敗，請稍後重試！
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- 設定表單 -->
+    <div class="row">
+        <!-- 左側設定類別 -->
+        <div class="col-md-3">
+            <div class="list-group mb-4">
+                <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#display-settings">
+                    <i class="fas fa-desktop me-2"></i>顯示設定
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#notification-settings">
+                    <i class="fas fa-bell me-2"></i>通知設定
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#category-settings">
+                    <i class="fas fa-tags me-2"></i>分類偏好
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#data-settings">
+                    <i class="fas fa-chart-bar me-2"></i>數據展示設定
+                </a>
+                <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#share-settings">
+                    <i class="fas fa-share-alt me-2"></i>分享設定
+                </a>
+            </div>
+
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle me-2"></i>關於個人化設定
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        您的個人化設定會自動保存並應用於所有裝置。
+                        根據您的使用習慣，系統會逐步學習並提供更精準的推薦。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側設定詳情 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- 顯示設定 -->
+                        <div class="tab-pane fade show active" id="display-settings">
+                            <h5 class="mb-4">顯示設定</h5>
+                            
+                            <form id="displaySettingsForm">
+                                <div class="mb-4">
+                                    <label class="form-label">預設排序方式</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultSorting" id="sort-importance" value="importance" checked>
+                                        <label class="form-check-label" for="sort-importance">依重要性</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultSorting" id="sort-date" value="date">
+                                        <label class="form-check-label" for="sort-date">依發布日期</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultSorting" id="sort-views" value="views">
+                                        <label class="form-check-label" for="sort-views">依瀏覽次數</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="itemsPerPage" class="form-label">每頁顯示新聞數量</label>
+                                    <select class="form-select" id="itemsPerPage" name="itemsPerPage">
+                                        <option value="10">10</option>
+                                        <option value="15" selected>15</option>
+                                        <option value="20">20</option>
+                                        <option value="30">30</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">新聞摘要長度</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="summaryLength" id="summary-short" value="short">
+                                        <label class="form-check-label" for="summary-short">精簡 (50字)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="summaryLength" id="summary-medium" value="medium" checked>
+                                        <label class="form-check-label" for="summary-medium">標準 (100字)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="summaryLength" id="summary-full" value="full">
+                                        <label class="form-check-label" for="summary-full">詳細 (200字)</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label d-block">儀表板佈局</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="dashboardLayout" id="layout-standard" value="standard" checked>
+                                        <label class="btn btn-outline-primary" for="layout-standard">標準</label>
+                                        
+                                        <input type="radio" class="btn-check" name="dashboardLayout" id="layout-compact" value="compact">
+                                        <label class="btn btn-outline-primary" for="layout-compact">緊湊</label>
+                                        
+                                        <input type="radio" class="btn-check" name="dashboardLayout" id="layout-detailed" value="detailed">
+                                        <label class="btn btn-outline-primary" for="layout-detailed">詳細</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-4">
+                                    <input class="form-check-input" type="checkbox" id="darkMode" name="darkMode">
+                                    <label class="form-check-label" for="darkMode">深色模式 <span class="badge bg-dark text-white">即將推出</span></label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 通知設定 -->
+                        <div class="tab-pane fade" id="notification-settings">
+                            <h5 class="mb-4">通知設定</h5>
+                            
+                            <form id="notificationSettingsForm">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications" name="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">電子郵件通知</label>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">通知頻率</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="notificationFrequency" id="freq-realtime" value="realtime">
+                                        <label class="form-check-label" for="freq-realtime">即時通知</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="notificationFrequency" id="freq-daily" value="daily" checked>
+                                        <label class="form-check-label" for="freq-daily">每日摘要</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="notificationFrequency" id="freq-weekly" value="weekly">
+                                        <label class="form-check-label" for="freq-weekly">每週摘要</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">通知內容</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notify-high-importance" name="notifyHighImportance" checked>
+                                        <label class="form-check-label" for="notify-high-importance">高重要性新聞</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notify-business-opportunities" name="notifyBusinessOpportunities" checked>
+                                        <label class="form-check-label" for="notify-business-opportunities">業務機會</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notify-industry-updates" name="notifyIndustryUpdates">
+                                        <label class="form-check-label" for="notify-industry-updates">產業動態</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="notify-regulatory-changes" name="notifyRegulatoryChanges" checked>
+                                        <label class="form-check-label" for="notify-regulatory-changes">法規變動</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="notificationLimit" class="form-label">每日最大通知數量</label>
+                                    <select class="form-select" id="notificationLimit" name="notificationLimit">
+                                        <option value="1">1</option>
+                                        <option value="3" selected>3</option>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="0">不限制</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 分類偏好 -->
+                        <div class="tab-pane fade" id="category-settings">
+                            <h5 class="mb-4">分類偏好</h5>
+                            
+                            <form id="categorySettingsForm">
+                                <div class="mb-4">
+                                    <label class="form-label">優先顯示分類</label>
+                                    <div class="mb-3">
+                                        <select class="form-select" id="priorityCategories" name="priorityCategories" multiple>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">按住Ctrl鍵可多選</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">忽略分類</label>
+                                    <div class="mb-3">
+                                        <select class="form-select" id="ignoredCategories" name="ignoredCategories" multiple>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">這些分類將不會出現在您的列表中</small>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoLearnCategories" name="autoLearnCategories" checked>
+                                    <label class="form-check-label" for="autoLearnCategories">根據閱讀習慣自動調整分類偏好</label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 數據展示設定 -->
+                        <div class="tab-pane fade" id="data-settings">
+                            <h5 class="mb-4">數據展示設定</h5>
+                            
+                            <form id="dataSettingsForm">
+                                <div class="mb-4">
+                                    <label class="form-label">儀表板主要統計資料</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stat-importance" name="statImportance" checked>
+                                        <label class="form-check-label" for="stat-importance">新聞重要性分布</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stat-trend" name="statTrend" checked>
+                                        <label class="form-check-label" for="stat-trend">新聞趨勢圖表</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stat-category" name="statCategory" checked>
+                                        <label class="form-check-label" for="stat-category">分類統計</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stat-business" name="statBusiness" checked>
+                                        <label class="form-check-label" for="stat-business">業務影響分析</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stat-client" name="statClient">
+                                        <label class="form-check-label" for="stat-client">客戶興趣分析</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">預設圖表類型</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultChartType" id="chart-bar" value="bar" checked>
+                                        <label class="form-check-label" for="chart-bar">長條圖</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultChartType" id="chart-line" value="line">
+                                        <label class="form-check-label" for="chart-line">折線圖</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultChartType" id="chart-pie" value="pie">
+                                        <label class="form-check-label" for="chart-pie">圓餅圖</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="showDataLabels" name="showDataLabels" checked>
+                                    <label class="form-check-label" for="showDataLabels">在圖表上顯示數據標籤</label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="animateCharts" name="animateCharts" checked>
+                                    <label class="form-check-label" for="animateCharts">啟用圖表動畫</label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 分享設定 -->
+                        <div class="tab-pane fade" id="share-settings">
+                            <h5 class="mb-4">分享設定</h5>
+                            
+                            <form id="shareSettingsForm">
+                                <div class="mb-4">
+                                    <label class="form-label">預設分享模板</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultShareTemplate" id="template-concise" value="concise">
+                                        <label class="form-check-label" for="template-concise">簡潔版</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultShareTemplate" id="template-detailed" value="detailed" checked>
+                                        <label class="form-check-label" for="template-detailed">詳細版</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="defaultShareTemplate" id="template-professional" value="professional">
+                                        <label class="form-check-label" for="template-professional">專業版</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">偏好分享管道</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="share-email" name="shareEmail" checked>
+                                        <label class="form-check-label" for="share-email">電子郵件</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="share-line" name="shareLine" checked>
+                                        <label class="form-check-label" for="share-line">LINE</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="share-wechat" name="shareWechat">
+                                        <label class="form-check-label" for="share-wechat">WeChat</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="share-pdf" name="sharePdf" checked>
+                                        <label class="form-check-label" for="share-pdf">PDF</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="signatureText" class="form-label">個人化簽名</label>
+                                    <textarea class="form-control" id="signatureText" name="signatureText" rows="3" placeholder="此資訊由您的保險專員提供">此資訊由您的保險專員提供，如有任何疑問，歡迎隨時聯絡。</textarea>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="includeContactInfo" name="includeContactInfo" checked>
+                                    <label class="form-check-label" for="includeContactInfo">自動附加聯絡資訊</label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-outline-secondary me-2" id="resetDefaults">恢復預設值</button>
+                    <button type="button" class="btn btn-primary" id="savePreferences">儲存設定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/user-preferences.js') }}"></script>
+{% endblock %}

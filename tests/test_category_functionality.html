@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能分類檢視功能測試</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .category-item:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+        .debug-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .test-result {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .test-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1><i class="fas fa-bug me-2"></i>智能分類檢視功能測試</h1>
+        
+        <!-- 測試面板 -->
+        <div class="debug-panel">
+            <h3>🔧 功能測試面板</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-primary" onclick="testCategoryStatsAPI()">測試分類統計API</button>
+                    <button class="btn btn-secondary ms-2" onclick="testCategoryNewsAPI()">測試分類新聞API</button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success" onclick="testSelectAllFunction()">測試全選功能</button>
+                    <button class="btn btn-warning ms-2" onclick="testCategoryClick()">測試分類點擊</button>
+                </div>
+            </div>
+            <div id="testResults" class="mt-3"></div>
+        </div>
+        
+        <!-- 智能分類檢視模擬 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3><i class="fas fa-brain text-info me-2"></i>智能分類檢視</h3>
+            </div>
+        </div>
+
+        <div class="row mb-4" id="categoryStatsContainer">
+            <div class="col-md-4">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-heart me-2"></i>客戶關注</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="理賠案例">
+                                理賠案例 <span class="badge bg-danger" id="count-理賠案例">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="保費調整">
+                                保費調整 <span class="badge bg-warning" id="count-保費調整">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="法規變動">
+                                法規變動 <span class="badge bg-info" id="count-法規變動">載入中...</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary btn-sm mt-2 w-100 view-all-btn" data-group="客戶關注">查看全部</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-building me-2"></i>公司動態</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="新商品發布">
+                                新商品發布 <span class="badge bg-success" id="count-新商品發布">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="通路政策">
+                                通路政策 <span class="badge bg-primary" id="count-通路政策">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="獲獎消息">
+                                獲獎消息 <span class="badge bg-warning" id="count-獲獎消息">載入中...</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-success btn-sm mt-2 w-100 view-all-btn" data-group="公司動態">查看全部</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>市場分析</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="保費趨勢">
+                                保費趨勢 <span class="badge bg-info" id="count-保費趨勢">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="競爭分析">
+                                競爭分析 <span class="badge bg-secondary" id="count-競爭分析">載入中...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between category-item" data-category="客群變化">
+                                客群變化 <span class="badge bg-dark" id="count-客群變化">載入中...</span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-info btn-sm mt-2 w-100 view-all-btn" data-group="市場分析">查看全部</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 優先關注新聞區域 -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-fire me-2"></i>優先關注新聞</h5>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label text-white" for="selectAll">全選</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" id="newsList">
+                        <div class="text-center py-4">
+                            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">點擊上方分類項目載入新聞</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入指示器 -->
+    <div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">載入中...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 簡化版測試函數
+        
+        function addTestResult(message, success = true) {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${success ? 'test-success' : 'test-error'}`;
+            div.innerHTML = `<i class="fas fa-${success ? 'check' : 'times'} me-2"></i>${message}`;
+            results.appendChild(div);
+        }
+        
+        async function testCategoryStatsAPI() {
+            try {
+                const response = await fetch('/business/api/category-stats');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTestResult('✅ 分類統計API正常工作', true);
+                    updateCategoryStatsDisplay(data.stats);
+                } else {
+                    addTestResult('❌ 分類統計API回傳錯誤', false);
+                }
+            } catch (error) {
+                addTestResult(`❌ 分類統計API請求失敗: ${error.message}`, false);
+            }
+        }
+        
+        async function testCategoryNewsAPI() {
+            try {
+                const response = await fetch('/business/api/category-news?group=客戶關注&category=保費調整');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTestResult(`✅ 分類新聞API正常工作，返回${data.count}條新聞`, true);
+                } else {
+                    addTestResult('❌ 分類新聞API回傳錯誤', false);
+                }
+            } catch (error) {
+                addTestResult(`❌ 分類新聞API請求失敗: ${error.message}`, false);
+            }
+        }
+        
+        function testSelectAllFunction() {
+            const selectAllBtn = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.news-select');
+            
+            if (selectAllBtn) {
+                // 模擬點擊全選
+                selectAllBtn.checked = true;
+                selectAllBtn.dispatchEvent(new Event('change'));
+                
+                const checkedBoxes = document.querySelectorAll('.news-select:checked');
+                if (checkedBoxes.length === checkboxes.length) {
+                    addTestResult('✅ 全選功能正常工作', true);
+                } else {
+                    addTestResult('❌ 全選功能無法正常選取所有項目', false);
+                }
+            } else {
+                addTestResult('❌ 找不到全選按鈕', false);
+            }
+        }
+        
+        function testCategoryClick() {
+            const categoryItem = document.querySelector('.category-item[data-category="保費調整"]');
+            if (categoryItem) {
+                categoryItem.click();
+                addTestResult('✅ 分類項目點擊事件已觸發', true);
+            } else {
+                addTestResult('❌ 找不到分類項目', false);
+            }
+        }
+        
+        function updateCategoryStatsDisplay(stats) {
+            for (const [group, categories] of Object.entries(stats)) {
+                for (const [category, count] of Object.entries(categories)) {
+                    const countElement = document.getElementById(`count-${category}`);
+                    if (countElement) {
+                        countElement.textContent = count;
+                        // 根據數量設置不同的樣式
+                        if (count > 5) {
+                            countElement.className = 'badge bg-danger';
+                        } else if (count > 2) {
+                            countElement.className = 'badge bg-warning';
+                        } else if (count > 0) {
+                            countElement.className = 'badge bg-info';
+                        } else {
+                            countElement.className = 'badge bg-secondary';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 初始化分類點擊事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryItems = document.querySelectorAll('.category-item');
+            const viewAllButtons = document.querySelectorAll('.view-all-btn');
+            
+            categoryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    const group = this.closest('.card').querySelector('.card-header h6').textContent.trim();
+                    
+                    loadCategoryNews(group, category);
+                });
+            });
+            
+            viewAllButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const group = this.getAttribute('data-group');
+                    loadCategoryGroupNews(group);
+                });
+            });
+            
+            // 全選功能
+            const selectAllBtn = document.getElementById('selectAll');
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.news-select');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+            }
+            
+            // 自動載入統計數據
+            testCategoryStatsAPI();
+        });
+        
+        async function loadCategoryNews(group, category) {
+            document.getElementById('loadingSpinner').classList.remove('d-none');
+            
+            try {
+                const response = await fetch(`/business/api/category-news?group=${encodeURIComponent(group)}&category=${encodeURIComponent(category)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateNewsList(data.news, `${group}: ${category}`, data.count);
+                    addTestResult(`✅ 載入「${category}」新聞成功，共${data.count}條`, true);
+                } else {
+                    addTestResult(`❌ 載入「${category}」新聞失敗`, false);
+                }
+            } catch (error) {
+                addTestResult(`❌ 載入新聞失敗: ${error.message}`, false);
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('d-none');
+            }
+        }
+        
+        async function loadCategoryGroupNews(group) {
+            document.getElementById('loadingSpinner').classList.remove('d-none');
+            
+            try {
+                const response = await fetch(`/business/api/category-group?group=${encodeURIComponent(group)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateNewsList(data.news, group, data.news.length);
+                    addTestResult(`✅ 載入「${group}」分類新聞成功，共${data.news.length}條`, true);
+                } else {
+                    addTestResult(`❌ 載入「${group}」分類新聞失敗`, false);
+                }
+            } catch (error) {
+                addTestResult(`❌ 載入分類新聞失敗: ${error.message}`, false);
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('d-none');
+            }
+        }
+        
+        function updateNewsList(newsData, categoryTitle, count) {
+            const newsListContainer = document.getElementById('newsList');
+            newsListContainer.innerHTML = '';
+            
+            // 添加標題
+            const headerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5><i class="fas fa-filter me-2"></i>${categoryTitle}</h5>
+                    <span class="badge bg-primary">${count} 筆結果</span>
+                </div>
+            `;
+            newsListContainer.insertAdjacentHTML('beforeend', headerHTML);
+            
+            if (!newsData || newsData.length === 0) {
+                const noResultsHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">此分類中沒有新聞</p>
+                    </div>
+                `;
+                newsListContainer.insertAdjacentHTML('beforeend', noResultsHTML);
+                return;
+            }
+            
+            newsData.forEach(news => {
+                let importanceClass, importanceText, importanceStars;
+                if (news.importance_score >= 0.7) {
+                    importanceClass = 'bg-danger';
+                    importanceText = '高';
+                    importanceStars = '★★★';
+                } else if (news.importance_score >= 0.4) {
+                    importanceClass = 'bg-warning text-dark';
+                    importanceText = '中';
+                    importanceStars = '★★☆';
+                } else {
+                    importanceClass = 'bg-info';
+                    importanceText = '低';
+                    importanceStars = '★☆☆';
+                }
+                
+                const publishDate = new Date(news.published_date).toLocaleDateString('zh-TW');
+                
+                const newsItemHTML = `
+                    <div class="news-item mb-3 p-3 border rounded" data-news-id="${news.id}">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <input type="checkbox" class="news-select form-check-input" value="${news.id}">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6>
+                                    <span class="importance-star text-warning">${importanceStars}</span>
+                                    ${news.title}
+                                </h6>
+                                <p class="text-muted mb-2">${news.summary}</p>
+                                <div>
+                                    <span class="badge ${importanceClass}">重要性：${importanceText}</span>
+                                    <span class="badge bg-secondary">來源：${news.source_name}</span>
+                                    <span class="badge bg-light text-dark">日期：${publishDate}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                newsListContainer.insertAdjacentHTML('beforeend', newsItemHTML);
+            });
+            
+            // 更新全選功能
+            const selectAllBtn = document.getElementById('selectAll');
+            if (selectAllBtn) {
+                selectAllBtn.checked = false;
+                selectAllBtn.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.news-select');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

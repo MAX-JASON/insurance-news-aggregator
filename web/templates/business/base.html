@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}業務員工具 - 賽博朋克風格 - {{ super() }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- 賽博朋克主題CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyberpunk-theme.css') }}">
+<!-- 業務員工具專用CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/business-dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/business-interactive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyberpunk-business.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyberpunk-enhanced.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/business-nav-enhancement.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- 業務員賽博朋克導航增強區域 -->
+<div class="cyber-enhancement-panel">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="cyber-business-nav">
+                    <a href="{{ url_for('business.index') }}" class="cyber-nav-item {% if request.endpoint == 'business.index' %}active{% endif %}">
+                        <i class="fas fa-home"></i><span>主控台</span>
+                    </a>
+                    <a href="{{ url_for('business.cyber_news') }}" class="cyber-nav-item {% if request.endpoint == 'business.cyber_news' %}active{% endif %}">
+                        <i class="fas fa-newspaper"></i><span>新聞中心</span>
+                    </a>
+                    <a href="{{ url_for('business.client_tool') }}" class="cyber-nav-item {% if request.endpoint == 'business.client_tool' %}active{% endif %}">
+                        <i class="fas fa-users"></i><span>客戶工具</span>
+                    </a>
+                    <a href="{{ url_for('business.share_tools_page') }}" class="cyber-nav-item {% if request.endpoint == 'business.share_tools_page' %}active{% endif %}">
+                        <i class="fas fa-share-alt"></i><span>分享工具</span>
+                    </a>
+                    <a href="{{ url_for('business.favorites_page') }}" class="cyber-nav-item {% if request.endpoint == 'business.favorites_page' %}active{% endif %}">
+                        <i class="fas fa-star"></i><span>我的最愛</span>
+                    </a>
+                    <a href="{{ url_for('business.preferences') }}" class="cyber-nav-item {% if request.endpoint == 'business.preferences' %}active{% endif %}">
+                        <i class="fas fa-cog"></i><span>偏好設定</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 主內容區 -->
+<div class="container-fluid mt-3">
+    {% block business_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ super() }}
+<!-- 賽博朋克效果JavaScript -->
+<script src="{{ url_for('static', filename='js/cyberpunk-effects.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cyberpunk-business.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cyberpunk-enhanced.js') }}"></script>
+<!-- 業務員工具專用JavaScript -->
+<script src="{{ url_for('static', filename='js/business-dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/client-tools.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🤖 啟動賽博朋克業務系統...');
+    
+    // 初始化賽博朋克效果
+    if (typeof CyberpunkEffects !== 'undefined') {
+        window.cyberpunkEffects = new CyberpunkEffects();
+    }
+    
+    // 初始化業務系統
+    if (typeof BusinessSystem !== 'undefined') {
+        window.businessSystem = new BusinessSystem();
+    }
+    
+    // 業務頁面專用：禁用爬蟲控制台
+    window.DISABLE_CRAWLER_CONSOLE = true;
+    
+    // 確保所有按鈕都有響應
+    setTimeout(() => {
+        document.querySelectorAll('button:not([onclick]), .btn:not([onclick])').forEach((btn, index) => {
+            if (!btn.href && btn.type !== 'submit') {
+                const action = btn.textContent.trim() || `按鈕${index + 1}`;
+                btn.addEventListener('click', function() {
+                    if (typeof cyberpunkUtils !== 'undefined') {
+                        cyberpunkUtils.addClickEffect(this);
+                        cyberpunkUtils.showNotification(`${action} 功能已激活`, 'info');
+                    }
+                });
+            }
+        });
+    }, 500);
+});
+</script>
+{% endblock %}

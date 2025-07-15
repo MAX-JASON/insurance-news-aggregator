@@ -1,0 +1,123 @@
+/* 導航欄按鈕重疊修復 */
+
+/* 確保導航欄有足夠的空間 */
+.navbar {
+    min-height: 56px !important;
+    padding: 0.5rem 0 !important;
+}
+
+/* 導航欄右側按鈕組 */
+.navbar .d-flex.align-items-center {
+    gap: 0.5rem;
+}
+
+/* 搜索框優化 */
+.navbar .form-control-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* 小屏幕下隱藏部分文字 */
+@media (max-width: 991.98px) {
+    .navbar .d-none.d-lg-inline {
+        display: none !important;
+    }
+    
+    .navbar .form-control-sm {
+        width: 120px !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .navbar .form-control-sm {
+        width: 100px !important;
+    }
+    
+    /* 小屏幕下調整搜索框和按鈕 */
+    .navbar .d-flex.me-3 {
+        margin-right: 0.5rem !important;
+    }
+    
+    .navbar .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* 賽博朋克模式切換按鈕位置調整 */
+#cyberpunk-toggle {
+    top: 70px !important;
+    right: 15px !important;
+}
+
+/* 確保按鈕不會被導航欄內容遮擋 */
+@media (min-width: 992px) {
+    #cyberpunk-toggle {
+        top: 80px !important;
+        right: 20px !important;
+    }
+}
+
+/* 下拉菜單優化 */
+.dropdown-menu-end {
+    right: 0;
+    left: auto;
+}
+
+.dropdown-menu {
+    min-width: 180px;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* 主內容區域上邊距調整 */
+main.container {
+    margin-top: 1.5rem !important;
+    padding-top: 0 !important;
+}
+
+/* 響應式調整 */
+@media (max-width: 575.98px) {
+    .navbar-collapse {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 0.375rem;
+        margin-top: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .navbar-collapse .navbar-nav {
+        margin-bottom: 1rem;
+    }
+    
+    .navbar-collapse .d-flex.align-items-center {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+    
+    .navbar-collapse .form-control-sm {
+        width: 100% !important;
+    }
+    
+    #cyberpunk-toggle {
+        display: none !important;
+    }
+}
+
+/* 修復潛在的z-index衝突 */
+.navbar {
+    z-index: 1030;
+}
+
+.dropdown-menu {
+    z-index: 1031;
+}
+
+#cyberpunk-toggle {
+    z-index: 1029;
+}
+
+/* 通知Toast的z-index */
+.alert.position-fixed {
+    z-index: 1050;
+}

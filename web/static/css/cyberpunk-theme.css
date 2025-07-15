@@ -1,0 +1,935 @@
+/* 
+ * 賽博朋克風格CSS框架 - 靜態版本
+ * Cyberpunk Style Framework - Static Version (No Animations)
+ */
+
+/* ==================== 基礎變數定義 ==================== */
+:root {
+  /* 霓虹色彩調色板 */
+  --neon-purple: #8B5FBF;
+  --neon-blue: #00D4FF;
+  --neon-green: #39FF14;
+  --neon-pink: #FF073A;
+  --neon-orange: #FF8C00;
+  --neon-cyan: #00FFFF;
+  
+  /* 深色基調 */
+  --bg-primary: rgba(11, 15, 25, 0.95);
+  --bg-secondary: rgba(18, 24, 38, 0.9);
+  --bg-tertiary: rgba(25, 35, 55, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.1);
+  
+  /* 文字色彩 */
+  --text-primary: #E0E6ED;
+  --text-secondary: #A8B2C7;
+  --text-accent: var(--neon-cyan);
+  --text-success: var(--neon-green);
+  --text-warning: var(--neon-orange);
+  --text-danger: var(--neon-pink);
+  
+  /* 邊框和陰影 - 靜態發光效果 */
+  --border-glow: 0 0 5px currentColor;
+  --box-shadow-neon: 0 0 15px rgba(0, 212, 255, 0.4);
+  --box-shadow-glass: 0 4px 16px rgba(31, 38, 135, 0.3);
+  
+  /* 間距系統 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+}
+
+/* ==================== 基礎重置 ==================== */
+* {
+  box-sizing: border-box;
+}
+
+/* ==================== 主體背景 - 靜態版本 ==================== */
+body.cyberpunk-theme {
+  background: linear-gradient(135deg, 
+    rgba(11, 15, 25, 1) 0%,
+    rgba(18, 24, 38, 1) 25%,
+    rgba(15, 20, 35, 1) 50%,
+    rgba(20, 25, 40, 1) 75%,
+    rgba(11, 15, 25, 1) 100%);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 靜態網格背景 */
+body.cyberpunk-theme::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  opacity: 0.15;
+  background-image: 
+    linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ==================== 卡片樣式 ==================== */
+.cyber-card {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 8px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--box-shadow-glass);
+}
+
+.cyber-card:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+}
+
+/* ==================== 按鈕樣式 ==================== */
+.btn-cyber {
+  background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(139, 95, 191, 0.2));
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.btn-cyber:hover {
+  background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(139, 95, 191, 0.3));
+  color: #ffffff;
+  box-shadow: var(--border-glow);
+}
+
+.btn-cyber-danger {
+  border-color: var(--neon-pink);
+  color: var(--neon-pink);
+}
+
+.btn-cyber-success {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* ==================== 輸入框樣式 ==================== */
+.form-control.cyber-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: var(--text-primary);
+  border-radius: 4px;
+}
+
+.form-control.cyber-input:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--neon-cyan);
+  box-shadow: var(--border-glow);
+  color: var(--text-primary);
+}
+
+/* ==================== 導航欄樣式 ==================== */
+.navbar.cyber-nav {
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  backdrop-filter: blur(15px);
+}
+
+.navbar.cyber-nav .navbar-brand {
+  color: var(--neon-cyan) !important;
+  font-weight: bold;
+  text-shadow: var(--border-glow);
+}
+
+.navbar.cyber-nav .nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+}
+
+.navbar.cyber-nav .nav-link:hover,
+.navbar.cyber-nav .nav-link.active {
+  color: var(--neon-cyan) !important;
+  text-shadow: var(--border-glow);
+}
+
+/* ==================== 表格樣式 ==================== */
+.table.cyber-table {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.table.cyber-table th {
+  background: var(--bg-secondary);
+  border-color: rgba(0, 212, 255, 0.3);
+  color: var(--neon-cyan);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table.cyber-table td {
+  border-color: rgba(0, 212, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.table.cyber-table tr:hover td {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+/* ==================== 徽章樣式 ==================== */
+.badge.cyber-badge {
+  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-blue));
+  color: #000000;
+  font-weight: bold;
+  padding: 0.4em 0.8em;
+  border-radius: 3px;
+}
+
+.badge.cyber-badge-success {
+  background: linear-gradient(45deg, var(--neon-green), #32CD32);
+}
+
+.badge.cyber-badge-warning {
+  background: linear-gradient(45deg, var(--neon-orange), #FFD700);
+}
+
+.badge.cyber-badge-danger {
+  background: linear-gradient(45deg, var(--neon-pink), #FF6B6B);
+}
+
+/* ==================== 進度條樣式 ==================== */
+.progress.cyber-progress {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  height: 12px;
+  border-radius: 6px;
+}
+
+.progress.cyber-progress .progress-bar {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* ==================== 模態框樣式 ==================== */
+.modal.cyber-modal .modal-content {
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.modal.cyber-modal .modal-header {
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  background: var(--bg-secondary);
+}
+
+.modal.cyber-modal .modal-title {
+  color: var(--neon-cyan);
+  font-weight: bold;
+}
+
+.modal.cyber-modal .modal-footer {
+  border-top: 1px solid rgba(0, 212, 255, 0.3);
+  background: var(--bg-secondary);
+}
+
+/* ==================== 側邊欄樣式 ==================== */
+.sidebar.cyber-sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid rgba(0, 212, 255, 0.3);
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar.cyber-sidebar .nav-link {
+  color: var(--text-secondary);
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.sidebar.cyber-sidebar .nav-link:hover,
+.sidebar.cyber-sidebar .nav-link.active {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--neon-cyan);
+  border-left: 3px solid var(--neon-cyan);
+}
+
+/* ==================== 文字樣式 ==================== */
+.text-cyber-primary { color: var(--neon-cyan) !important; }
+.text-cyber-success { color: var(--neon-green) !important; }
+.text-cyber-warning { color: var(--neon-orange) !important; }
+.text-cyber-danger { color: var(--neon-pink) !important; }
+.text-cyber-purple { color: var(--neon-purple) !important; }
+
+/* ==================== 邊框樣式 ==================== */
+.border-cyber { border: 1px solid rgba(0, 212, 255, 0.3) !important; }
+.border-cyber-glow { 
+  border: 1px solid var(--neon-cyan) !important;
+  box-shadow: var(--border-glow);
+}
+
+/* ==================== 背景樣式 ==================== */
+.bg-cyber-dark { background: var(--bg-primary) !important; }
+.bg-cyber-glass { 
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ==================== 特殊效果類 ==================== */
+.cyber-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.cyber-border-glow {
+  box-shadow: var(--border-glow);
+}
+
+/* ==================== 新聞卡片專用樣式 ==================== */
+.news-card.cyber-news-card {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 6px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(8px);
+}
+
+.news-card.cyber-news-card:hover {
+  border-color: rgba(0, 212, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.news-card.cyber-news-card .news-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.news-card.cyber-news-card .news-source {
+  color: var(--neon-cyan);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.news-card.cyber-news-card .news-time {
+  color: var(--text-secondary);
+  font-size: 0.85em;
+}
+
+/* ==================== 響應式設計 ==================== */
+@media (max-width: 768px) {
+  .cyber-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .btn-cyber {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: 0.9em;
+  }
+}
+
+/* ==================== 頁尾樣式 ==================== */
+.footer.cyber-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+
+/* ==================== 滾動條樣式 ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-blue));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+}
+
+/* ==================== 禁用所有動畫 ==================== */
+*, *::before, *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 為body添加動態霓虹背景效果 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -5;
+  background: 
+    /* 深層霓虹光暈 */
+    radial-gradient(circle at 25% 25%, rgba(139, 95, 191, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 0%, rgba(57, 255, 20, 0.05) 0%, transparent 60%),
+    /* 基礎漸層 */
+    linear-gradient(135deg, rgba(11, 15, 25, 0.95) 0%, rgba(18, 24, 38, 0.9) 100%);
+  animation: backgroundShift 10s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* 通用霓虹邊框效果 */
+.neon-border {
+  position: relative;
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  box-shadow: 
+    0 0 5px rgba(0, 212, 255, 0.3),
+    inset 0 0 5px rgba(0, 212, 255, 0.1);
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(5px);
+}
+
+.neon-border:hover {
+  border-color: rgba(0, 212, 255, 0.8);
+  box-shadow: 
+    0 0 15px rgba(0, 212, 255, 0.6),
+    0 0 30px rgba(0, 212, 255, 0.3),
+    inset 0 0 10px rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* 強化的霓虹按鈕 */
+.neon-border.btn, .btn.neon-border {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 5px currentColor;
+}
+
+.neon-border.btn:hover, .btn.neon-border:hover {
+  background: rgba(0, 212, 255, 0.2);
+  color: #ffffff;
+  text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ==================== 動態背景效果 ==================== */
+.cyber-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(139, 95, 191, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+    linear-gradient(45deg, rgba(11, 15, 25, 0.9) 0%, rgba(18, 24, 38, 0.9) 100%);
+}
+
+/* 網格背景 - 強化版半透明冷光背板 */
+.cyber-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: 
+    /* 主要網格線 - 霓虹青色 */
+    linear-gradient(rgba(0, 212, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.3) 1px, transparent 1px),
+    /* 次要網格線 - 霓虹紫色 */
+    linear-gradient(rgba(139, 95, 191, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 95, 191, 0.2) 1px, transparent 1px),
+    /* 發光點 */
+    radial-gradient(circle at 0% 0%, rgba(0, 255, 255, 0.4) 1px, transparent 2px);
+  background-size: 
+    50px 50px,
+    50px 50px,
+    10px 10px, 
+    10px 10px,
+    100px 100px;
+  background-position:
+    0 0,
+    0 0,
+    25px 25px,
+    25px 25px,
+    0 0;
+  animation: gridPulse 3s ease-in-out infinite, gridShift 8s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+}
+
+@keyframes gridPulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3)) brightness(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.6)) brightness(1.2);
+  }
+}
+
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+/* 動態玻璃粒子懸浮效果容器 */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 玻璃粒子 - 多種大小和發光效果 */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(0, 212, 255, 0.4) 50%, transparent 100%);
+  /* 移除動畫，保持靜態發光效果 */
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+/* 大粒子 */
+.particle.large {
+  width: 8px;
+  height: 8px;
+  /* 移除動畫 */
+  background: radial-gradient(circle, var(--particle-color, #00FFFF) 0%, rgba(0, 212, 255, 0.3) 70%, transparent 100%);
+  box-shadow: 
+    0 0 30px var(--particle-color, rgba(0, 255, 255, 0.8)),
+    inset 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* 中粒子 */
+.particle.medium {
+  width: 5px;
+  height: 5px;
+  animation-duration: 10s, 2.5s;
+  background: radial-gradient(circle, var(--particle-color, #8B5FBF) 0%, rgba(139, 95, 191, 0.3) 70%, transparent 100%);
+  box-shadow: 
+    0 0 15px var(--particle-color, rgba(139, 95, 191, 0.6)),
+    inset 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* 小粒子 */
+.particle.small {
+  width: 3px;
+  height: 3px;
+  animation-duration: 8s, 1.5s;
+  background: radial-gradient(circle, var(--particle-color, #39FF14) 0%, rgba(57, 255, 20, 0.2) 80%, transparent 100%);
+  box-shadow: 
+    0 0 10px var(--particle-color, rgba(57, 255, 20, 0.5)),
+    inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* 移除移動動畫，只保留靜態發光效果 */
+@keyframes staticGlow {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 5px currentColor);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+  50% {
+    filter: brightness(1.1) drop-shadow(0 0 8px currentColor);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 5px currentColor);
+  }
+  100% {
+    filter: brightness(1.5) drop-shadow(0 0 15px currentColor);
+  }
+}
+
+/* ==================== 玻璃形態元件 ==================== */
+.glass-morphism {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-glass);
+}
+
+.glass-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-glass);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-normal) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue), var(--neon-green));
+  border-radius: 12px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.glass-card:hover::before {
+  opacity: 0.3;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    var(--box-shadow-glass),
+    0 0 30px rgba(0, 212, 255, 0.2);
+}
+
+/* ==================== 霓虹按鈕系統 ==================== */
+.neon-btn {
+  background: transparent;
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-family: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-normal) ease;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.neon-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+  transition: left var(--transition-slow) ease;
+}
+
+.neon-btn:hover::before {
+  left: 100%;
+}
+
+.neon-btn:hover {
+  box-shadow: 
+    0 0 20px var(--neon-blue),
+    inset 0 0 10px rgba(0, 212, 255, 0.1);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.neon-btn:active {
+  transform: scale(0.98);
+}
+
+/* 不同顏色變體 */
+.neon-btn.purple {
+  border-color: var(--neon-purple);
+  color: var(--neon-purple);
+}
+
+.neon-btn.purple:hover {
+  box-shadow: 
+    0 0 20px var(--neon-purple),
+    inset 0 0 10px rgba(139, 95, 191, 0.1);
+  text-shadow: 0 0 10px var(--neon-purple);
+}
+
+.neon-btn.green {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+.neon-btn.green:hover {
+  box-shadow: 
+    0 0 20px var(--neon-green),
+    inset 0 0 10px rgba(57, 255, 20, 0.1);
+  text-shadow: 0 0 10px var(--neon-green);
+}
+
+/* ==================== 新聞卡片設計 ==================== */
+.news-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-glass);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-normal) ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap: var(--spacing-md);
+  cursor: pointer;
+}
+
+.news-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--neon-blue), var(--neon-purple));
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.news-card:hover::after {
+  opacity: 1;
+}
+
+.news-priority-high {
+  border-left: 4px solid var(--neon-pink);
+  animation: priorityPulse 2s ease-in-out infinite;
+}
+
+.news-priority-medium {
+  border-left: 4px solid var(--neon-orange);
+}
+
+.news-priority-low {
+  border-left: 4px solid var(--neon-green);
+}
+
+@keyframes priorityPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 7, 58, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 7, 58, 0.6); }
+}
+
+.news-thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.news-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.news-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.4;
+}
+
+.news-meta {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.news-tags {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.news-tag {
+  background: rgba(0, 212, 255, 0.2);
+  color: var(--neon-cyan);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+/* ==================== 數據視覺化組件 ==================== */
+.chart-container {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-glass);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-normal) ease;
+  position: relative;
+  overflow: hidden;
+  height: 300px;
+}
+
+.chart-title {
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--spacing-md);
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* ==================== 側邊欄設計 ==================== */
+.cyber-sidebar {
+  background: var(--bg-secondary);
+  backdrop-filter: blur(15px);
+  border-right: 1px solid rgba(0, 212, 255, 0.3);
+  padding: var(--spacing-lg);
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.cyber-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--neon-blue), transparent, var(--neon-purple));
+  animation: sidebarPulse 3s ease-in-out infinite;
+}
+
+@keyframes sidebarPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ==================== 導航欄設計 ==================== */
+.cyber-navbar {
+  background: var(--bg-secondary);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  padding: var(--spacing-md) var(--spacing-lg);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--neon-cyan);
+  text-decoration: none;
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* ==================== 響應式設計 ==================== */
+@media (max-width: 768px) {
+  .cyber-sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal) ease;
+    position: fixed;
+    z-index: 2000;
+  }
+  
+  .cyber-sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .news-card {
+    flex-direction: column;
+  }
+  
+  .news-thumbnail {
+    width: 100%;
+    height: 150px;
+  }
+}
+
+/* ==================== 動畫增強 ==================== */
+.fade-in {
+  animation: fadeIn var(--transition-normal) ease;
+}
+
+/* 只保留淡入效果，移除移動 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-in-left {
+  /* 移除滑動動畫 */
+  opacity: 1;
+}
+
+/* 移除滑動動畫定義 */
+
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.8); }
+}
+
+/* ==================== 滾動條美化 ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neon-blue);
+  border-radius: 4px;
+  box-shadow: 0 0 10px currentColor;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}

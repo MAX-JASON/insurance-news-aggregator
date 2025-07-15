@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}系統診斷測試 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 mb-4">
+                <i class="fas fa-stethoscope text-primary me-2"></i>
+                系統診斷測試
+            </h1>
+            <p class="lead">此頁面用於測試系統的各項功能和錯誤處理能力</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-wrench me-2"></i>功能測試</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <button id="testModal" class="btn btn-outline-primary">
+                            <i class="fas fa-window-restore me-2"></i>測試 Modal 對話框
+                        </button>
+                        <button id="testNotification" class="btn btn-outline-success">
+                            <i class="fas fa-bell me-2"></i>測試通知系統
+                        </button>
+                        <button id="testImageError" class="btn btn-outline-warning">
+                            <i class="fas fa-image me-2"></i>測試圖片錯誤處理
+                        </button>
+                        <button id="testApiError" class="btn btn-outline-danger">
+                            <i class="fas fa-server me-2"></i>測試 API 錯誤處理
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>系統狀態</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush" id="systemStatus">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            JavaScript
+                            <span class="badge bg-success rounded-pill">正常</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            CSS 樣式
+                            <span class="badge bg-success rounded-pill">正常</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Bootstrap
+                            <span class="badge bg-success rounded-pill" id="bootstrapStatus">正常</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            API 連接
+                            <span class="badge bg-secondary rounded-pill" id="apiStatus">檢查中...</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            本地存儲
+                            <span class="badge bg-secondary rounded-pill" id="storageStatus">檢查中...</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-bug me-2"></i>錯誤日誌</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button id="clearLogs" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>清除日誌
+                        </button>
+                        <button id="refreshLogs" class="btn btn-sm btn-outline-secondary ms-2">
+                            <i class="fas fa-sync me-2"></i>刷新日誌
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>時間</th>
+                                    <th>類型</th>
+                                    <th>訊息</th>
+                                    <th>詳情</th>
+                                </tr>
+                            </thead>
+                            <tbody id="errorLogs">
+                                <tr>
+                                    <td colspan="4" class="text-center">暫無錯誤日誌</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 測試用模態對話框 -->
+<div class="modal fade" id="testModalDialog" tabindex="-1" aria-labelledby="testModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testModalLabel">測試對話框</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>這是一個用於測試的對話框。如果您能看到此對話框，則表示Modal功能正常運作。</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Modal是Bootstrap的一個重要組件，用於顯示對話框、提示和表單等內容。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="modalTestAction">測試操作</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('診斷頁面已載入');
+        
+        // 檢查系統狀態
+        checkSystemStatus();
+        
+        // 載入錯誤日誌
+        loadErrorLogs();
+        
+        // 綁定按鈕事件
+        document.getElementById('testModal').addEventListener('click', testModal);
+        document.getElementById('testNotification').addEventListener('click', testNotification);
+        document.getElementById('testImageError').addEventListener('click', testImageError);
+        document.getElementById('testApiError').addEventListener('click', testApiError);
+        document.getElementById('clearLogs').addEventListener('click', clearErrorLogs);
+        document.getElementById('refreshLogs').addEventListener('click', loadErrorLogs);
+        document.getElementById('modalTestAction').addEventListener('click', function() {
+            window.showNotification('Modal測試操作已執行', 'success');
+        });
+    });
+    
+    // 檢查系統狀態
+    function checkSystemStatus() {
+        // 檢查Bootstrap
+        if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+            document.getElementById('bootstrapStatus').className = 'badge bg-danger rounded-pill';
+            document.getElementById('bootstrapStatus').textContent = '異常';
+        } else {
+            if (window.modalPolyfillLoaded) {
+                document.getElementById('bootstrapStatus').className = 'badge bg-warning rounded-pill';
+                document.getElementById('bootstrapStatus').textContent = '使用替代方案';
+            }
+        }
+        
+        // 檢查API連接
+        fetch('/api/health', { 
+            method: 'GET',
+            signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById('apiStatus').className = 'badge bg-success rounded-pill';
+                document.getElementById('apiStatus').textContent = '正常';
+            } else {
+                document.getElementById('apiStatus').className = 'badge bg-warning rounded-pill';
+                document.getElementById('apiStatus').textContent = '部分可用';
+            }
+        })
+        .catch(err => {
+            document.getElementById('apiStatus').className = 'badge bg-danger rounded-pill';
+            document.getElementById('apiStatus').textContent = '不可用';
+        });
+        
+        // 檢查本地存儲
+        try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+            document.getElementById('storageStatus').className = 'badge bg-success rounded-pill';
+            document.getElementById('storageStatus').textContent = '正常';
+        } catch (err) {
+            document.getElementById('storageStatus').className = 'badge bg-danger rounded-pill';
+            document.getElementById('storageStatus').textContent = '不可用';
+        }
+    }
+    
+    // 載入錯誤日誌
+    function loadErrorLogs() {
+        const errorsTable = document.getElementById('errorLogs');
+        
+        try {
+            const errors = JSON.parse(localStorage.getItem('pageErrors') || '[]');
+            
+            if (errors.length === 0) {
+                errorsTable.innerHTML = '<tr><td colspan="4" class="text-center">暫無錯誤日誌</td></tr>';
+                return;
+            }
+            
+            errorsTable.innerHTML = '';
+            
+            errors.forEach((error, index) => {
+                const row = document.createElement('tr');
+                
+                // 格式化時間
+                let timeStr = 'N/A';
+                if (error.timestamp) {
+                    const date = new Date(error.timestamp);
+                    timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                }
+                
+                row.innerHTML = `
+                    <td>${timeStr}</td>
+                    <td>${error.message ? '錯誤' : '警告'}</td>
+                    <td>${error.message || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-info view-error-detail" data-index="${index}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                errorsTable.appendChild(row);
+            });
+            
+            // 添加查看詳情事件
+            document.querySelectorAll('.view-error-detail').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = this.getAttribute('data-index');
+                    const error = errors[index];
+                    
+                    let details = '';
+                    for (let key in error) {
+                        details += `<strong>${key}:</strong> ${error[key]}<br>`;
+                    }
+                    
+                    showErrorDialog('錯誤詳情', `
+                        <div class="error-details">
+                            ${details}
+                        </div>
+                    `);
+                });
+            });
+        } catch (err) {
+            errorsTable.innerHTML = '<tr><td colspan="4" class="text-center text-danger">讀取錯誤日誌時發生錯誤</td></tr>';
+            console.error('讀取錯誤日誌失敗:', err);
+        }
+    }
+    
+    // 清除錯誤日誌
+    function clearErrorLogs() {
+        localStorage.removeItem('pageErrors');
+        loadErrorLogs();
+        window.showNotification('錯誤日誌已清除', 'success');
+    }
+    
+    // 測試Modal
+    function testModal() {
+        try {
+            const modalElement = document.getElementById('testModalDialog');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } catch (err) {
+            console.error('顯示Modal時發生錯誤:', err);
+            window.showErrorDialog('Modal測試失敗', `發生錯誤: ${err.message}`, function() {
+                if (typeof fixBootstrapModals === 'function') {
+                    fixBootstrapModals();
+                    window.showNotification('已嘗試修復Modal問題，請再試一次', 'info');
+                }
+            });
+        }
+    }
+    
+    // 測試通知
+    function testNotification() {
+        const types = ['success', 'info', 'warning', 'danger'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        
+        window.showNotification(`這是一個${type}類型的測試通知`, type);
+    }
+    
+    // 測試圖片錯誤
+    function testImageError() {
+        // 創建一個帶有錯誤URL的圖片
+        const img = document.createElement('img');
+        img.src = '/non-existent-image.jpg';
+        img.alt = '測試圖片';
+        img.style.width = '200px';
+        img.style.height = '150px';
+        img.className = 'img-thumbnail mx-auto d-block';
+        
+        // 創建容器
+        const container = document.createElement('div');
+        container.className = 'alert alert-info mt-3';
+        container.innerHTML = '<p class="text-center mb-2">測試圖片錯誤處理:</p>';
+        container.appendChild(img);
+        
+        // 添加到頁面
+        const testModalDialog = document.querySelector('.modal-body');
+        testModalDialog.appendChild(container);
+        
+        // 顯示對話框
+        testModal();
+    }
+    
+    // 測試API錯誤
+    function testApiError() {
+        // 嘗試訪問不存在的API
+        fetch('/api/v1/non-existent-endpoint', {
+            method: 'GET',
+            signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('API返回:', data);
+        })
+        .catch(err => {
+            console.error('API測試錯誤:', err);
+            
+            // 顯示API錯誤追蹤狀態
+            if (window.apiErrorTracker && window.apiErrorTracker.errors) {
+                const errorInfo = Object.entries(window.apiErrorTracker.errors)
+                    .map(([endpoint, data]) => {
+                        return `
+                            <div class="mb-3 border-bottom pb-2">
+                                <h6>${endpoint}</h6>
+                                <p class="mb-1">錯誤次數: ${data.count}</p>
+                                <p class="mb-1">狀態: ${data.disabled ? '<span class="text-danger">已禁用</span>' : '<span class="text-success">可用</span>'}</p>
+                                ${data.lastError ? `
+                                <p class="mb-1">最後錯誤: ${data.lastError.status} - ${data.lastError.message}</p>
+                                <p class="mb-0 small text-muted">時間: ${data.lastError.time}</p>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                
+                window.showErrorDialog('API錯誤追蹤', `
+                    <p>測試API錯誤已成功觸發。</p>
+                    <h6 class="mt-3">API錯誤追蹤狀態:</h6>
+                    ${errorInfo || '<p>暫無API錯誤記錄</p>'}
+                `);
+            } else {
+                window.showErrorDialog('API測試', '測試API錯誤已成功觸發。');
+            }
+        });
+    }
+</script>
+{% endblock %}

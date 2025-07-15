@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}關於我們 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="fas fa-shield-alt me-3"></i>
+                關於台灣保險新聞聚合器
+            </h1>
+            <p class="lead">專業、智能、全面的保險業資訊平台</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card mb-5">
+            <div class="card-body">
+                <h3><i class="fas fa-bullseye me-2"></i>我們的使命</h3>
+                <p>台灣保險新聞聚合器致力於為保險業從業人員、學者研究者及一般民眾提供最新、最全面的保險業資訊。我們運用先進的人工智慧技術，從多個權威來源收集、分析和整理保險相關新聞，讓您能夠快速掌握市場動態。</p>
+            </div>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-body">
+                <h3><i class="fas fa-star me-2"></i>核心特色</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <i class="fas fa-robot text-primary me-2"></i>
+                                <strong>智能分析</strong><br>
+                                <small class="text-muted">運用NLP技術進行情感分析、關鍵詞提取和趨勢預測</small>
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-clock text-success me-2"></i>
+                                <strong>即時更新</strong><br>
+                                <small class="text-muted">24小時自動監控，確保資訊即時性</small>
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-filter text-info me-2"></i>
+                                <strong>智能分類</strong><br>
+                                <small class="text-muted">自動分類整理，快速找到所需資訊</small>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <i class="fas fa-chart-line text-warning me-2"></i>
+                                <strong>趨勢分析</strong><br>
+                                <small class="text-muted">深度分析市場趨勢和發展方向</small>
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-mobile-alt text-danger me-2"></i>
+                                <strong>響應式設計</strong><br>
+                                <small class="text-muted">支援各種設備，隨時隨地獲取資訊</small>
+                            </li>
+                            <li class="mb-3">
+                                <i class="fas fa-code text-secondary me-2"></i>
+                                <strong>開放API</strong><br>
+                                <small class="text-muted">提供RESTful API，方便開發者整合</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-body">
+                <h3><i class="fas fa-cogs me-2"></i>技術架構</h3>
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fab fa-python fa-3x text-primary mb-2"></i>
+                        <h5>Python Flask</h5>
+                        <p class="text-muted">後端核心框架</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-brain fa-3x text-success mb-2"></i>
+                        <h5>機器學習</h5>
+                        <p class="text-muted">智能分析引擎</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fab fa-bootstrap fa-3x text-info mb-2"></i>
+                        <h5>Bootstrap 5</h5>
+                        <p class="text-muted">響應式前端</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-database fa-3x text-warning mb-2"></i>
+                        <h5>SQLite</h5>
+                        <p class="text-muted">資料庫系統</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-spider fa-3x text-danger mb-2"></i>
+                        <h5>網路爬蟲</h5>
+                        <p class="text-muted">自動化收集</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-chart-bar fa-3x text-secondary mb-2"></i>
+                        <h5>數據可視化</h5>
+                        <p class="text-muted">圖表展示</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-body">
+                <h3><i class="fas fa-newspaper me-2"></i>新聞來源</h3>
+                <p>我們從以下權威媒體收集保險相關新聞：</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li>現代保險</li>
+                            <li>保險行銷雜誌</li>
+                            <li>金融監督管理委員會</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li>中華民國人壽保險商業同業公會</li>
+                            <li>中華民國產物保險商業同業公會</li>
+                            <li>其他保險專業媒體</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-body">
+                <h3><i class="fas fa-envelope me-2"></i>聯絡我們</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>開發團隊</strong></p>
+                        <p>台灣保險新聞聚合器開發團隊</p>
+                        <p>
+                            <i class="fas fa-envelope me-2"></i>
+                            <a href="mailto:info@insurance-news-tw.com">info@insurance-news-tw.com</a>
+                        </p>
+                        <p>
+                            <i class="fab fa-github me-2"></i>
+                            <a href="#" target="_blank">GitHub Repository</a>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>技術支援</strong></p>
+                        <p>如有技術問題或建議，歡迎聯繫我們</p>
+                        <p>
+                            <i class="fas fa-phone me-2"></i>
+                            +886-2-xxxx-xxxx
+                        </p>
+                        <p>
+                            <i class="fas fa-clock me-2"></i>
+                            週一至週五 09:00-18:00
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-heart text-danger me-2"></i>支持我們</h3>
+                <p>如果您覺得我們的服務有幫助，歡迎分享給更多人知道！</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-primary">
+                        <i class="fab fa-facebook me-1"></i>分享到 Facebook
+                    </button>
+                    <button class="btn btn-info">
+                        <i class="fab fa-twitter me-1"></i>分享到 Twitter
+                    </button>
+                    <button class="btn btn-success">
+                        <i class="fab fa-line me-1"></i>分享到 LINE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 分享功能
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (this.textContent.includes('分享')) {
+                e.preventDefault();
+                alert('分享功能開發中...');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,212 @@
+/* 業務儀表板專用樣式 */
+
+/* 重要性標記樣式 */
+.importance-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.importance-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.importance-high {
+    background-color: #dc3545;
+    color: white;
+}
+
+.importance-medium {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.importance-low {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* 排序控制樣式 */
+.sort-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.sort-controls .btn-group {
+    margin-left: 8px;
+}
+
+.sort-controls .active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 業務影響分析卡片 */
+.impact-card {
+    border-left: 4px solid;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.impact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.impact-high {
+    border-left-color: #dc3545;
+}
+
+.impact-medium {
+    border-left-color: #ffc107;
+}
+
+.impact-low {
+    border-left-color: #17a2b8;
+}
+
+/* 統計卡片樣式 */
+.stats-card {
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.stats-card .icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.stats-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stats-card .label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.stats-primary {
+    background: linear-gradient(135deg, #a8c0ff 0%, #3f5efb 100%);
+    color: white;
+}
+
+.stats-success {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    color: white;
+}
+
+.stats-warning {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: white;
+}
+
+.stats-danger {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    color: white;
+}
+
+/* 新聞條目強化樣式 */
+.news-item {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.news-item:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+.news-item.high-importance {
+    border-left: 4px solid #dc3545;
+}
+
+.news-item.medium-importance {
+    border-left: 4px solid #ffc107;
+}
+
+.news-item.low-importance {
+    border-left: 4px solid #17a2b8;
+}
+
+/* 趨勢分析卡片 */
+.trend-card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.trend-card .header {
+    padding: 12px;
+    color: white;
+    font-weight: bold;
+}
+
+.trend-header-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+}
+
+.trend-header-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.trend-body {
+    padding: 16px;
+}
+
+/* 圖表容器 */
+.chart-container {
+    min-height: 250px;
+    position: relative;
+}
+
+/* 即時搜索樣式 */
+.search-container {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-container .form-control:focus {
+    box-shadow: none;
+    border-color: #007bff;
+}
+
+#searchResults {
+    position: absolute;
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,.1);
+    border-radius: 0 0 8px 8px;
+    background: white;
+}
+
+#searchResults .list-group-item-action {
+    transition: all 0.2s;
+}
+
+#searchResults .list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+#searchSpinner {
+    color: #007bff;
+}

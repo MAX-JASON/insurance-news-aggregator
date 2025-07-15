@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險業務專家工作台 - 台灣保險新聞聚合器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --accent-gold: #f59e0b;
+            --success-green: #10b981;
+            --warning-orange: #f97316;
+            --danger-red: #ef4444;
+            --light-gray: #f8fafc;
+            --dark-gray: #64748b;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Microsoft JhengHei', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        
+        .dashboard-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--accent-gold);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .icon-news { background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue)); }
+        .icon-analysis { background: linear-gradient(135deg, var(--success-green), #059669); }
+        .icon-trends { background: linear-gradient(135deg, var(--accent-gold), #d97706); }
+        .icon-alerts { background: linear-gradient(135deg, var(--warning-orange), #ea580c); }
+        
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--secondary-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .news-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .category-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .category-監理法規 { background-color: #ddd6fe; color: #7c3aed; }
+        .category-市場動態 { background-color: #dcfce7; color: #16a34a; }
+        .category-商品創新 { background-color: #fef3c7; color: #d97706; }
+        .category-理賠案例 { background-color: #fee2e2; color: #dc2626; }
+        .category-風險管理 { background-color: #e0f2fe; color: #0284c7; }
+        .category-綜合新聞 { background-color: #f1f5f9; color: #475569; }
+        
+        .quick-action-btn {
+            background: white;
+            border: 2px solid var(--secondary-blue);
+            color: var(--secondary-blue);
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+        
+        .quick-action-btn:hover {
+            background: var(--secondary-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            color: var(--primary-blue);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 0.5rem;
+            color: var(--accent-gold);
+        }
+        
+        .trend-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--accent-gold);
+        }
+        
+        .progress-custom {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 25px;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert-item {
+            background: linear-gradient(135deg, #fef7cd, #fef3c7);
+            border: none;
+            border-left: 4px solid var(--warning-orange);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                保險業務專家工作台
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text text-white">
+                    <i class="fas fa-user-tie me-2"></i>
+                    歡迎，保險專家
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- 歡迎區塊 -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">
+                        <i class="fas fa-chart-line text-warning me-2"></i>
+                        保險市場智能分析中心
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-calendar me-2"></i>
+                        為您整理最新的保險業動態與市場資訊，助力業務決策
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <input type="text" class="form-control search-box" placeholder="🔍 搜尋保險新聞、法規、商品...">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 左側內容 -->
+            <div class="col-lg-8">
+                <!-- 統計卡片 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-news">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <h3 class="mb-1" id="total-news">10</h3>
+                            <p class="text-muted mb-0">今日新聞</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-analysis">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="mb-1">25</h3>
+                            <p class="text-muted mb-0">智能分析</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-trends">
+                                <i class="fas fa-trending-up"></i>
+                            </div>
+                            <h3 class="mb-1">8</h3>
+                            <p class="text-muted mb-0">市場趨勢</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-alerts">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h3 class="mb-1">3</h3>
+                            <p class="text-muted mb-0">重要提醒</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速操作 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="section-title">
+                            <i class="fas fa-rocket"></i>
+                            業務快速操作
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="/news" class="quick-action-btn w-100 text-center">
+                                    <i class="fas fa-newspaper me-2"></i>瀏覽最新新聞
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/analysis/dashboard" class="quick-action-btn w-100 text-center">
+                                    <i class="fas fa-chart-bar me-2"></i>市場分析報告
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/api/docs" class="quick-action-btn w-100 text-center">
+                                    <i class="fas fa-code me-2"></i>API 數據接口
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="#" class="quick-action-btn w-100 text-center" onclick="generateReport()">
+                                    <i class="fas fa-file-alt me-2"></i>生成業務報表
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最新新聞 -->
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="section-title">
+                            <i class="fas fa-newspaper"></i>
+                            今日保險要聞
+                        </h5>
+                        <div id="news-list">
+                            <div class="text-center py-4">
+                                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">正在載入新聞數據...</p>
+                                <button class="btn btn-primary" onclick="loadSampleData()">
+                                    <i class="fas fa-download me-2"></i>載入範例數據
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側邊欄 -->
+            <div class="col-lg-4">
+                <!-- 市場趨勢 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            市場趨勢分析
+                        </h5>
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>數位保險</span>
+                                <span class="text-success">+45%</span>
+                            </div>
+                            <div class="progress progress-custom">
+                                <div class="progress-bar bg-success" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>ESG投資</span>
+                                <span class="text-success">+30%</span>
+                            </div>
+                            <div class="progress progress-custom">
+                                <div class="progress-bar bg-info" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="trend-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>微型保險</span>
+                                <span class="text-warning">+15%</span>
+                            </div>
+                            <div class="progress progress-custom">
+                                <div class="progress-bar bg-warning" style="width: 40%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 重要提醒 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="section-title">
+                            <i class="fas fa-bell"></i>
+                            重要提醒
+                        </h5>
+                        <div class="alert alert-item">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>新法規提醒：</strong>保險業資本適足性新規將於下月實施
+                        </div>
+                        <div class="alert alert-item">
+                            <i class="fas fa-chart-up me-2"></i>
+                            <strong>市場動態：</strong>Q3保費收入創歷史新高
+                        </div>
+                        <div class="alert alert-item">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>商機提醒：</strong>數位保險平台需求大增
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 業務工具 -->
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="section-title">
+                            <i class="fas fa-tools"></i>
+                            專業工具
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" onclick="openCalculator()">
+                                <i class="fas fa-calculator me-2"></i>保費計算器
+                            </button>
+                            <button class="btn btn-outline-success" onclick="openRiskAssessment()">
+                                <i class="fas fa-shield-alt me-2"></i>風險評估工具
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="openMarketAnalysis()">
+                                <i class="fas fa-chart-pie me-2"></i>市場分析工具
+                            </button>
+                            <button class="btn btn-outline-info" onclick="openComplianceCheck()">
+                                <i class="fas fa-gavel me-2"></i>合規檢查工具
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 載入範例數據
+        function loadSampleData() {
+            const button = event.target;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>載入中...';
+            button.disabled = true;
+            
+            fetch('/api/v1/crawler/run', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ 範例數據載入成功！頁面將自動重新整理');
+                    window.location.reload();
+                } else {
+                    loadLocalNews();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadLocalNews();
+            });
+        }
+        
+        // 載入本地新聞
+        function loadLocalNews() {
+            const newsHtml = `
+                <div class="news-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">金管會發布新版保險業資本適足性規範</h6>
+                        <span class="category-badge category-監理法規">監理法規</span>
+                    </div>
+                    <p class="text-muted small mb-2">金管會發布新版保險業資本適足性規範，提高最低資本要求並強化風險管理...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>12-15 09:30
+                            <i class="fas fa-source me-1 ms-2"></i>金管會保險局
+                        </small>
+                        <div>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>原文
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>詳情
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">台灣人壽推出AI智能理賠服務</h6>
+                        <span class="category-badge category-商品創新">商品創新</span>
+                    </div>
+                    <p class="text-muted small mb-2">台灣人壽推出AI智能理賠服務，可縮短理賠處理時間50%...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>12-15 08:45
+                            <i class="fas fa-source me-1 ms-2"></i>現代保險
+                        </small>
+                        <div>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>原文
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>詳情
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="news-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">2024年前三季保險業保費收入創新高</h6>
+                        <span class="category-badge category-市場動態">市場動態</span>
+                    </div>
+                    <p class="text-muted small mb-2">2024年前三季保險業保費收入達1.8兆元，年成長8.5%...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>12-14 16:20
+                            <i class="fas fa-source me-1 ms-2"></i>保險事業發展中心
+                        </small>
+                        <div>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>原文
+                            </a>
+                            <a href="#" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>詳情
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('news-list').innerHTML = newsHtml;
+            document.getElementById('total-news').textContent = '3';
+        }
+
+        // 生成業務報表
+        function generateReport() {
+            alert('📊 正在生成業務報表...\n\n功能開發中，敬請期待！');
+        }
+
+        // 專業工具函數
+        function openCalculator() {
+            alert('🧮 保費計算器\n\n此功能正在開發中，將整合多種保險商品的費率計算功能');
+        }
+
+        function openRiskAssessment() {
+            alert('🛡️ 風險評估工具\n\n此功能正在開發中，將提供客戶風險等級評估與建議');
+        }
+
+        function openMarketAnalysis() {
+            alert('📈 市場分析工具\n\n此功能正在開發中，將提供深度市場分析與競品比較');
+        }
+
+        function openComplianceCheck() {
+            alert('⚖️ 合規檢查工具\n\n此功能正在開發中，將協助檢查業務流程的合規性');
+        }
+
+        // 頁面載入完成後執行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏢 保險業務專家工作台已載入');
+            loadLocalNews(); // 預設載入範例新聞
+        });
+    </script>
+</body>
+</html>

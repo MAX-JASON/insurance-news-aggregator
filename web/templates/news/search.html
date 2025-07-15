@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}搜索新聞 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-search me-2"></i>
+            搜索保險新聞
+        </h2>
+        
+        <!-- 搜索表單 -->
+        <form method="GET" action="/search" class="mb-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="keyword" 
+                               value="{{ keyword }}" 
+                               placeholder="請輸入關鍵詞搜索保險新聞..."
+                               required>
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="fas fa-search me-1"></i>搜索
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select form-select-lg">
+                        <option value="">所有分類</option>
+                        <option value="產業動態">產業動態</option>
+                        <option value="商品資訊">商品資訊</option>
+                        <option value="法規政策">法規政策</option>
+                        <option value="市場分析">市場分析</option>
+                        <option value="公司新聞">公司新聞</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+        
+        <!-- 搜索提示 -->
+        {% if not keyword %}
+        <div class="alert alert-info">
+            <h5><i class="fas fa-lightbulb me-2"></i>搜索提示</h5>
+            <ul class="mb-0">
+                <li>支援中文關鍵詞搜索</li>
+                <li>可以搜索新聞標題、內容、來源等</li>
+                <li>使用空格分隔多個關鍵詞</li>
+                <li>支援分類篩選功能</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 搜索結果 -->
+{% if keyword %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>
+                搜索結果：<span class="text-primary">"{{ keyword }}"</span>
+                {% if results %}
+                    <small class="text-muted">(共找到 {{ results|length }} 條結果)</small>
+                {% endif %}
+            </h4>
+            {% if results %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortResults('date')">
+                    <i class="fas fa-calendar me-1"></i>按時間排序
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortResults('relevance')">
+                    <i class="fas fa-star me-1"></i>按相關度排序
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if results %}
+        {% for news in results %}
+        <div class="col-12 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h5 class="card-title">
+                                <a href="/news/{{ news.id }}" class="text-decoration-none">
+                                    {{ news.title }}
+                                </a>
+                            </h5>
+                            <p class="card-text">{{ news.summary }}</p>
+                            <div class="d-flex gap-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ news.published_date[:10] }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-source me-1"></i>
+                                    {{ news.source }}
+                                </small>
+                                <span class="badge bg-primary">{{ news.category }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div class="d-flex flex-column gap-2">
+                                <a href="/news/{{ news.id }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-read me-1"></i>閱讀全文
+                                </a>
+                                <a href="/analysis/article/{{ news.id }}" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-chart-line me-1"></i>分析
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% elif keyword %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                <h4><i class="fas fa-exclamation-triangle me-2"></i>沒有找到結果</h4>
+                <p>沒有找到包含關鍵詞 "<strong>{{ keyword }}</strong>" 的新聞。</p>
+                <div class="mt-3">
+                    <p class="mb-2">您可以嘗試：</p>
+                    <ul class="list-unstyled">
+                        <li>• 檢查關鍵詞拼寫</li>
+                        <li>• 使用更通用的關鍵詞</li>
+                        <li>• 減少關鍵詞數量</li>
+                        <li>• 嘗試不同的分類</li>
+                    </ul>
+                </div>
+                <a href="/news" class="btn btn-primary">瀏覽所有新聞</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 分頁 -->
+{% if pagination %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="搜索結果分頁">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="?keyword={{ keyword }}&page={{ pagination.prev_num }}">上一頁</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != pagination.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="?keyword={{ keyword }}&page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?keyword={{ keyword }}&page={{ pagination.next_num }}">下一頁</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function sortResults(sortBy) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort', sortBy);
+    window.location.search = urlParams.toString();
+}
+
+// 高亮關鍵詞
+document.addEventListener('DOMContentLoaded', function() {
+    const keyword = '{{ keyword }}';
+    if (keyword) {
+        // 這裡可以添加關鍵詞高亮邏輯
+        console.log('搜索關鍵詞:', keyword);
+    }
+});
+</script>
+{% endblock %}

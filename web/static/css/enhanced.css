@@ -1,0 +1,347 @@
+
+/* 台灣保險新聞聚合器 - 增強樣式表 v2.0 */
+
+/* 主要變數定義 */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --font-family-sans: 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
+}
+
+/* 全局優化 */
+body {
+    font-family: var(--font-family-sans);
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: #fafbfc;
+}
+
+/* 導航欄美化 */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    transition: all 0.3s ease;
+    border-radius: 0.375rem;
+    margin: 0 0.2rem;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* 卡片美化 */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    color: white;
+    font-weight: 600;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    border: none;
+}
+
+/* 新聞卡片特殊樣式 */
+.news-card {
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.news-card:hover {
+    border-left-color: var(--success-color);
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+}
+
+.news-title {
+    color: var(--dark-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.news-title:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.news-meta {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+}
+
+.news-summary {
+    color: #495057;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+
+/* 統計卡片 */
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 1rem;
+}
+
+.stats-card:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0.75rem 2rem rgba(0, 123, 255, 0.3);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    line-height: 1;
+}
+
+/* 按鈕增強 */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+/* 載入動畫 */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,123,255,.3);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 淡入動畫 */
+.fade-in {
+    animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* 通知樣式 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* 表單優化 */
+.form-control {
+    border-radius: 0.5rem;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* 搜索框特殊樣式 */
+.search-container {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-input {
+    border-radius: 2rem;
+    padding-left: 3rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+}
+
+/* 響應式優化 */
+@media (max-width: 768px) {
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+}
+
+/* 滾動條美化 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* 頁腳樣式 */
+.footer {
+    background: linear-gradient(135deg, var(--dark-color), #495057);
+    color: var(--light-color);
+    margin-top: 3rem;
+    padding: 2rem 0;
+}
+
+/* 標籤樣式 */
+.badge {
+    border-radius: 1rem;
+    font-weight: 500;
+}
+
+/* 分頁樣式 */
+.pagination .page-link {
+    border-radius: 0.5rem;
+    margin: 0 0.125rem;
+    border: none;
+    color: var(--primary-color);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* 載入狀態 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* 回到頂部按鈕 */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: none;
+}
+
+.back-to-top:hover {
+    background: var(--info-color);
+    transform: translateY(-3px);
+}

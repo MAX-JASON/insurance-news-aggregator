@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}{{ news.title }} - {{ super() }}{% endblock %}
+
+{% block head %}
+<meta name="description" content="{{ news.summary }}">
+<meta property="og:title" content="{{ news.title }}">
+<meta property="og:description" content="{{ news.summary }}">
+<meta property="og:url" content="{{ request.url }}">
+{% if news.image_url %}
+<meta property="og:image" content="{{ url_for('static', filename=news.image_url, _external=True) }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- 麵包屑導航 -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">首頁</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('web.news_list') }}">新聞</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ news.title[:50] }}...</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- 主要內容 -->
+        <div class="col-lg-8">
+            <article class="news-detail">                <!-- 新聞標題 -->
+                <header class="news-header mb-4">
+                    <h1 class="display-5 fw-bold mb-3 text-primary">{{ news.title }}</h1>
+                    
+                    <!-- 新聞元信息 -->
+                    <div class="news-meta d-flex flex-wrap align-items-center mb-3">
+                        <span class="badge bg-primary me-3">
+                            <i class="fas fa-folder me-1"></i>
+                            {{ news.category }}
+                        </span>
+                          <span class="text-muted me-3">
+                            <i class="fas fa-calendar me-1"></i>
+                            {% if news.published_date %}
+                                {% if news.published_date.strftime is defined %}
+                                    {{ news.published_date.strftime('%Y年%m月%d日 %H:%M') }}
+                                {% else %}
+                                    {{ news.published_date }}
+                                {% endif %}
+                            {% else %}
+                                未知時間
+                            {% endif %}
+                        </span>
+                        
+                        <span class="text-muted me-3">
+                            <i class="fas fa-globe me-1"></i>
+                            {{ news.source }}
+                        </span>
+                        
+                        {% if news.author %}
+                        <span class="text-muted me-3">
+                            <i class="fas fa-user me-1"></i>
+                            {{ news.author }}
+                        </span>
+                        {% endif %}
+                        
+                        <span class="text-muted me-3">
+                            <i class="fas fa-eye me-1"></i>
+                            {{ news.view_count }} 次瀏覽
+                        </span>
+                        
+                        {% if news.url %}
+                        <a href="{{ news.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>
+                            查看原文
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 重要性評分 -->
+                    {% if news.importance_score and news.importance_score > 0.5 %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-star me-2"></i>
+                        <strong>重要新聞</strong> - 重要性評分: {{ "%.1f"|format(news.importance_score * 100) }}%
+                    </div>
+                    {% endif %}
+                </header>                
+                <!-- 新聞摘要 -->
+                {% if news.summary %}
+                <div class="news-summary mb-4">
+                    <div class="alert alert-light border-start border-primary border-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>新聞摘要
+                        </h6>
+                        <p class="mb-0">{{ news.summary }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- 新聞內容 -->
+                <div class="news-content">
+                    <div class="content-body">
+                        {% if news.content %}
+                            {% set paragraphs = news.content.split('\n') %}
+                            {% for paragraph in paragraphs %}
+                                {% if paragraph.strip() %}
+                                <p class="mb-3">{{ paragraph.strip() }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            內容暫時無法顯示，請點擊上方「查看原文」按鈕前往原始網站閱讀完整內容。
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 標籤 -->
+                {% if news.tags %}
+                <div class="news-tags mt-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-tags me-2"></i>相關標籤
+                    </h6>
+                    <div class="tag-container">
+                        {% for tag in news.tags %}
+                        <span class="badge bg-light text-dark me-2 mb-2">
+                            <i class="fas fa-tag me-1"></i>{{ tag }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- 分享和動作按鈕 -->
+                <div class="news-actions mt-4 pt-4 border-top">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">分享這篇新聞</h6>
+                            <div class="share-buttons">
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2" onclick="shareToFacebook()">
+                                    <i class="fab fa-facebook-f me-1"></i>Facebook
+                                </a>
+                                <a href="#" class="btn btn-outline-info btn-sm me-2" onclick="shareToLine()">
+                                    <i class="fab fa-line me-1"></i>LINE
+                                </a>
+                                <a href="#" class="btn btn-outline-secondary btn-sm" onclick="copyLink()">
+                                    <i class="fas fa-link me-1"></i>複製連結
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            {% if news.url %}
+                            <a href="{{ news.url }}" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt me-2"></i>
+                                前往原始網站閱讀
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                </header>
+
+                <!-- 新聞圖片 -->
+                {% if news.image_url %}
+                <div class="news-image mb-4">
+                    <img src="{{ news.image_url }}" alt="{{ news.title }}" class="img-fluid rounded">
+                </div>
+                {% endif %}
+
+                <!-- 新聞內容 -->
+                <div class="news-content">
+                    {{ news.content|safe }}
+                </div>
+
+                <!-- 關鍵詞標籤 -->
+                {% if news.keywords %}
+                <div class="news-keywords mt-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-tags me-2"></i>關鍵詞
+                    </h6>
+                    <div class="d-flex flex-wrap">
+                        {% for keyword in news.keywords %}
+                        <span class="badge bg-light text-dark me-2 mb-2"># {{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 原文連結 -->
+                <div class="news-source mt-4 p-3 bg-light rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>新聞來源：</strong>{{ news.source.name if news.source else '未知來源' }}
+                        </div>
+                        {% if news.url and news.url != request.url %}
+                        <a href="{{ news.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>查看原文
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 分享按鈕 -->
+                <div class="news-share mt-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-share-alt me-2"></i>分享此新聞
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="shareToFacebook()">
+                            <i class="fab fa-facebook-f me-1"></i>Facebook
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="shareToTwitter()">
+                            <i class="fab fa-twitter me-1"></i>Twitter
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="shareToLine()">
+                            <i class="fab fa-line me-1"></i>LINE
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard()">
+                            <i class="fas fa-copy me-1"></i>複製連結
+                        </button>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- 側邊欄 -->
+        <div class="col-lg-4">
+            <!-- 相關新聞 -->
+            {% if related_news %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-newspaper me-2"></i>相關新聞
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% for related in related_news %}
+                    <div class="p-3 border-bottom">
+                        <h6 class="mb-2">
+                            <a href="{{ url_for('web.news_detail', news_id=related.id) }}" class="text-decoration-none">
+                                {{ related.title }}
+                            </a>
+                        </h6>                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {% if related.published_date %}
+                                {{ related.published_date.strftime('%m月%d日') if related.published_date.strftime else related.published_date }}
+                            {% else %}
+                                未知時間
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 熱門新聞 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-fire me-2"></i>熱門新聞
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="p-3 border-bottom">
+                        <h6 class="mb-2">
+                            <a href="#" class="text-decoration-none">保險業數位轉型加速進行</a>
+                        </h6>
+                        <small class="text-muted">
+                            <i class="fas fa-eye me-1"></i>1,234 次瀏覽
+                        </small>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <h6 class="mb-2">
+                            <a href="#" class="text-decoration-none">新型醫療保險商品上市</a>
+                        </h6>
+                        <small class="text-muted">
+                            <i class="fas fa-eye me-1"></i>987 次瀏覽
+                        </small>
+                    </div>
+                    <div class="p-3">
+                        <h6 class="mb-2">
+                            <a href="#" class="text-decoration-none">金管會發布保險新規</a>
+                        </h6>
+                        <small class="text-muted">
+                            <i class="fas fa-eye me-1"></i>756 次瀏覽
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for sharing -->
+<script>
+function shareToFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+}
+
+function shareToTwitter() {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent('{{ news.title }}');
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+}
+
+function shareToLine() {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent('{{ news.title }}');
+    window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+}
+
+function copyToClipboard() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('連結已複製到剪貼簿');
+    });
+}
+</script>
+{% endblock %}

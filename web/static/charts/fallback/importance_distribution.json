@@ -1,0 +1,31 @@
+{
+  "type": "pie",
+  "data": {
+    "labels": [
+      "高重要性",
+      "中重要性",
+      "低重要性"
+    ],
+    "datasets": [
+      {
+        "data": [
+          25,
+          45,
+          30
+        ],
+        "backgroundColor": [
+          "#dc3545",
+          "#ffc107",
+          "#28a745"
+        ]
+      }
+    ]
+  },
+  "options": {
+    "responsive": true,
+    "title": {
+      "display": true,
+      "text": "重要性分佈"
+    }
+  }
+}

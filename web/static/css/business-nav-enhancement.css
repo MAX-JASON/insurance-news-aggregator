@@ -1,0 +1,73 @@
+/* 業務頁面導航增強 */
+.cyber-enhancement-panel {
+    background: linear-gradient(90deg, 
+        rgba(0, 12, 24, 0.95) 0%, 
+        rgba(0, 20, 40, 0.95) 50%, 
+        rgba(0, 12, 24, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.cyber-business-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.cyber-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 1rem;
+    color: #88ccff;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    background: rgba(0, 40, 80, 0.3);
+}
+
+.cyber-nav-item:hover {
+    color: #00ffff;
+    background: rgba(0, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.cyber-nav-item.active {
+    color: #ffffff;
+    background: rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+}
+
+.cyber-nav-item i {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .cyber-business-nav {
+        gap: 0.5rem;
+    }
+    
+    .cyber-nav-item {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    .cyber-nav-item span {
+        display: none;
+    }
+    
+    .cyber-nav-item i {
+        margin-right: 0;
+        font-size: 1rem;
+    }
+}

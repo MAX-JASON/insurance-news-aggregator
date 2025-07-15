@@ -1,0 +1,30 @@
+{
+  "type": "bar",
+  "data": {
+    "labels": [
+      "類別1",
+      "類別2",
+      "類別3",
+      "類別4"
+    ],
+    "datasets": [
+      {
+        "label": "source_stats",
+        "data": [
+          12,
+          19,
+          8,
+          15
+        ],
+        "backgroundColor": "#007bff"
+      }
+    ]
+  },
+  "options": {
+    "responsive": true,
+    "title": {
+      "display": true,
+      "text": "source_stats"
+    }
+  }
+}

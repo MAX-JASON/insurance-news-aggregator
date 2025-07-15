@@ -1,0 +1,310 @@
+{% extends "business/base.html" %}
+
+{% block title %}優先新聞 - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+.priority-news-container {
+    background: rgba(255, 100, 100, 0.05);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.priority-item {
+    background: rgba(255, 0, 100, 0.08);
+    border: 1px solid rgba(255, 0, 100, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(255, 0, 100, 0.1);
+}
+
+.priority-item:hover {
+    background: rgba(255, 0, 100, 0.12);
+    box-shadow: 0 8px 30px rgba(255, 0, 100, 0.2);
+    transform: translateY(-2px);
+}
+
+.priority-badge {
+    background: linear-gradient(135deg, #ff0066 0%, #ff6600 100%);
+    color: #ffffff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    box-shadow: 0 0 10px rgba(255, 0, 102, 0.5);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- 頁面標題 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-fire text-danger me-3"></i>優先關注新聞
+            </h1>
+            <p class="text-muted">按重要性和業務影響排序的最新新聞</p>
+        </div>
+        <div>
+            <a href="{{ url_for('business.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>返回儀表板
+            </a>
+        </div>
+    </div>
+
+    <!-- 排序控制 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="sort-controls">
+                        <label for="sortOrder">排序方式：</label>
+                        <div class="btn-group" role="group" id="sortOrder">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" data-sort="importance">
+                                <i class="fas fa-star me-1"></i>重要性
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-sort="date">
+                                <i class="fas fa-calendar me-1"></i>日期
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-sort="impact">
+                                <i class="fas fa-chart-line me-1"></i>業務影響
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="sort-controls justify-content-md-end">
+                        <label for="importanceFilter">重要性：</label>
+                        <div class="btn-group" role="group" id="importanceFilter">
+                            <button type="button" class="btn btn-sm btn-outline-danger active" data-filter="all">
+                                全部
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-filter="high">
+                                高
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" data-filter="medium">
+                                中
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info" data-filter="low">
+                                低
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新聞列表 -->
+    <div class="row" id="newsList">
+        {% for news in priority_news %}
+            {% set importance_class = 'high-importance' if news.importance_score >= 0.7 else 'medium-importance' if news.importance_score >= 0.4 else 'low-importance' %}
+            {% set importance_level = 'high' if news.importance_score >= 0.7 else 'medium' if news.importance_score >= 0.4 else 'low' %}
+            
+            <div class="col-md-6 col-lg-4 mb-4 news-item-container" 
+                 data-importance="{{ importance_level }}" 
+                 data-date="{{ news.published_date.isoformat() if news.published_date else '' }}" 
+                 data-impact="{{ news.business_impact_score|default(0) }}">
+                <div class="card h-100 news-item {{ importance_class }}">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">{{ news.source.name if news.source else '未知來源' }}</span>
+                            <div class="importance-badge importance-{{ importance_level }}">
+                                {{ '高' if news.importance_score >= 0.7 else '中' if news.importance_score >= 0.4 else '低' }}重要性
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{{ url_for('web.news_detail', news_id=news.id) }}" class="text-decoration-none">
+                                {{ news.title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small">{{ news.summary[:150] }}{% if news.summary|length > 150 %}...{% endif %}</p>
+                        
+                        <!-- 業務影響分析 -->
+                        <div class="mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-briefcase text-primary me-2"></i>
+                                <span class="fw-bold">業務影響</span>
+                            </div>
+                            <p class="small text-muted mt-1">{{ news.business_impact }}</p>
+                        </div>
+                        
+                        <!-- 重要性指標 -->
+                        <div class="importance-indicator mt-3">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-{{ 'danger' if news.importance_score >= 0.7 else 'warning' if news.importance_score >= 0.4 else 'info' }}" 
+                                     role="progressbar" 
+                                     style="width: {{ (news.importance_score or 0) * 100 }}%" 
+                                     aria-valuenow="{{ (news.importance_score or 0) * 100 }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="small">重要性評分</span>
+                                <span class="small">{{ '%.0f%%'|format((news.importance_score or 0) * 100) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                {{ news.published_date.strftime('%Y-%m-%d') if news.published_date else '未知日期' }}
+                            </small>
+                            <div class="btn-group">
+                                <a href="{{ url_for('web.news_detail', news_id=news.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('business.share_tools', news_id=news.id) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-share-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>目前沒有符合條件的優先新聞
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 分頁 -->
+    {% if pagination and pagination.pages > 1 %}
+    <div class="d-flex justify-content-center mt-4">
+        <nav aria-label="頁面導航">
+            <ul class="pagination">
+                <li class="page-item{{ ' disabled' if pagination.page == 1 else '' }}">
+                    <a class="page-link" href="{{ url_for('business.priority_news', page=pagination.page-1) }}" aria-label="上一頁">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                
+                {% for p in pagination.iter_pages() %}
+                    {% if p %}
+                        <li class="page-item{{ ' active' if p == pagination.page else '' }}">
+                            <a class="page-link" href="{{ url_for('business.priority_news', page=p) }}">{{ p }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <li class="page-item{{ ' disabled' if pagination.page == pagination.pages else '' }}">
+                    <a class="page-link" href="{{ url_for('business.priority_news', page=pagination.page+1) }}" aria-label="下一頁">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 排序功能
+    const sortButtons = document.querySelectorAll('#sortOrder .btn');
+    sortButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // 更新激活狀態
+            sortButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 獲取排序方式
+            const sortBy = this.getAttribute('data-sort');
+            sortNewsList(sortBy);
+        });
+    });
+    
+    // 過濾功能
+    const filterButtons = document.querySelectorAll('#importanceFilter .btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // 更新激活狀態
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 獲取過濾條件
+            const filter = this.getAttribute('data-filter');
+            filterNewsList(filter);
+        });
+    });
+    
+    // 初始排序
+    sortNewsList('importance');
+    
+    // 排序新聞列表
+    function sortNewsList(sortBy) {
+        const newsList = document.getElementById('newsList');
+        const newsItems = Array.from(newsList.getElementsByClassName('news-item-container'));
+        
+        newsItems.sort((a, b) => {
+            if (sortBy === 'importance') {
+                // 按重要性排序（從高到低）
+                const importanceA = getImportanceLevelValue(a.getAttribute('data-importance'));
+                const importanceB = getImportanceLevelValue(b.getAttribute('data-importance'));
+                return importanceB - importanceA;
+            } else if (sortBy === 'date') {
+                // 按日期排序（從新到舊）
+                const dateA = a.getAttribute('data-date') || '';
+                const dateB = b.getAttribute('data-date') || '';
+                return dateB.localeCompare(dateA);
+            } else if (sortBy === 'impact') {
+                // 按業務影響排序
+                const impactA = parseFloat(a.getAttribute('data-impact')) || 0;
+                const impactB = parseFloat(b.getAttribute('data-impact')) || 0;
+                return impactB - impactA;
+            }
+            return 0;
+        });
+        
+        // 重新排序DOM元素
+        newsItems.forEach(item => {
+            newsList.appendChild(item);
+        });
+        
+        // 保持當前過濾條件
+        const activeFilter = document.querySelector('#importanceFilter .active').getAttribute('data-filter');
+        filterNewsList(activeFilter);
+    }
+    
+    // 過濾新聞列表
+    function filterNewsList(filter) {
+        const newsItems = document.querySelectorAll('.news-item-container');
+        
+        newsItems.forEach(item => {
+            if (filter === 'all' || item.getAttribute('data-importance') === filter) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    // 獲取重要性等級數值（用於排序）
+    function getImportanceLevelValue(level) {
+        switch (level) {
+            case 'high': return 3;
+            case 'medium': return 2;
+            case 'low': return 1;
+            default: return 0;
+        }
+    }
+});
+</script>
+{% endblock %}

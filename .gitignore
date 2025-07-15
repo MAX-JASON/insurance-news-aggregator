@@ -1,0 +1,52 @@
+# Python相關
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虛擬環境
+venv/
+ENV/
+
+# IDE相關
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 資料庫
+*.db
+*.sqlite3
+*.sqlite
+instance/*.db
+
+# 日誌
+logs/
+*.log
+
+# 備份和緩存檔案
+*.bak
+*.tmp
+*.old
+.cache/
+py_files_backup_confirmation.txt
+
+# 操作系統相關
+.DS_Store
+Thumbs.db

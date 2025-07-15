@@ -1,0 +1,585 @@
+{% extends "base.html" %}
+
+{% block title %}通知管理儀表板{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- 頁面標題 -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-bell me-2"></i>通知管理儀表板</h2>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="testNotifications()">
+                        <i class="fas fa-vial me-1"></i>測試通知系統
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="manualPush()">
+                        <i class="fas fa-paper-plane me-1"></i>手動推送
+                    </button>
+                    <a href="{{ url_for('notification.settings') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i>設定
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">總推送次數</h6>
+                            <h3 class="mb-0">{{ push_stats.total_pushes|default(0) }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-paper-plane fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">成功率</h6>
+                            <h3 class="mb-0">{{ "%.1f"|format(push_stats.success_rate * 100)|default("0.0") }}%</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">推送新聞數</h6>
+                            <h3 class="mb-0">{{ push_stats.total_news_pushed|default(0) }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-newspaper fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">通知用戶數</h6>
+                            <h3 class="mb-0">{{ push_stats.total_users_notified|default(0) }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 推送規則管理 -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-rules me-2"></i>推送規則</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>規則名稱</th>
+                                    <th>狀態</th>
+                                    <th>最後執行</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rule in rules %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ rule.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            目標: {{ rule.target_users|join(', ') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if rule.enabled else 'secondary' }}">
+                                            {{ '啟用' if rule.enabled else '停用' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if rule.last_run %}
+                                            {{ rule.last_run.strftime('%m-%d %H:%M') }}
+                                        {% else %}
+                                            <span class="text-muted">從未執行</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="toggleRule('{{ rule.name }}')">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" 
+                                                onclick="executeRule('{{ rule.name }}')">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近通知歷史 -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history me-2"></i>最近通知記錄</h5>
+                </div>
+                <div class="card-body">
+                    <div class="notification-history" style="max-height: 400px; overflow-y: auto;">
+                        {% for notification in notification_history %}
+                        <div class="d-flex align-items-center mb-3 p-3 border rounded">
+                            <div class="me-3">
+                                {% if notification.success %}
+                                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-danger fa-lg"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">{{ notification.subject }}</div>
+                                <small class="text-muted">
+                                    類型: {{ notification.type }} | 
+                                    收件人: {{ notification.recipients|length }} 位 |
+                                    時間: {{ notification.timestamp }}
+                                </small>
+                                {% if not notification.success and notification.error_message %}
+                                <div class="text-danger small mt-1">
+                                    錯誤: {{ notification.error_message }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速操作面板 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt me-2"></i>快速操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="sendTestEmail()">
+                                <i class="fas fa-envelope me-2"></i>發送測試郵件
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-success w-100 mb-2" onclick="sendTestLine()">
+                                <i class="fab fa-line me-2"></i>發送測試LINE
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-info w-100 mb-2" onclick="sendTestWebhook()">
+                                <i class="fas fa-webhook me-2"></i>發送測試Webhook
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>自定義通知</h6>
+                            <form id="customNotificationForm">
+                                <div class="mb-2">
+                                    <input type="email" class="form-control form-control-sm" 
+                                           placeholder="收件人郵箱" id="customRecipient" required>
+                                </div>
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm" 
+                                           placeholder="主題" id="customSubject" required>
+                                </div>
+                                <div class="mb-2">
+                                    <textarea class="form-control form-control-sm" rows="3" 
+                                              placeholder="訊息內容" id="customMessage" required></textarea>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="methodEmail" value="email" checked>
+                                        <label class="form-check-label" for="methodEmail">郵件</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="methodLine" value="line">
+                                        <label class="form-check-label" for="methodLine">LINE</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">發送自定義通知</button>
+                            </form>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>系統狀態</h6>
+                            <div id="systemStatus" class="p-3 bg-light rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>郵件服務:</span>
+                                    <span id="emailStatus" class="badge bg-secondary">檢查中...</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>LINE服務:</span>
+                                    <span id="lineStatus" class="badge bg-secondary">檢查中...</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Webhook服務:</span>
+                                    <span id="webhookStatus" class="badge bg-secondary">檢查中...</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm mt-2" onclick="checkSystemStatus()">
+                                <i class="fas fa-sync-alt me-1"></i>刷新狀態
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 載入中模態框 -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">載入中...</span>
+                </div>
+                <div class="mt-2">處理中，請稍候...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 通知管理功能
+class NotificationManager {
+    constructor() {
+        this.initializeEventListeners();
+        this.checkSystemStatus();
+    }
+    
+    initializeEventListeners() {
+        // 自定義通知表單
+        document.getElementById('customNotificationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.sendCustomNotification();
+        });
+    }
+    
+    async sendCustomNotification() {
+        const recipient = document.getElementById('customRecipient').value;
+        const subject = document.getElementById('customSubject').value;
+        const message = document.getElementById('customMessage').value;
+        
+        const methods = [];
+        if (document.getElementById('methodEmail').checked) methods.push('email');
+        if (document.getElementById('methodLine').checked) methods.push('line');
+        
+        if (methods.length === 0) {
+            this.showAlert('請至少選擇一種發送方式', 'warning');
+            return;
+        }
+        
+        try {
+            this.showLoading(true);
+            
+            const response = await fetch('/notification/api/send/custom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    recipients: [recipient],
+                    subject: subject,
+                    message: message,
+                    methods: methods
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                this.showAlert(result.message, 'success');
+                document.getElementById('customNotificationForm').reset();
+            } else {
+                this.showAlert(result.message, 'danger');
+            }
+            
+        } catch (error) {
+            this.showAlert('發送失敗: ' + error.message, 'danger');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+    
+    async checkSystemStatus() {
+        try {
+            const response = await fetch('/notification/api/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ type: 'all' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                this.updateStatusBadges(result.results);
+            }
+            
+        } catch (error) {
+            console.error('檢查系統狀態失敗:', error);
+        }
+    }
+    
+    updateStatusBadges(results) {
+        const badges = {
+            'emailStatus': results.email,
+            'lineStatus': results.line,
+            'webhookStatus': results.webhook
+        };
+        
+        for (const [badgeId, status] of Object.entries(badges)) {
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                badge.className = status ? 'badge bg-success' : 'badge bg-danger';
+                badge.textContent = status ? '正常' : '異常';
+            }
+        }
+    }
+    
+    showLoading(show) {
+        const modal = document.getElementById('loadingModal');
+        if (show) {
+            new bootstrap.Modal(modal).show();
+        } else {
+            bootstrap.Modal.getInstance(modal)?.hide();
+        }
+    }
+    
+    showAlert(message, type) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        const container = document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // 自動消失
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+}
+
+// 全域函數
+async function testNotifications() {
+    try {
+        notificationManager.showLoading(true);
+        
+        const response = await fetch('/notification/api/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type: 'all' })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            notificationManager.showAlert(result.message, 'success');
+            notificationManager.updateStatusBadges(result.results);
+        } else {
+            notificationManager.showAlert(result.message, 'danger');
+        }
+        
+    } catch (error) {
+        notificationManager.showAlert('測試失敗: ' + error.message, 'danger');
+    } finally {
+        notificationManager.showLoading(false);
+    }
+}
+
+async function manualPush() {
+    const ruleName = prompt('請輸入要執行的規則名稱:');
+    if (!ruleName) return;
+    
+    try {
+        notificationManager.showLoading(true);
+        
+        const response = await fetch('/notification/api/push/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rule_name: ruleName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            notificationManager.showAlert(result.message, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            notificationManager.showAlert(result.message, 'danger');
+        }
+        
+    } catch (error) {
+        notificationManager.showAlert('推送失敗: ' + error.message, 'danger');
+    } finally {
+        notificationManager.showLoading(false);
+    }
+}
+
+async function toggleRule(ruleName) {
+    try {
+        const response = await fetch(`/notification/api/rules/${ruleName}/toggle`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            notificationManager.showAlert(result.message, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            notificationManager.showAlert(result.message, 'danger');
+        }
+        
+    } catch (error) {
+        notificationManager.showAlert('操作失敗: ' + error.message, 'danger');
+    }
+}
+
+async function executeRule(ruleName) {
+    if (!confirm(`確定要執行規則「${ruleName}」嗎？`)) return;
+    
+    try {
+        notificationManager.showLoading(true);
+        
+        const response = await fetch('/notification/api/push/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rule_name: ruleName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            notificationManager.showAlert(result.message, 'success');
+        } else {
+            notificationManager.showAlert(result.message, 'danger');
+        }
+        
+    } catch (error) {
+        notificationManager.showAlert('執行失敗: ' + error.message, 'danger');
+    } finally {
+        notificationManager.showLoading(false);
+    }
+}
+
+function sendTestEmail() {
+    testSpecificNotification('email');
+}
+
+function sendTestLine() {
+    testSpecificNotification('line');
+}
+
+function sendTestWebhook() {
+    testSpecificNotification('webhook');
+}
+
+async function testSpecificNotification(type) {
+    try {
+        notificationManager.showLoading(true);
+        
+        const response = await fetch('/notification/api/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type: type })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            const success = result.results[type];
+            notificationManager.showAlert(
+                `${type} 測試${success ? '成功' : '失敗'}`, 
+                success ? 'success' : 'danger'
+            );
+        } else {
+            notificationManager.showAlert(result.message, 'danger');
+        }
+        
+    } catch (error) {
+        notificationManager.showAlert('測試失敗: ' + error.message, 'danger');
+    } finally {
+        notificationManager.showLoading(false);
+    }
+}
+
+function checkSystemStatus() {
+    notificationManager.checkSystemStatus();
+}
+
+// 初始化
+let notificationManager;
+document.addEventListener('DOMContentLoaded', function() {
+    notificationManager = new NotificationManager();
+});
+</script>
+{% endblock %}

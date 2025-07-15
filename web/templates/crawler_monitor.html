@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬蟲監控 - 台灣保險新聞聚合器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-active { background-color: #28a745; }
+        .status-inactive { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        
+        .metric-card {
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .log-entry {
+            border-left: 4px solid #dee2e6;
+            margin-bottom: 0.5rem;
+        }
+        .log-entry.success { border-left-color: #28a745; }
+        .log-entry.error { border-left-color: #dc3545; }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-spider me-2"></i>
+                爬蟲監控系統
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">首頁</a>
+                <a class="nav-link active" href="/crawler/monitor">監控</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 總覽統計 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-tachometer-alt me-2"></i>系統總覽</h2>
+            </div>
+        </div>
+
+        <div class="row mb-4" id="overview-stats">
+            <!-- 統計卡片將由JavaScript動態載入 -->
+        </div>
+
+        <!-- 來源狀態 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-newspaper me-2"></i>
+                            新聞來源狀態
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>來源名稱</th>
+                                        <th>狀態</th>
+                                        <th>新聞數量</th>
+                                        <th>成功率</th>
+                                        <th>可靠性</th>
+                                        <th>最後爬取</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sources-table">
+                                    <!-- 來源數據將由JavaScript載入 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近活動 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            最近活動
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div id="recent-activities">
+                            <!-- 活動記錄將由JavaScript載入 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            系統狀態
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="system-status">
+                            <!-- 系統狀態將由JavaScript載入 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重新整理按鈕 -->
+    <button class="btn btn-primary refresh-btn" onclick="refreshData()">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 載入數據
+        async function loadCrawlerStatus() {
+            try {
+                const response = await fetch('/api/v1/crawler/status');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateOverviewStats(data.data);
+                    updateRecentActivities(data.data.recent_activities);
+                    updateSystemStatus(data.data);
+                }
+            } catch (error) {
+                console.error('載入爬蟲狀態失敗:', error);
+            }
+        }
+
+        async function loadCrawlerSources() {
+            try {
+                const response = await fetch('/api/v1/crawler/sources');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateSourcesTable(data.data);
+                }
+            } catch (error) {
+                console.error('載入爬蟲來源失敗:', error);
+            }
+        }
+
+        function updateOverviewStats(data) {
+            const container = document.getElementById('overview-stats');
+            container.innerHTML = `
+                <div class="col-md-3">
+                    <div class="card metric-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-0">${data.news.total}</h3>
+                            <p class="text-muted mb-0">總新聞數</p>
+                            <small class="text-success">今日 +${data.news.today}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-rss fa-2x text-info mb-2"></i>
+                            <h3 class="mb-0">${data.sources.active}/${data.sources.total}</h3>
+                            <p class="text-muted mb-0">活躍來源</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-tasks fa-2x text-success mb-2"></i>
+                            <h3 class="mb-0">${data.crawls_today.total}</h3>
+                            <p class="text-muted mb-0">今日爬取</p>
+                            <small class="text-success">${data.crawls_today.success_rate}% 成功</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                            <h3 class="mb-0">${data.crawls_today.failed}</h3>
+                            <p class="text-muted mb-0">失敗次數</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSourcesTable(sources) {
+            const tbody = document.getElementById('sources-table');
+            tbody.innerHTML = sources.map(source => `
+                <tr>
+                    <td>
+                        <strong>${source.name}</strong>
+                        <br>
+                        <small class="text-muted">${source.url}</small>
+                    </td>
+                    <td>
+                        <span class="status-indicator status-${source.status}"></span>
+                        ${source.status === 'active' ? '活躍' : '停用'}
+                    </td>
+                    <td>
+                        <span class="badge bg-primary">${source.total_news}</span>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar ${source.success_rate >= 80 ? 'bg-success' : source.success_rate >= 60 ? 'bg-warning' : 'bg-danger'}" 
+                                 style="width: ${source.success_rate}%">
+                                ${source.success_rate}%
+                            </div>
+                        </div>
+                        <small class="text-muted">${source.successful_crawls}/${source.successful_crawls + source.failed_crawls}</small>
+                    </td>
+                    <td>
+                        <span class="badge ${source.reliability_score >= 0.8 ? 'bg-success' : source.reliability_score >= 0.6 ? 'bg-warning' : 'bg-danger'}">
+                            ${(source.reliability_score * 100).toFixed(1)}%
+                        </span>
+                    </td>
+                    <td>
+                        ${source.last_crawl ? 
+                            `<small>${new Date(source.last_crawl).toLocaleString('zh-TW')}</small>
+                             <br>
+                             <span class="badge ${source.last_crawl_success ? 'bg-success' : 'bg-danger'}">
+                                ${source.last_crawl_success ? '成功' : '失敗'}
+                             </span>` 
+                            : '<span class="text-muted">從未爬取</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateRecentActivities(activities) {
+            const container = document.getElementById('recent-activities');
+            container.innerHTML = activities.map(activity => `
+                <div class="log-entry ${activity.success ? 'success' : 'error'} p-3 bg-white rounded mb-2">
+                    <div class="d-flex justify-content-between">
+                        <strong>${activity.source}</strong>
+                        <small class="text-muted">${new Date(activity.created_at).toLocaleString('zh-TW')}</small>
+                    </div>
+                    <div class="mt-1">
+                        <span class="badge ${activity.success ? 'bg-success' : 'bg-danger'}">
+                            ${activity.success ? '成功' : '失敗'}
+                        </span>
+                        ${activity.success ? 
+                            `發現 ${activity.news_found} 則新聞，新增 ${activity.news_new} 則` :
+                            `錯誤: ${activity.error_message || '未知錯誤'}`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSystemStatus(data) {
+            const container = document.getElementById('system-status');
+            const uptime = '正常運行';  // 可以從後端獲取實際運行時間
+            
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <h6>系統運行狀態</h6>
+                        <div class="d-flex align-items-center">
+                            <span class="status-indicator status-active"></span>
+                            <span>正常運行</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">今日成功率</small>
+                        <div class="h5">${data.crawls_today.success_rate}%</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">活躍來源</small>
+                        <div class="h5">${data.sources.active}/${data.sources.total}</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <small class="text-muted">最後更新</small>
+                        <div>${new Date().toLocaleString('zh-TW')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function refreshData() {
+            const refreshBtn = document.querySelector('.refresh-btn i');
+            refreshBtn.classList.add('fa-spin');
+            
+            Promise.all([loadCrawlerStatus(), loadCrawlerSources()])
+                .finally(() => {
+                    refreshBtn.classList.remove('fa-spin');
+                });
+        }
+
+        // 初始載入
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            
+            // 每30秒自動重新整理
+            setInterval(refreshData, 30000);
+        });
+    </script>
+</body>
+</html>

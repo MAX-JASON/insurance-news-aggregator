@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}提交反饋 - 台灣保險新聞聚合器{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .rating {
+        display: inline-block;
+        position: relative;
+        height: 50px;
+        line-height: 50px;
+        font-size: 50px;
+    }
+
+    .rating label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .rating label:last-child {
+        position: static;
+    }
+
+    .rating label:nth-child(1) {
+        z-index: 5;
+    }
+
+    .rating label:nth-child(2) {
+        z-index: 4;
+    }
+
+    .rating label:nth-child(3) {
+        z-index: 3;
+    }
+
+    .rating label:nth-child(4) {
+        z-index: 2;
+    }
+
+    .rating label:nth-child(5) {
+        z-index: 1;
+    }
+
+    .rating label input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+    }
+
+    .rating label .icon {
+        float: left;
+        color: transparent;
+    }
+
+    .rating label:last-child .icon {
+        color: #ccc;
+    }
+
+    .rating:not(:hover) label input:checked ~ .icon,
+    .rating:hover label:hover input ~ .icon {
+        color: #ffc107;
+    }
+
+    .rating label input:focus:not(:checked) ~ .icon:last-child {
+        color: #ddd;
+    }
+    
+    .feature-checkbox {
+        margin-right: 15px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+    
+    .feedback-submit-btn {
+        margin-top: 20px;
+    }
+    
+    .feedback-result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+    }
+    
+    .feedback-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .feedback-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">提供您的寶貴意見</h1>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="card-text">感謝您使用台灣保險新聞聚合器！您的反饋對我們非常重要，它將幫助我們持續改進產品和服務。</p>
+            
+            <form id="feedbackForm" method="post" action="/feedback/submit" class="mt-4">
+                <div class="mb-3">
+                    <label for="category" class="form-label">反饋類別</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="" selected disabled>請選擇反饋類別</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">您的評分</label>
+                    <div class="rating">
+                        <label>
+                            <input type="radio" name="rating" value="1" required />
+                            <span class="icon">★</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="rating" value="2" />
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="rating" value="3" />
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="rating" value="4" />
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="rating" value="5" />
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                            <span class="icon">★</span>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">1星=非常不滿意，5星=非常滿意</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">相關功能</label>
+                    <div class="row">
+                        {% for feature in features %}
+                        <div class="col-md-4">
+                            <div class="feature-checkbox">
+                                <input class="form-check-input" type="checkbox" name="features[]" value="{{ feature.id }}" id="feature_{{ feature.id }}">
+                                <label class="form-check-label" for="feature_{{ feature.id }}">
+                                    {{ feature.name }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="message" class="form-label">反饋訊息</label>
+                    <textarea class="form-control" id="message" name="message" rows="5" placeholder="請提供詳細的反饋訊息，包括您的使用體驗、發現的問題或建議..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary feedback-submit-btn">提交反饋</button>
+            </form>
+            
+            <div id="feedbackResult" class="feedback-result">
+                <p id="feedbackResultMessage"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="/" class="btn btn-outline-secondary">返回首頁</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    $("#feedbackForm").on("submit", function(e) {
+        e.preventDefault();
+        
+        // 獲取表單數據
+        const formData = {
+            category: $("#category").val(),
+            rating: $("input[name='rating']:checked").val(),
+            features: $("input[name='features[]']:checked").map(function() {
+                return $(this).val();
+            }).get(),
+            message: $("#message").val(),
+            source: 'web',
+            metadata: {
+                browser: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            }
+        };
+        
+        // 發送AJAX請求
+        $.ajax({
+            url: "/api/v1/feedback/submit",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function(response) {
+                if (response.success) {
+                    // 顯示成功訊息
+                    $("#feedbackResult")
+                        .removeClass("feedback-error")
+                        .addClass("feedback-success")
+                        .show();
+                    $("#feedbackResultMessage").text("感謝您的反饋！我們已收到您的意見。");
+                    
+                    // 清空表單
+                    $("#feedbackForm")[0].reset();
+                    
+                    // 3秒後自動返回首頁
+                    setTimeout(function() {
+                        window.location.href = "/";
+                    }, 3000);
+                } else {
+                    // 顯示錯誤訊息
+                    $("#feedbackResult")
+                        .removeClass("feedback-success")
+                        .addClass("feedback-error")
+                        .show();
+                    $("#feedbackResultMessage").text("提交反饋失敗：" + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                // 顯示錯誤訊息
+                $("#feedbackResult")
+                    .removeClass("feedback-success")
+                    .addClass("feedback-error")
+                    .show();
+                $("#feedbackResultMessage").text("提交反饋時發生錯誤，請稍後再試。");
+                console.error("反饋提交錯誤:", error);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

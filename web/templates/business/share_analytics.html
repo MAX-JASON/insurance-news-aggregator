@@ -1,0 +1,542 @@
+{% extends "business/base.html" %}
+
+{% block title %}分享效率評估 - 保險新聞聚合器{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .dashboard-card .card-body {
+        padding: 20px;
+    }
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        background-color: white;
+        margin-bottom: 20px;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 500;
+        color: #0d6efd;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .trend-up {
+        color: #198754;
+    }
+    .trend-down {
+        color: #dc3545;
+    }
+    .data-table th {
+        background-color: #f8f9fa;
+    }
+    .share-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        border-left: 3px solid #0d6efd;
+    }
+    .share-item:hover {
+        background-color: #f1f3f5;
+    }
+    .high-response {
+        border-left-color: #198754;
+    }
+    .medium-response {
+        border-left-color: #ffc107;
+    }
+    .low-response {
+        border-left-color: #dc3545;
+    }
+    .response-high {
+        color: #198754;
+    }
+    .response-medium {
+        color: #ffc107;
+    }
+    .response-low {
+        color: #dc3545;
+    }
+    .insight-card {
+        padding: 15px;
+        background-color: #f0f7ff;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 3px solid #0d6efd;
+    }
+    .insight-card h5 {
+        color: #0d6efd;
+        margin-bottom: 10px;
+    }
+    .date-range-picker {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .date-range-picker label {
+        margin-right: 10px;
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>分享效率評估</h2>
+        <div class="date-range-picker">
+            <label for="date-range">日期範圍：</label>
+            <select class="form-select" id="date-range">
+                <option value="7">過去7天</option>
+                <option value="30" selected>過去30天</option>
+                <option value="90">過去90天</option>
+                <option value="180">過去180天</option>
+                <option value="365">過去一年</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <i class="fas fa-share-alt fa-2x text-primary"></i>
+                    </div>
+                    <span class="badge bg-success">+12%</span>
+                </div>
+                <div class="stat-value">86</div>
+                <div class="stat-label">總分享次數</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <i class="fas fa-eye fa-2x text-info"></i>
+                    </div>
+                    <span class="badge bg-success">+8%</span>
+                </div>
+                <div class="stat-value">412</div>
+                <div class="stat-label">總點閱次數</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <i class="fas fa-reply fa-2x text-warning"></i>
+                    </div>
+                    <span class="badge bg-success">+5%</span>
+                </div>
+                <div class="stat-value">27%</div>
+                <div class="stat-label">平均回應率</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <i class="fas fa-calendar-check fa-2x text-success"></i>
+                    </div>
+                    <span class="badge bg-warning text-dark">-2%</span>
+                </div>
+                <div class="stat-value">14</div>
+                <div class="stat-label">成功約訪次數</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 左側：圖表與分享效率 -->
+        <div class="col-md-8">
+            <!-- 分享趨勢圖表 -->
+            <div class="card dashboard-card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">分享與回應趨勢</h4>
+                    <div class="chart-container" id="shareResponseChart"></div>
+                </div>
+            </div>
+
+            <!-- 分享類型效率 -->
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h4 class="card-title">分享類型效率</h4>
+                    <div class="chart-container" id="shareTypeChart"></div>
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="response-high"><i class="fab fa-line fa-2x"></i></h5>
+                                    <p class="mb-1">Line</p>
+                                    <h4 class="mb-1">35%</h4>
+                                    <p class="small text-muted">回應率最高</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="response-medium"><i class="fas fa-envelope fa-2x"></i></h5>
+                                    <p class="mb-1">電子郵件</p>
+                                    <h4 class="mb-1">24%</h4>
+                                    <p class="small text-muted">適合詳細內容</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="response-low"><i class="fas fa-comments fa-2x"></i></h5>
+                                    <p class="mb-1">簡訊</p>
+                                    <h4 class="mb-1">18%</h4>
+                                    <p class="small text-muted">開啟率較低</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右側：洞察與最佳實踐 -->
+        <div class="col-md-4">
+            <!-- 分享效率洞察 -->
+            <div class="card dashboard-card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">分享效率洞察</h4>
+                    
+                    <div class="insight-card">
+                        <h5><i class="fas fa-lightbulb me-2"></i>最佳分享時機</h5>
+                        <p class="mb-0">週二與週四的上午9-11點分享內容獲得的回應率高出平均值32%。建議優先在這些時段進行重要訊息分享。</p>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <h5><i class="fas fa-chart-pie me-2"></i>最有效主題</h5>
+                        <p class="mb-0">與「稅務優惠」和「理賠條款變更」相關的新聞分享獲得最高回應率，高達41%。這類資訊對客戶價值明顯較高。</p>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <h5><i class="fas fa-users me-2"></i>客戶群體差異</h5>
+                        <p class="mb-0">35-45歲客戶群體對分享內容的回應率最高(32%)，其次是55歲以上群體(28%)。建議根據年齡層調整分享策略。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 最佳實踐建議 -->
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">最佳實踐建議</h4>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-2 text-primary">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </div>
+                            <h5 class="mb-0">個人化標題</h5>
+                        </div>
+                        <p class="ms-4 mb-3 small">包含客戶姓名的標題開啟率提升35%，加上與其投保產品相關的關鍵字可進一步提升效果。</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-2 text-primary">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </div>
+                            <h5 class="mb-0">簡潔明瞭</h5>
+                        </div>
+                        <p class="ms-4 mb-3 small">正文保持在200字以內的分享，完整閱讀率高出冗長內容3倍以上。優先呈現核心價值點。</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-2 text-primary">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </div>
+                            <h5 class="mb-0">明確行動呼籲</h5>
+                        </div>
+                        <p class="ms-4 mb-3 small">包含明確下一步行動建議的分享(如預約時間、回覆意見)的回應率是無明確指示的2.4倍。</p>
+                    </div>
+                    
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="me-2 text-primary">
+                                <i class="fas fa-check-circle fa-lg"></i>
+                            </div>
+                            <h5 class="mb-0">跟進時機</h5>
+                        </div>
+                        <p class="ms-4 mb-0 small">首次分享後24-48小時內進行跟進可將總體回應率提高21%。建議設置自動提醒進行跟進。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-0">近期分享效果追蹤</h4>
+                        <div>
+                            <select class="form-select" id="share-sort">
+                                <option value="date">依日期</option>
+                                <option value="response" selected>依回應率</option>
+                                <option value="clicks">依點閱數</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- 分享項目列表 -->
+                    <div class="share-items-list">
+                        <div class="share-item high-response">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-1">投資型保險稅制優惠再延長五年</h5>
+                                    <p class="text-muted small mb-1">分享時間: 2025/06/28 09:15 | 分享對象: 15位客戶</p>
+                                    <p class="small mb-0">使用客戶互動工具，透過Line和電子郵件發送，附加詳細稅制變更分析</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">點閱率</p>
+                                            <h5 class="mb-0">87%</h5>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 small text-muted">回應率</p>
+                                            <h5 class="response-high mb-0">42%</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">約訪轉換</p>
+                                            <h5 class="mb-0">5位</h5>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary">查看詳情</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="share-item medium-response">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-1">健康保險理賠條款大修改！7月起生效</h5>
+                                    <p class="text-muted small mb-1">分享時間: 2025/07/02 14:30 | 分享對象: 28位客戶</p>
+                                    <p class="small mb-0">使用客戶互動工具，透過電子郵件發送，針對已投保健康險客戶進行個人化提醒</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">點閱率</p>
+                                            <h5 class="mb-0">73%</h5>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 small text-muted">回應率</p>
+                                            <h5 class="response-medium mb-0">31%</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">約訪轉換</p>
+                                            <h5 class="mb-0">6位</h5>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary">查看詳情</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="share-item low-response">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-1">保險科技新創募資達10億</h5>
+                                    <p class="text-muted small mb-1">分享時間: 2025/06/30 16:45 | 分享對象: 32位客戶</p>
+                                    <p class="small mb-0">使用簡訊發送，未使用客戶互動工具，一般性群發無個人化內容</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">點閱率</p>
+                                            <h5 class="mb-0">42%</h5>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 small text-muted">回應率</p>
+                                            <h5 class="response-low mb-0">12%</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <p class="mb-1 small text-muted">約訪轉換</p>
+                                            <h5 class="mb-0">1位</h5>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary">查看詳情</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分頁 -->
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一頁</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">下一頁</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+$(document).ready(function() {
+    // 分享趨勢圖表
+    var shareResponseOptions = {
+        series: [{
+            name: '分享次數',
+            type: 'column',
+            data: [8, 5, 12, 10, 6, 14, 18, 9, 4]
+        }, {
+            name: '回應次數',
+            type: 'line',
+            data: [3, 1, 4, 2, 1, 5, 6, 2, 1]
+        }],
+        chart: {
+            height: 300,
+            type: 'line',
+            toolbar: {
+                show: false
+            }
+        },
+        stroke: {
+            width: [0, 3]
+        },
+        dataLabels: {
+            enabled: false
+        },
+        labels: ['6/23', '6/24', '6/25', '6/26', '6/27', '6/28', '6/29', '6/30', '7/1'],
+        xaxis: {
+            type: 'category'
+        },
+        yaxis: [{
+            title: {
+                text: '分享次數'
+            }
+        }, {
+            opposite: true,
+            title: {
+                text: '回應次數'
+            }
+        }],
+        colors: ['#0d6efd', '#20c997'],
+        tooltip: {
+            shared: true,
+            intersect: false
+        },
+        legend: {
+            position: 'top'
+        }
+    };
+    
+    var shareResponseChart = new ApexCharts(document.querySelector("#shareResponseChart"), shareResponseOptions);
+    shareResponseChart.render();
+    
+    // 分享類型效率圖表
+    var shareTypeOptions = {
+        series: [{
+            name: '回應率',
+            data: [35, 24, 18, 21, 15]
+        }],
+        chart: {
+            type: 'bar',
+            height: 300,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: ['Line分享', '電子郵件', '簡訊', '一對一即時通訊', '社群媒體分享'],
+            title: {
+                text: '回應率 (%)'
+            }
+        },
+        yaxis: {
+            title: {
+                text: '分享管道'
+            }
+        },
+        colors: ['#0d6efd']
+    };
+    
+    var shareTypeChart = new ApexCharts(document.querySelector("#shareTypeChart"), shareTypeOptions);
+    shareTypeChart.render();
+    
+    // 日期範圍變更事件
+    $('#date-range').change(function() {
+        // 實際應用中，這裡應該發送AJAX請求獲取新的數據
+        alert('日期範圍已變更為：' + $(this).val() + '天。實際應用中將重新加載數據。');
+    });
+    
+    // 分享排序變更事件
+    $('#share-sort').change(function() {
+        // 實際應用中，這裡應該重新排序分享項目
+        alert('排序方式已變更為：' + $(this).val() + '。實際應用中將重新排序數據。');
+    });
+    
+    // 查看詳情按鈕點擊事件
+    $('.btn-outline-primary').click(function() {
+        // 實際應用中，這裡應該彈出詳情模態框或導航到詳情頁面
+        alert('查看分享詳情（實際應用中將顯示完整報告）');
+    });
+});
+</script>
+{% endblock %}

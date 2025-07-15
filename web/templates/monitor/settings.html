@@ -1,0 +1,473 @@
+{% extends "monitor/base.html" %}
+
+{% block title %}監控設定 - 保險新聞聚合器{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-cog me-2"></i>監控設定</h2>
+                <button class="btn btn-primary" id="saveSettingsBtn">
+                    <i class="fas fa-save me-2"></i>儲存設定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 爬蟲設定 -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-spider me-2"></i>爬蟲設定</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="crawlInterval" class="form-label">爬蟲執行間隔（分鐘）</label>
+                        <input type="number" class="form-control" id="crawlInterval" value="30" min="5" max="1440">
+                        <div class="form-text">建議設定為 30-60 分鐘以避免被目標網站封鎖</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="maxRetries" class="form-label">最大重試次數</label>
+                        <input type="number" class="form-control" id="maxRetries" value="3" min="1" max="10">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="timeout" class="form-label">請求超時（秒）</label>
+                        <input type="number" class="form-control" id="timeout" value="30" min="10" max="120">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableDeduplication" checked>
+                        <label class="form-check-label" for="enableDeduplication">
+                            啟用新聞去重功能
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableAutoMode" checked>
+                        <label class="form-check-label" for="enableAutoMode">
+                            啟用自動爬蟲模式
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 監控設定 -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>監控設定</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="refreshInterval" class="form-label">監控頁面刷新間隔（秒）</label>
+                        <input type="number" class="form-control" id="refreshInterval" value="10" min="5" max="300">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="maxLogEntries" class="form-label">最大日誌條目數</label>
+                        <input type="number" class="form-control" id="maxLogEntries" value="1000" min="100" max="10000">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alertThreshold" class="form-label">系統警告閾值</label>
+                        <div class="row">
+                            <div class="col-4">
+                                <label for="cpuThreshold" class="form-label text-sm">CPU (%)</label>
+                                <input type="number" class="form-control" id="cpuThreshold" value="80" min="50" max="95">
+                            </div>
+                            <div class="col-4">
+                                <label for="memoryThreshold" class="form-label text-sm">記憶體 (%)</label>
+                                <input type="number" class="form-control" id="memoryThreshold" value="85" min="50" max="95">
+                            </div>
+                            <div class="col-4">
+                                <label for="diskThreshold" class="form-label text-sm">硬碟 (%)</label>
+                                <input type="number" class="form-control" id="diskThreshold" value="90" min="50" max="95">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableErrorAlerts" checked>
+                        <label class="form-check-label" for="enableErrorAlerts">
+                            啟用錯誤警告
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="enablePerformanceMonitoring" checked>
+                        <label class="form-check-label" for="enablePerformanceMonitoring">
+                            啟用效能監控
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知設定 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>通知設定</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>郵件通知</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="enableEmailNotifications">
+                                <label class="form-check-label" for="enableEmailNotifications">
+                                    啟用郵件通知
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="emailAddress" class="form-label">通知郵箱</label>
+                                <input type="email" class="form-control" id="emailAddress" placeholder="admin@example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6>LINE 通知</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="enableLineNotifications">
+                                <label class="form-check-label" for="enableLineNotifications">
+                                    啟用 LINE 通知
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="lineToken" class="form-label">LINE Token</label>
+                                <input type="password" class="form-control" id="lineToken" placeholder="輸入 LINE Notify Token">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h6>Webhook 通知</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="enableWebhookNotifications">
+                                <label class="form-check-label" for="enableWebhookNotifications">
+                                    啟用 Webhook 通知
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="webhookUrl" class="form-label">Webhook URL</label>
+                                <input type="url" class="form-control" id="webhookUrl" placeholder="https://example.com/webhook">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>通知觸發條件</h6>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="notifyOnError" checked>
+                                <label class="form-check-label" for="notifyOnError">系統錯誤</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="notifyOnCrawlFailure" checked>
+                                <label class="form-check-label" for="notifyOnCrawlFailure">爬蟲失敗</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="notifyOnHighResource">
+                                <label class="form-check-label" for="notifyOnHighResource">資源使用過高</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="notifyOnImportantNews">
+                                <label class="form-check-label" for="notifyOnImportantNews">重要新聞</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 進階設定 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tools me-2"></i>進階設定</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="logLevel" class="form-label">日誌層級</label>
+                                <select class="form-select" id="logLevel">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO" selected>INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="dataRetentionDays" class="form-label">數據保留天數</label>
+                                <input type="number" class="form-control" id="dataRetentionDays" value="30" min="7" max="365">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxConcurrentCrawlers" class="form-label">最大並發爬蟲數</label>
+                                <input type="number" class="form-control" id="maxConcurrentCrawlers" value="3" min="1" max="10">
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enableDebugMode">
+                                <label class="form-check-label" for="enableDebugMode">
+                                    啟用調試模式
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <button class="btn btn-primary me-2" id="saveSettingsBtn2">
+                        <i class="fas fa-save me-2"></i>儲存設定
+                    </button>
+                    <button class="btn btn-secondary me-2" id="resetSettingsBtn">
+                        <i class="fas fa-undo me-2"></i>重置為預設值
+                    </button>
+                    <button class="btn btn-success me-2" id="testSettingsBtn">
+                        <i class="fas fa-vial me-2"></i>測試設定
+                    </button>
+                    <button class="btn btn-info" id="exportSettingsBtn">
+                        <i class="fas fa-download me-2"></i>匯出設定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 預設設定
+const defaultSettings = {
+    crawler: {
+        interval: 30,
+        maxRetries: 3,
+        timeout: 30,
+        enableDeduplication: true,
+        enableAutoMode: true
+    },
+    monitoring: {
+        refreshInterval: 10,
+        maxLogEntries: 1000,
+        cpuThreshold: 80,
+        memoryThreshold: 85,
+        diskThreshold: 90,
+        enableErrorAlerts: true,
+        enablePerformanceMonitoring: true
+    },
+    notifications: {
+        email: {
+            enabled: false,
+            address: ''
+        },
+        line: {
+            enabled: false,
+            token: ''
+        },
+        webhook: {
+            enabled: false,
+            url: ''
+        },
+        triggers: {
+            error: true,
+            crawlFailure: true,
+            highResource: false,
+            importantNews: false
+        }
+    },
+    advanced: {
+        logLevel: 'INFO',
+        dataRetentionDays: 30,
+        maxConcurrentCrawlers: 3,
+        enableDebugMode: false
+    }
+};
+
+// 載入設定
+function loadSettings() {
+    // 這裡可以從 API 載入實際設定，目前使用預設值
+    const settings = defaultSettings;
+    
+    // 爬蟲設定
+    document.getElementById('crawlInterval').value = settings.crawler.interval;
+    document.getElementById('maxRetries').value = settings.crawler.maxRetries;
+    document.getElementById('timeout').value = settings.crawler.timeout;
+    document.getElementById('enableDeduplication').checked = settings.crawler.enableDeduplication;
+    document.getElementById('enableAutoMode').checked = settings.crawler.enableAutoMode;
+    
+    // 監控設定
+    document.getElementById('refreshInterval').value = settings.monitoring.refreshInterval;
+    document.getElementById('maxLogEntries').value = settings.monitoring.maxLogEntries;
+    document.getElementById('cpuThreshold').value = settings.monitoring.cpuThreshold;
+    document.getElementById('memoryThreshold').value = settings.monitoring.memoryThreshold;
+    document.getElementById('diskThreshold').value = settings.monitoring.diskThreshold;
+    document.getElementById('enableErrorAlerts').checked = settings.monitoring.enableErrorAlerts;
+    document.getElementById('enablePerformanceMonitoring').checked = settings.monitoring.enablePerformanceMonitoring;
+    
+    // 通知設定
+    document.getElementById('enableEmailNotifications').checked = settings.notifications.email.enabled;
+    document.getElementById('emailAddress').value = settings.notifications.email.address;
+    document.getElementById('enableLineNotifications').checked = settings.notifications.line.enabled;
+    document.getElementById('lineToken').value = settings.notifications.line.token;
+    document.getElementById('enableWebhookNotifications').checked = settings.notifications.webhook.enabled;
+    document.getElementById('webhookUrl').value = settings.notifications.webhook.url;
+    
+    // 通知觸發條件
+    document.getElementById('notifyOnError').checked = settings.notifications.triggers.error;
+    document.getElementById('notifyOnCrawlFailure').checked = settings.notifications.triggers.crawlFailure;
+    document.getElementById('notifyOnHighResource').checked = settings.notifications.triggers.highResource;
+    document.getElementById('notifyOnImportantNews').checked = settings.notifications.triggers.importantNews;
+    
+    // 進階設定
+    document.getElementById('logLevel').value = settings.advanced.logLevel;
+    document.getElementById('dataRetentionDays').value = settings.advanced.dataRetentionDays;
+    document.getElementById('maxConcurrentCrawlers').value = settings.advanced.maxConcurrentCrawlers;
+    document.getElementById('enableDebugMode').checked = settings.advanced.enableDebugMode;
+}
+
+// 收集當前設定
+function getCurrentSettings() {
+    return {
+        crawler: {
+            interval: parseInt(document.getElementById('crawlInterval').value),
+            maxRetries: parseInt(document.getElementById('maxRetries').value),
+            timeout: parseInt(document.getElementById('timeout').value),
+            enableDeduplication: document.getElementById('enableDeduplication').checked,
+            enableAutoMode: document.getElementById('enableAutoMode').checked
+        },
+        monitoring: {
+            refreshInterval: parseInt(document.getElementById('refreshInterval').value),
+            maxLogEntries: parseInt(document.getElementById('maxLogEntries').value),
+            cpuThreshold: parseInt(document.getElementById('cpuThreshold').value),
+            memoryThreshold: parseInt(document.getElementById('memoryThreshold').value),
+            diskThreshold: parseInt(document.getElementById('diskThreshold').value),
+            enableErrorAlerts: document.getElementById('enableErrorAlerts').checked,
+            enablePerformanceMonitoring: document.getElementById('enablePerformanceMonitoring').checked
+        },
+        notifications: {
+            email: {
+                enabled: document.getElementById('enableEmailNotifications').checked,
+                address: document.getElementById('emailAddress').value
+            },
+            line: {
+                enabled: document.getElementById('enableLineNotifications').checked,
+                token: document.getElementById('lineToken').value
+            },
+            webhook: {
+                enabled: document.getElementById('enableWebhookNotifications').checked,
+                url: document.getElementById('webhookUrl').value
+            },
+            triggers: {
+                error: document.getElementById('notifyOnError').checked,
+                crawlFailure: document.getElementById('notifyOnCrawlFailure').checked,
+                highResource: document.getElementById('notifyOnHighResource').checked,
+                importantNews: document.getElementById('notifyOnImportantNews').checked
+            }
+        },
+        advanced: {
+            logLevel: document.getElementById('logLevel').value,
+            dataRetentionDays: parseInt(document.getElementById('dataRetentionDays').value),
+            maxConcurrentCrawlers: parseInt(document.getElementById('maxConcurrentCrawlers').value),
+            enableDebugMode: document.getElementById('enableDebugMode').checked
+        }
+    };
+}
+
+// 儲存設定
+async function saveSettings() {
+    const settings = getCurrentSettings();
+    
+    try {
+        // 這裡應該發送到後端 API 儲存設定
+        console.log('儲存設定:', settings);
+        
+        // 模擬 API 請求
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 顯示成功訊息
+        alert('設定儲存成功！');
+    } catch (error) {
+        console.error('儲存設定失敗:', error);
+        alert('儲存設定失敗，請稍後重試。');
+    }
+}
+
+// 重置設定
+function resetSettings() {
+    if (confirm('確定要重置為預設設定嗎？這將清除所有自訂設定。')) {
+        loadSettings();
+    }
+}
+
+// 測試設定
+async function testSettings() {
+    const settings = getCurrentSettings();
+    
+    // 測試通知設定
+    try {
+        if (settings.notifications.email.enabled) {
+            console.log('測試郵件通知...');
+            // 模擬測試郵件
+        }
+        
+        if (settings.notifications.line.enabled) {
+            console.log('測試 LINE 通知...');
+            // 模擬測試 LINE 通知
+        }
+        
+        if (settings.notifications.webhook.enabled) {
+            console.log('測試 Webhook 通知...');
+            // 模擬測試 Webhook
+        }
+        
+        alert('設定測試完成！請檢查相關通知管道。');
+    } catch (error) {
+        console.error('測試設定失敗:', error);
+        alert('測試設定失敗，請檢查設定是否正確。');
+    }
+}
+
+// 匯出設定
+function exportSettings() {
+    const settings = getCurrentSettings();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "monitor_settings.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+// 頁面載入完成後初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+    
+    // 綁定事件
+    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+    document.getElementById('saveSettingsBtn2').addEventListener('click', saveSettings);
+    document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+    document.getElementById('testSettingsBtn').addEventListener('click', testSettings);
+    document.getElementById('exportSettingsBtn').addEventListener('click', exportSettings);
+});
+</script>
+{% endblock %}

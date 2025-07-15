@@ -1,0 +1,408 @@
+# 台灣保險新聞來源配置 - 全覆蓋版
+# Taiwan Insurance News Sources - Complete Coverage
+
+# 保險專業媒體
+insurance_professional:
+  primary:
+    - name: "保險雲雜誌"
+      url: "https://www.goodins.life"
+      description: "台灣保險業專業媒體"
+      rss: null
+      priority: "high"
+      keywords: ["保險", "保單", "理賠", "保費"]
+      
+    - name: "保險事業發展中心"
+      url: "https://www.rmim.com.tw"
+      description: "保險研究與教育機構"
+      rss: null
+      priority: "high"
+      keywords: ["保險教育", "保險研究", "保險發展"]
+      
+    - name: "中華民國人壽保險商業同業公會"
+      url: "https://www.lia-roc.org.tw"
+      description: "人壽保險業同業公會"
+      rss: null
+      priority: "high"
+      keywords: ["人壽保險", "壽險公會", "壽險業"]
+      
+    - name: "中華民國產物保險商業同業公會"
+      url: "https://www.tii.org.tw"
+      description: "產物保險業同業公會"
+      rss: null
+      priority: "high"
+      keywords: ["產物保險", "產險公會", "產險業"]
+
+# 財經新聞媒體
+financial_media:
+  tier1:
+    - name: "經濟日報"
+      url: "https://money.udn.com"
+      rss: "https://udn.com/rssfeed/news/1/6644/6645"
+      description: "經濟日報理財版"
+      priority: "critical"
+      keywords: ["理財", "金融", "保險", "投資"]
+      
+    - name: "工商時報"
+      url: "https://ctee.com.tw"
+      rss: "https://ctee.com.tw/feed"
+      description: "工商時報財經版"
+      priority: "critical"
+      keywords: ["財經", "金融", "保險", "企業"]
+      
+    - name: "中時新聞網"
+      url: "https://www.chinatimes.com"
+      rss: "https://www.chinatimes.com/rss/money-rss.xml"
+      description: "中時新聞網財經版"
+      priority: "high"
+      keywords: ["財經", "理財", "保險"]
+      
+    - name: "聯合新聞網"
+      url: "https://udn.com"
+      rss: "https://udn.com/rssfeed/news/1/6644"
+      description: "聯合新聞網理財版"
+      priority: "high"
+      keywords: ["理財", "保險", "金融"]
+      
+  tier2:
+    - name: "財訊雜誌"
+      url: "https://www.wealth.com.tw"
+      description: "財經雜誌權威"
+      priority: "high"
+      keywords: ["財經", "財富管理", "保險"]
+      
+    - name: "今周刊"
+      url: "https://www.businesstoday.com.tw"
+      description: "知名商業財經雜誌"
+      priority: "medium"
+      keywords: ["商業", "理財", "保險"]
+      
+    - name: "天下雜誌"
+      url: "https://www.cw.com.tw"
+      description: "台灣知名雜誌"
+      priority: "medium"
+      keywords: ["企業", "財經", "保險"]
+      
+    - name: "風傳媒"
+      url: "https://storm.mg/finance"
+      rss: "https://www.storm.mg/feeds/finance.xml"
+      description: "風傳媒財經版"
+      priority: "medium"
+      keywords: ["財經", "政經", "保險"]
+      
+    - name: "Money101"
+      url: "https://www.money101.com.tw"
+      description: "專業理財比較平台"
+      priority: "medium"
+      keywords: ["理財", "比較", "保險", "信用卡"]
+
+# 健康醫療媒體
+health_medical:
+  primary:
+    - name: "Heho健康"
+      url: "https://heho.com.tw"
+      rss: "https://heho.com.tw/feed/"
+      description: "專業健康資訊平台"
+      priority: "high"
+      keywords: ["健康", "醫療", "保險", "長照"]
+      
+    - name: "早安健康"
+      url: "https://www.edh.tw"
+      description: "健康生活資訊平台"
+      priority: "medium"
+      keywords: ["健康", "養生", "醫療險"]
+      
+    - name: "康健雜誌"
+      url: "https://www.commonhealth.com.tw"
+      description: "台灣知名健康雜誌"
+      priority: "high"
+      keywords: ["健康", "醫療", "保險", "長照"]
+      
+    - name: "健康醫療網"
+      url: "https://www.healthnews.com.tw"
+      description: "專業醫療新聞網站"
+      priority: "medium"
+      keywords: ["醫療", "健康", "保險"]
+      
+    - name: "華人健康網"
+      url: "https://www.top1health.com"
+      description: "華人健康資訊網"
+      priority: "medium"
+      keywords: ["健康", "醫療", "保險"]
+
+# 政府機關
+government:
+  critical:
+    - name: "金融監督管理委員會"
+      url: "https://www.fsc.gov.tw"
+      description: "金融監管主管機關"
+      priority: "critical"
+      keywords: ["金融監理", "保險監理", "金融政策"]
+      
+    - name: "保險局"
+      url: "https://www.insurance.gov.tw"
+      description: "保險業主管機關"
+      priority: "critical"
+      keywords: ["保險監理", "保險法規", "保險政策"]
+      
+    - name: "銀行局"
+      url: "https://www.banking.gov.tw"
+      description: "銀行業主管機關"
+      priority: "high"
+      keywords: ["銀行監理", "銀保", "金融政策"]
+      
+  important:
+    - name: "財政部"
+      url: "https://www.mof.gov.tw"
+      description: "國家財政主管機關"
+      priority: "high"
+      keywords: ["財政政策", "稅務", "金融"]
+      
+    - name: "衛生福利部"
+      url: "https://www.mohw.gov.tw"
+      description: "健康長照主管機關"
+      priority: "medium"
+      keywords: ["健康政策", "長照政策", "社會保險"]
+      
+    - name: "長期照顧專區"
+      url: "https://www.longtermcare.gov.tw"
+      description: "長期照護政策專區"
+      priority: "medium"
+      keywords: ["長照", "照護", "長照險"]
+      
+    - name: "勞動部"
+      url: "https://www.mol.gov.tw"
+      description: "勞工權益主管機關"
+      priority: "medium"
+      keywords: ["勞保", "職災", "勞工保險"]
+      
+    - name: "中央銀行"
+      url: "https://www.cbc.gov.tw"
+      description: "貨幣政策主管機關"
+      priority: "medium"
+      keywords: ["貨幣政策", "利率", "金融穩定"]
+
+# 科技創新媒體
+technology:
+  fintech:
+    - name: "數位時代"
+      url: "https://www.bnext.com.tw"
+      description: "科技創新媒體"
+      priority: "medium"
+      keywords: ["數位轉型", "金融科技", "保險科技"]
+      
+    - name: "科技新報"
+      url: "https://technews.tw"
+      description: "科技新聞網站"
+      priority: "medium"
+      keywords: ["科技", "AI", "區塊鏈", "保險科技"]
+      
+    - name: "INSIDE"
+      url: "https://www.inside.com.tw"
+      description: "網路趨勢媒體"
+      priority: "medium"
+      keywords: ["網路", "創新", "金融科技"]
+      
+    - name: "iThome"
+      url: "https://www.ithome.com.tw"
+      description: "IT專業媒體"
+      priority: "medium"
+      keywords: ["資訊科技", "資安", "數位化"]
+
+# 產業專業媒體
+industry:
+  automotive:
+    - name: "汽車日報"
+      url: "https://carnews.com"
+      description: "汽車產業媒體"
+      priority: "low"
+      keywords: ["汽車", "車險", "交通安全"]
+      
+    - name: "車訊網"
+      url: "https://www.carnews.com"
+      description: "汽車資訊網站"
+      priority: "low"
+      keywords: ["汽車", "車險"]
+      
+  real_estate:
+    - name: "住展雜誌"
+      url: "https://www.myhousing.com.tw"
+      description: "房地產專業媒體"
+      priority: "low"
+      keywords: ["房地產", "住宅險", "火險"]
+      
+    - name: "好房網"
+      url: "https://news.housefun.com.tw"
+      description: "房地產新聞網"
+      priority: "low"
+      keywords: ["房地產", "住宅", "保險"]
+
+# 特殊議題媒體
+special_topics:
+  aging_society:
+    - name: "銀髮市場"
+      url: "https://www.seniormarket.tw"
+      description: "銀髮族市場媒體"
+      priority: "medium"
+      keywords: ["高齡", "銀髮族", "退休", "長照"]
+      
+  legal:
+    - name: "法律白話文運動"
+      url: "https://plainlaw.me"
+      description: "法律知識媒體"
+      priority: "medium"
+      keywords: ["法律", "權益", "保險法"]
+      
+    - name: "司法改革基金會"
+      url: "https://www.jrf.org.tw"
+      description: "司法改革組織"
+      priority: "low"
+      keywords: ["司法", "消費者權益", "保險爭議"]
+
+# 國際新聞來源（保險相關）
+international:
+  asia:
+    - name: "路透社"
+      url: "https://www.reuters.com"
+      rss: "https://feeds.reuters.com/reuters/topNews"
+      description: "國際新聞通訊社"
+      priority: "low"
+      keywords: ["國際保險", "再保險", "金融"]
+      
+    - name: "彭博社"
+      url: "https://www.bloomberg.com"
+      description: "國際財經媒體"
+      priority: "low"
+      keywords: ["國際金融", "保險", "再保險"]
+
+# Google新聞RSS搜索組合（擴展版）
+google_news_searches:
+  primary_insurance:
+    - "保險 台灣"
+    - "人壽保險 台灣"
+    - "產險 台灣"
+    - "車險 台灣"
+    - "健康險 台灣"
+    - "醫療險 台灣"
+    - "意外險 台灣"
+    - "年金險 台灣"
+    - "長照險 台灣"
+    - "失能險 台灣"
+    
+  regulatory:
+    - "金管會 保險"
+    - "保險局"
+    - "保險法修正"
+    - "保險業法"
+    - "金融檢查 保險"
+    - "保險罰款"
+    - "保險監理"
+    - "RBC制度"
+    - "IFRS17"
+    - "償付能力"
+    
+  market_trends:
+    - "保險科技 台灣"
+    - "數位保險"
+    - "網路投保"
+    - "AI保險"
+    - "區塊鏈保險"
+    - "ESG保險"
+    - "永續保險"
+    - "氣候保險"
+    - "保險創新"
+    - "保險轉型"
+    
+  companies:
+    - "國泰人壽"
+    - "富邦人壽"
+    - "新光人壽"
+    - "南山人壽"
+    - "台灣人壽"
+    - "全球人壽"
+    - "三商美邦"
+    - "宏泰人壽"
+    - "國泰產險"
+    - "富邦產險"
+    
+  social_issues:
+    - "高齡化 保險"
+    - "少子化 保險"
+    - "長照 保險"
+    - "退休規劃"
+    - "醫療 保險"
+    - "癌症 保險"
+    - "失智 保險"
+    - "職災 保險"
+    - "疫情 保險"
+    - "天災 保險"
+    
+  business:
+    - "保險理賠"
+    - "保險糾紛"
+    - "保險詐騙"
+    - "保險申訴"
+    - "保險評議"
+    - "銀行保險"
+    - "保險通路"
+    - "保險業績"
+    - "保險佣金"
+    - "保險併購"
+    
+  legal_policy:
+    - "保險法規"
+    - "保險政策"
+    - "保險改革"
+    - "消費者保護 保險"
+    - "個資法 保險"
+    - "洗錢防制 保險"
+    - "保險稅務"
+    - "保險會計"
+    - "保險資本"
+    - "保險準備金"
+    
+  international:
+    - "國際保險 台灣"
+    - "再保險 台灣"
+    - "跨國保險"
+    - "境外保單"
+    - "香港保單"
+    - "美國保險"
+    - "全球保險"
+    - "保險併購"
+    - "外資保險"
+    - "保險開放"
+
+# 關鍵字優先級設定
+keyword_priority:
+  critical:
+    - "金管會"
+    - "保險局"
+    - "保險法"
+    - "保險業法"
+    - "保險詐騙"
+    - "保險糾紛"
+    
+  high:
+    - "保險"
+    - "人壽保險"
+    - "產險"
+    - "理賠"
+    - "保費"
+    - "投保"
+    - "長照險"
+    - "醫療險"
+    
+  medium:
+    - "年金險"
+    - "意外險"
+    - "車險"
+    - "健康險"
+    - "保險科技"
+    - "數位保險"
+    - "銀行保險"
+    
+  low:
+    - "保險業績"
+    - "保險通路"
+    - "保險代理人"
+    - "保險經紀人"

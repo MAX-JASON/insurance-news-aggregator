@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險業務專家工作台 - 台灣保險新聞聚合器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --accent-gold: #f59e0b;
+            --success-green: #10b981;
+            --warning-orange: #f97316;
+            --danger-red: #ef4444;
+            --light-gray: #f8fafc;
+            --dark-gray: #64748b;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Microsoft JhengHei', sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        
+        .dashboard-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--accent-gold);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .icon-news { background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue)); }
+        .icon-analysis { background: linear-gradient(135deg, var(--success-green), #059669); }
+        .icon-trends { background: linear-gradient(135deg, var(--accent-gold), #d97706); }
+        .icon-alerts { background: linear-gradient(135deg, var(--warning-orange), #ea580c); }
+        
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--secondary-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .news-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .category-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .category-監理法規 { background-color: #ddd6fe; color: #7c3aed; }
+        .category-市場動態 { background-color: #dcfce7; color: #16a34a; }
+        .category-商品創新 { background-color: #fef3c7; color: #d97706; }
+        .category-default { background-color: #e5e7eb; color: #374151; }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>
+                保險業務專家工作台
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text text-white">
+                    <i class="fas fa-user-tie me-2"></i>
+                    歡迎，保險專家
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- 歡迎區塊 -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">
+                        <i class="fas fa-chart-line text-warning me-2"></i>
+                        保險市場智能分析中心
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-calendar me-2"></i>
+                        為您整理最新的保險業動態與市場資訊，助力業務決策
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/search" class="form-control search-box" style="display: inline-block; text-decoration: none; text-align: center; padding: 10px;">
+                        🔍 搜尋保險新聞、法規、商品...
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 左側內容 -->
+            <div class="col-lg-8">
+                <!-- 統計卡片 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-news">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <h3 class="mb-1">{{ today_news or 0 }}</h3>
+                            <p class="text-muted mb-0">今日新聞</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-analysis">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="mb-1">{{ analysis_count or 0 }}</h3>
+                            <p class="text-muted mb-0">智能分析</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-trends">
+                                <i class="fas fa-trending-up"></i>
+                            </div>
+                            <h3 class="mb-1">{{ trend_count or 0 }}</h3>
+                            <p class="text-muted mb-0">市場趨勢</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon icon-alerts">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h3 class="mb-1">{{ alert_count or 0 }}</h3>
+                            <p class="text-muted mb-0">重要提醒</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速操作 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-rocket"></i>
+                            業務快速操作
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <a href="/news" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-newspaper me-2"></i>瀏覽最新新聞
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/search" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-search me-2"></i>搜索新聞
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/api/v1/stats" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-chart-bar me-2"></i>統計數據
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/test" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-cog me-2"></i>系統測試
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最新新聞 -->
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-newspaper"></i>
+                            最新保險要聞 ({{ news_count or 0 }} 則)
+                        </h5>
+                        
+                        {% if recent_news %}
+                            {% for news in recent_news %}
+                            <div class="news-card">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0">{{ news.title }}</h6>
+                                    <span class="category-badge category-{{ news.category.name if news.category else 'default' }}">
+                                        {{ news.category.name if news.category else '綜合新聞' }}
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-2">{{ news.summary }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ news.created_at.strftime('%m-%d %H:%M') if news.created_at else '未知時間' }}
+                                        <i class="fas fa-source me-1 ms-2"></i>{{ news.source.name if news.source else '未知來源' }}
+                                    </small>
+                                    <div>
+                                        {% if news.url and news.url != '#' %}
+                                        <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-external-link-alt me-1"></i>原文
+                                        </a>
+                                        {% endif %}
+                                        <a href="/news/{{ news.id }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye me-1"></i>詳情
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            <div class="text-center mt-3">
+                                <a href="/news" class="btn btn-primary">
+                                    <i class="fas fa-list me-2"></i>查看更多新聞
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">暫無新聞數據</p>
+                                <a href="/init" class="btn btn-primary">
+                                    <i class="fas fa-sync me-2"></i>初始化數據
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側邊欄 -->
+            <div class="col-lg-4">
+                <!-- 系統統計 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            系統統計
+                        </h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>總新聞數</span>
+                            <strong class="text-primary">{{ news_count or 0 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>新聞來源</span>
+                            <strong class="text-success">{{ total_sources or 0 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>新聞分類</span>
+                            <strong class="text-warning">{{ total_categories or 0 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>今日新增</span>
+                            <strong class="text-info">{{ today_news or 0 }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速連結 -->
+                <div class="card mb-4" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-link"></i>
+                            快速連結
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <a href="/news" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list me-2"></i>所有新聞
+                            </a>
+                            <a href="/search" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-search me-2"></i>搜索功能
+                            </a>
+                            <a href="/api/v1/stats" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-code me-2"></i>API接口
+                            </a>
+                            <a href="/test" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-cog me-2"></i>系統測試
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 重要提醒 -->
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-bell"></i>
+                            重要提醒
+                        </h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>系統狀態：</strong>專業版已啟動並正常運行
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>提示：</strong>點擊上方統計卡片可查看詳細信息
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 頁面載入完成後執行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏢 保險業務專家工作台已載入');
+            console.log('📊 統計數據:', {
+                今日新聞: {{ today_news or 0 }},
+                總新聞數: {{ news_count or 0 }},
+                新聞來源: {{ total_sources or 0 }},
+                新聞分類: {{ total_categories or 0 }}
+            });
+        });
+    </script>
+</body>
+</html>

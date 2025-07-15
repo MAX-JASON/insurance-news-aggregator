@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}反饋列表 - 台灣保險新聞聚合器{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .feedback-card {
+        margin-bottom: 15px;
+        border-left: 5px solid #ccc;
+    }
+    
+    .rating-1 { border-left-color: #e74c3c; }
+    .rating-2 { border-left-color: #e67e22; }
+    .rating-3 { border-left-color: #f1c40f; }
+    .rating-4 { border-left-color: #2ecc71; }
+    .rating-5 { border-left-color: #27ae60; }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2em;
+    }
+    
+    .feedback-info {
+        color: #6c757d;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+    
+    .feedback-features {
+        margin-top: 10px;
+    }
+    
+    .feature-badge {
+        font-size: 0.8em;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">用戶反饋列表</h1>
+    
+    <!-- 篩選選項 -->
+    <div class="filter-section">
+        <form method="get" id="filterForm">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">反饋類別</label>
+                        <select class="form-select form-select-sm" id="category" name="category">
+                            <option value="">全部類別</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if current_filters.category == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">最低評分</label>
+                        <select class="form-select form-select-sm" id="rating" name="rating">
+                            <option value="">不限評分</option>
+                            {% for i in range(1, 6) %}
+                            <option value="{{ i }}" {% if current_filters.rating|int == i %}selected{% endif %}>
+                                {{ i }} 星及以上
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="timeframe" class="form-label">時間範圍</label>
+                        <select class="form-select form-select-sm" id="timeframe" name="timeframe">
+                            <option value="">全部時間</option>
+                            <option value="today" {% if current_filters.timeframe == 'today' %}selected{% endif %}>今天</option>
+                            <option value="week" {% if current_filters.timeframe == 'week' %}selected{% endif %}>本週</option>
+                            <option value="month" {% if current_filters.timeframe == 'month' %}selected{% endif %}>本月</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="feature" class="form-label">相關功能</label>
+                        <select class="form-select form-select-sm" id="feature" name="feature">
+                            <option value="">全部功能</option>
+                            {% for feature in features %}
+                            <option value="{{ feature.id }}" {% if current_filters.feature == feature.id %}selected{% endif %}>
+                                {{ feature.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-sm" placeholder="搜尋關鍵字" name="search" value="{{ current_filters.search|default('') }}">
+                        <button class="btn btn-outline-primary btn-sm" type="submit">搜尋</button>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 text-end">
+                    <button type="submit" class="btn btn-primary btn-sm">套用篩選</button>
+                    <a href="/feedback/list" class="btn btn-secondary btn-sm ms-2">清除篩選</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 反饋列表 -->
+    <div id="feedbackList">
+        {% if feedbacks %}
+            {% for feedback in feedbacks %}
+                <div class="card feedback-card rating-{{ feedback.rating }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{ feedback.username }}</h5>
+                            <div class="rating-stars">{{ "★" * feedback.rating }}</div>
+                        </div>
+                        
+                        <div class="feedback-info">
+                            <span class="me-3"><i class="fas fa-tag"></i> {{ feedback.category }}</span>
+                            <span class="me-3"><i class="fas fa-clock"></i> {{ feedback.timestamp }}</span>
+                            <span><i class="fas fa-laptop"></i> {{ feedback.source }}</span>
+                        </div>
+                        
+                        <p class="card-text">{{ feedback.message }}</p>
+                        
+                        {% if feedback.features %}
+                            <div class="feedback-features">
+                                {% for feature in feedback.features %}
+                                    <span class="badge bg-light text-dark feature-badge">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                沒有符合條件的反饋
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- 分頁 -->
+    {% if pagination and pagination.pages > 1 %}
+        <div class="pagination-container">
+            <nav aria-label="頁碼導航">
+                <ul class="pagination">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('feedback.list_feedback', page=pagination.prev_num, **current_filters) }}">上一頁</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">上一頁</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == pagination.page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('feedback.list_feedback', page=page_num, **current_filters) }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('feedback.list_feedback', page=pagination.next_num, **current_filters) }}">下一頁</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">下一頁</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="/feedback/dashboard" class="btn btn-primary">返回儀表板</a>
+        <a href="/" class="btn btn-outline-secondary ms-2">返回首頁</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    // 自動提交表單當下拉選單改變時
+    $('#category, #rating, #timeframe, #feature').on('change', function() {
+        $('#filterForm').submit();
+    });
+});
+</script>
+{% endblock %}

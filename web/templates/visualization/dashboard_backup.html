@@ -1,0 +1,1123 @@
+{% extends "base.html" %}
+
+{% block title %}高級數據視覺化儀表板{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+.chart-container {
+    position: relative;
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.15s ease-in-out;
+}
+
+.chart-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.metric-card {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.chart-tabs .nav-link {
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.chart-tabs .nav-link.active {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+}
+
+.interactive-frame {
+    width: 100%;
+    height: 600px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-chart-line me-2"></i>高級數據視覺化儀表板</h2>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="refreshAllCharts()">
+                        <i class="fas fa-sync-alt me-1"></i>刷新圖表
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="exportDashboard()">
+                        <i class="fas fa-download me-1"></i>導出報告
+                    </button>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" 
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog me-1"></i>設定
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="showTimeRangeModal()">時間範圍</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showChartSettings()">圖表設定</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="resetDashboard()">重置儀表板</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 時間範圍選擇 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <label class="form-label me-2 mb-0">時間範圍:</label>
+                            <select id="timeRange" class="form-select form-select-sm me-3" style="width: auto;" onchange="updateTimeRange()">
+                                <option value="7">最近7天</option>
+                                <option value="30" selected>最近30天</option>
+                                <option value="60">最近60天</option>
+                                <option value="90">最近90天</option>
+                            </select>
+                            
+                            <label class="form-label me-2 mb-0">用戶:</label>
+                            <select id="userSelect" class="form-select form-select-sm" style="width: auto;" onchange="updateUser()">
+                                <option value="">全體用戶</option>
+                                <option value="{{ user_id }}" selected>當前用戶</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-info me-2">數據範圍: {{ days }}天</span>
+                            <span class="badge bg-success" id="lastUpdated">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 關鍵指標卡片 -->
+    <div class="row mb-4" id="metricsCards">
+        <div class="col-md-3">
+            <div class="metric-card text-center">
+                <h3 id="totalNews" class="mb-1">-</h3>
+                <p class="mb-0">總新聞數</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card text-center" style="background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);">
+                <h3 id="avgImportance" class="mb-1">-</h3>
+                <p class="mb-0">平均重要性</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card text-center" style="background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);">
+                <h3 id="totalViews" class="mb-1">-</h3>
+                <p class="mb-0">總瀏覽量</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card text-center" style="background: linear-gradient(45deg, #43e97b 0%, #38f9d7 100%);">
+                <h3 id="activeSources" class="mb-1">-</h3>
+                <p class="mb-0">活躍來源</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖表標籤頁 -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-pills chart-tabs mb-3" id="chartTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="pill" 
+                            data-bs-target="#overview" type="button" role="tab">
+                        <i class="fas fa-chart-area me-1"></i>總覽
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="trends-tab" data-bs-toggle="pill" 
+                            data-bs-target="#trends" type="button" role="tab">
+                        <i class="fas fa-line-chart me-1"></i>趨勢分析
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="distribution-tab" data-bs-toggle="pill" 
+                            data-bs-target="#distribution" type="button" role="tab">
+                        <i class="fas fa-pie-chart me-1"></i>分佈分析
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="interactive-tab" data-bs-toggle="pill" 
+                            data-bs-target="#interactive" type="button" role="tab">
+                        <i class="fas fa-mouse-pointer me-1"></i>交互式圖表
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="advanced-tab" data-bs-toggle="pill" 
+                            data-bs-target="#advanced" type="button" role="tab">
+                        <i class="fas fa-cogs me-1"></i>進階分析
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 圖表內容 -->
+    <div class="tab-content" id="chartTabContent">
+        <!-- 總覽標籤頁 -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-line me-2"></i>新聞數量趨勢</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="newsTrendChart"></canvas>
+                                <div class="loading-overlay" id="newsTrendLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-pie me-2"></i>重要性分佈</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="importanceChart"></canvas>
+                                <div class="loading-overlay" id="importanceLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-globe me-2"></i>來源統計</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="sourceChart"></canvas>
+                                <div class="loading-overlay" id="sourceLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-smile me-2"></i>情感分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="sentimentChart"></canvas>
+                                <div class="loading-overlay" id="sentimentLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 趨勢分析標籤頁 -->
+        <div class="tab-pane fade" id="trends" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-area me-2"></i>多維度趨勢分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 500px;">
+                                <div id="trendsChart"></div>
+                                <div class="loading-overlay" id="trendsLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分佈分析標籤頁 -->
+        <div class="tab-pane fade" id="distribution" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-tags me-2"></i>分類分佈</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <div id="categoryChart"></div>
+                                <div class="loading-overlay" id="categoryLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-fire me-2"></i>熱力圖分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <div id="heatmapChart"></div>
+                                <div class="loading-overlay" id="heatmapLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交互式圖表標籤頁 -->
+        <div class="tab-pane fade" id="interactive" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-mouse-pointer me-2"></i>交互式綜合儀表板</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="interactiveContainer">
+                                <iframe id="interactiveFrame" class="interactive-frame" 
+                                        src="about:blank"></iframe>
+                                <div class="loading-overlay" id="interactiveLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 進階分析標籤頁 -->
+        <div class="tab-pane fade" id="advanced" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-project-diagram me-2"></i>關聯分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <div id="correlationChart"></div>
+                                <div class="loading-overlay" id="correlationLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-brain me-2"></i>智能預測</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <div id="predictionChart"></div>
+                                <div class="loading-overlay" id="predictionLoading">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 時間範圍設定模態框 -->
+<div class="modal fade" id="timeRangeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">自定義時間範圍</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="timeRangeForm">
+                    <div class="mb-3">
+                        <label class="form-label">開始日期</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">結束日期</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="applyCustomTimeRange()">應用</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- JavaScript 配置 -->
+<script type="text/javascript">
+    // 從後端傳入的配置數據
+    var DASHBOARD_CONFIG = {
+        userId: {% if user_id %}{{ user_id }}{% else %}null{% endif %},
+        days: {% if days %}{{ days }}{% else %}30{% endif %}
+    };
+</script>
+
+<script>
+// 高級視覺化儀表板管理器
+class AdvancedVisualizationDashboard {
+    constructor() {
+        this.currentUserId = DASHBOARD_CONFIG.userId;
+        this.currentDays = DASHBOARD_CONFIG.days;
+        this.charts = {};
+        this.isLoading = false;
+        
+        this.initializeEventListeners();
+        this.loadDashboard();
+    }
+    
+    initializeEventListeners() {
+        // 標籤頁切換事件
+        document.querySelectorAll('[data-bs-toggle="pill"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', (e) => {
+                this.onTabChanged(e.target.getAttribute('data-bs-target').substring(1));
+            });
+        });
+    }
+    
+    async loadDashboard() {
+        if (this.isLoading) return;
+        
+        this.isLoading = true;
+        this.showAllLoadingOverlays(true);
+        
+        try {
+            // 載入分析摘要
+            await this.loadAnalyticsSummary();
+            
+            // 載入圖表
+            await this.loadCharts();
+            
+            this.updateLastUpdatedTime();
+            
+        } catch (error) {
+            console.error('載入儀表板失敗:', error);
+            this.showAlert('載入儀表板失敗: ' + error.message, 'danger');
+        } finally {
+            this.isLoading = false;
+            this.showAllLoadingOverlays(false);
+        }
+    }
+    
+    async loadAnalyticsSummary() {
+        try {
+            const params = new URLSearchParams({
+                user_id: this.currentUserId || '',
+                days: this.currentDays
+            });
+            
+            const response = await fetch(`/visualization/api/analytics/summary?${params}`);
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                this.updateMetricsCards(result.data);
+            } else {
+                throw new Error(result.message);
+            }
+            
+        } catch (error) {
+            console.error('載入分析摘要失敗:', error);
+            throw error;
+        }
+    }
+    
+    async loadCharts() {
+        try {
+            const params = new URLSearchParams({
+                user_id: this.currentUserId || '',
+                days: this.currentDays
+            });
+            
+            const response = await fetch(`/visualization/api/generate/business_charts?${params}`);
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                this.chartsData = result.data.charts;
+                await this.renderAllCharts();
+            } else {
+                throw new Error(result.message);
+            }
+            
+        } catch (error) {
+            console.error('載入圖表失敗:', error);
+            throw error;
+        }
+    }
+    
+    updateMetricsCards(data) {
+        document.getElementById('totalNews').textContent = data.total_news || 0;
+        document.getElementById('avgImportance').textContent = 
+            data.avg_importance ? data.avg_importance.toFixed(2) : '0.00';
+        document.getElementById('totalViews').textContent = data.total_views || 0;
+        document.getElementById('activeSources').textContent = data.active_sources || 0;
+    }
+    
+    async renderAllCharts() {
+        // 渲染基本圖表
+        await this.renderNewsTrendChart();
+        await this.renderImportanceChart();
+        await this.renderSourceChart();
+        await this.renderSentimentChart();
+        
+        // 載入交互式圖表
+        this.loadInteractiveChart();
+    }
+    
+    async renderNewsTrendChart() {
+        try {
+            const ctx = document.getElementById('newsTrendChart').getContext('2d');
+            
+            // 模擬數據，實際應該從API獲取
+            const data = {
+                labels: this.generateDateLabels(this.currentDays),
+                datasets: [{
+                    label: '新聞數量',
+                    data: this.generateRandomData(this.currentDays, 5, 20),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4
+                }, {
+                    label: '重要新聞',
+                    data: this.generateRandomData(this.currentDays, 1, 8),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4
+                }]
+            };
+            
+            if (this.charts.newsTrend) {
+                this.charts.newsTrend.destroy();
+            }
+            
+            this.charts.newsTrend = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            this.hideLoadingOverlay('newsTrendLoading');
+            
+        } catch (error) {
+            console.error('渲染新聞趨勢圖失敗:', error);
+        }
+    }
+    
+    async renderImportanceChart() {
+        try {
+            const ctx = document.getElementById('importanceChart').getContext('2d');
+            
+            const data = {
+                labels: ['高重要性', '中重要性', '低重要性', '一般'],
+                datasets: [{
+                    data: [25, 35, 30, 10],
+                    backgroundColor: [
+                        '#FF6B6B',
+                        '#4ECDC4',
+                        '#45B7D1',
+                        '#96CEB4'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            };
+            
+            if (this.charts.importance) {
+                this.charts.importance.destroy();
+            }
+            
+            this.charts.importance = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            this.hideLoadingOverlay('importanceLoading');
+            
+        } catch (error) {
+            console.error('渲染重要性圖失敗:', error);
+        }
+    }
+    
+    async renderSourceChart() {
+        try {
+            const ctx = document.getElementById('sourceChart').getContext('2d');
+            
+            const data = {
+                labels: ['工商時報', '經濟日報', '保險雜誌', '財經新報', '業界快訊'],
+                datasets: [{
+                    label: '新聞數量',
+                    data: [45, 38, 32, 25, 18],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            };
+            
+            if (this.charts.source) {
+                this.charts.source.destroy();
+            }
+            
+            this.charts.source = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            this.hideLoadingOverlay('sourceLoading');
+            
+        } catch (error) {
+            console.error('渲染來源圖失敗:', error);
+        }
+    }
+    
+    async renderSentimentChart() {
+        try {
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            
+            const data = {
+                labels: ['正面', '中性', '負面'],
+                datasets: [{
+                    data: [65, 70, 15],
+                    backgroundColor: ['#28a745', '#6c757d', '#dc3545']
+                }]
+            };
+            
+            if (this.charts.sentiment) {
+                this.charts.sentiment.destroy();
+            }
+            
+            this.charts.sentiment = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            this.hideLoadingOverlay('sentimentLoading');
+            
+        } catch (error) {
+            console.error('渲染情感圖失敗:', error);
+        }
+    }
+    
+    async loadInteractiveChart() {
+        try {
+            const params = new URLSearchParams({
+                user_id: this.currentUserId || '',
+                days: this.currentDays
+            });
+            
+            const response = await fetch(`/visualization/api/chart/interactive_dashboard?${params}`);
+            const result = await response.json();
+            
+            if (result.status === 'success' && result.data.type === 'html') {
+                const iframe = document.getElementById('interactiveFrame');
+                iframe.src = result.data.chart_url;
+                this.hideLoadingOverlay('interactiveLoading');
+            }
+            
+        } catch (error) {
+            console.error('載入交互式圖表失敗:', error);
+        }
+    }
+    
+    onTabChanged(tabId) {
+        switch (tabId) {
+            case 'trends':
+                this.loadTrendsTab();
+                break;
+            case 'distribution':
+                this.loadDistributionTab();
+                break;
+            case 'advanced':
+                this.loadAdvancedTab();
+                break;
+        }
+    }
+    
+    loadTrendsTab() {
+        // 使用ApexCharts渲染趨勢圖
+        const options = {
+            series: [{
+                name: '新聞數量',
+                data: this.generateRandomData(this.currentDays, 5, 20)
+            }, {
+                name: '平均重要性',
+                data: this.generateRandomData(this.currentDays, 0.3, 0.9)
+            }],
+            chart: {
+                height: 400,
+                type: 'line',
+                toolbar: {
+                    show: true
+                }
+            },
+            colors: ['#008FFB', '#00E396'],
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            xaxis: {
+                categories: this.generateDateLabels(this.currentDays)
+            },
+            yaxis: [{
+                title: {
+                    text: '新聞數量'
+                }
+            }, {
+                opposite: true,
+                title: {
+                    text: '重要性分數'
+                }
+            }]
+        };
+        
+        if (this.charts.trends) {
+            this.charts.trends.destroy();
+        }
+        
+        this.charts.trends = new ApexCharts(document.querySelector("#trendsChart"), options);
+        this.charts.trends.render();
+        this.hideLoadingOverlay('trendsLoading');
+    }
+    
+    loadDistributionTab() {
+        // 載入分類圖表
+        this.loadCategoryChart();
+        this.loadHeatmapChart();
+    }
+    
+    loadCategoryChart() {
+        const options = {
+            series: [44, 55, 13, 43, 22],
+            chart: {
+                type: 'donut',
+                height: 350
+            },
+            labels: ['市場動態', '政策法規', '產品資訊', '行業分析', '其他'],
+            colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0'],
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        };
+        
+        if (this.charts.category) {
+            this.charts.category.destroy();
+        }
+        
+        this.charts.category = new ApexCharts(document.querySelector("#categoryChart"), options);
+        this.charts.category.render();
+        this.hideLoadingOverlay('categoryLoading');
+    }
+    
+    loadHeatmapChart() {
+        // 生成熱力圖數據
+        const heatmapData = [];
+        const hours = [];
+        for (let i = 0; i < 24; i++) {
+            hours.push(i + ':00');
+        }
+        
+        const categories = ['市場動態', '政策法規', '產品資訊', '行業分析'];
+        categories.forEach(category => {
+            const data = [];
+            hours.forEach(hour => {
+                data.push({
+                    x: hour,
+                    y: Math.floor(Math.random() * 10)
+                });
+            });
+            heatmapData.push({
+                name: category,
+                data: data
+            });
+        });
+        
+        const options = {
+            series: heatmapData,
+            chart: {
+                height: 350,
+                type: 'heatmap',
+            },
+            plotOptions: {
+                heatmap: {
+                    shadeIntensity: 0.5,
+                    colorScale: {
+                        ranges: [{
+                            from: 0,
+                            to: 3,
+                            name: '低',
+                            color: '#00A100'
+                        }, {
+                            from: 4,
+                            to: 6,
+                            name: '中',
+                            color: '#128FD9'
+                        }, {
+                            from: 7,
+                            to: 10,
+                            name: '高',
+                            color: '#FFB200'
+                        }]
+                    }
+                }
+            }
+        };
+        
+        if (this.charts.heatmap) {
+            this.charts.heatmap.destroy();
+        }
+        
+        this.charts.heatmap = new ApexCharts(document.querySelector("#heatmapChart"), options);
+        this.charts.heatmap.render();
+        this.hideLoadingOverlay('heatmapLoading');
+    }
+    
+    loadAdvancedTab() {
+        // 載入關聯分析和預測圖表
+        this.loadCorrelationChart();
+        this.loadPredictionChart();
+    }
+    
+    loadCorrelationChart() {
+        // 散點圖顯示重要性與瀏覽量的關聯
+        const data = [];
+        for (let i = 0; i < 50; i++) {
+            data.push([
+                Math.random() * 1, // 重要性
+                Math.floor(Math.random() * 1000) // 瀏覽量
+            ]);
+        }
+        
+        const options = {
+            series: [{
+                name: '新聞',
+                data: data
+            }],
+            chart: {
+                height: 350,
+                type: 'scatter',
+                zoom: {
+                    enabled: true,
+                    type: 'xy'
+                }
+            },
+            xaxis: {
+                title: {
+                    text: '重要性分數'
+                }
+            },
+            yaxis: {
+                title: {
+                    text: '瀏覽量'
+                }
+            }
+        };
+        
+        if (this.charts.correlation) {
+            this.charts.correlation.destroy();
+        }
+        
+        this.charts.correlation = new ApexCharts(document.querySelector("#correlationChart"), options);
+        this.charts.correlation.render();
+        this.hideLoadingOverlay('correlationLoading');
+    }
+    
+    loadPredictionChart() {
+        // 預測圖表
+        const currentData = this.generateRandomData(15, 5, 20);
+        const predictedData = this.generateRandomData(7, 5, 20);
+        
+        const options = {
+            series: [{
+                name: '歷史數據',
+                data: currentData
+            }, {
+                name: '預測數據',
+                data: predictedData
+            }],
+            chart: {
+                height: 350,
+                type: 'line'
+            },
+            stroke: {
+                width: [3, 3],
+                dashArray: [0, 5]
+            },
+            colors: ['#008FFB', '#FF4560'],
+            xaxis: {
+                categories: [...this.generateDateLabels(15), ...this.generateDateLabels(7, 15)]
+            }
+        };
+        
+        if (this.charts.prediction) {
+            this.charts.prediction.destroy();
+        }
+        
+        this.charts.prediction = new ApexCharts(document.querySelector("#predictionChart"), options);
+        this.charts.prediction.render();
+        this.hideLoadingOverlay('predictionLoading');
+    }
+    
+    // 工具函數
+    generateDateLabels(days, offset = 0) {
+        const labels = [];
+        for (let i = offset; i < days + offset; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - (days - i - 1));
+            labels.push(date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }));
+        }
+        return labels;
+    }
+    
+    generateRandomData(length, min, max) {
+        return Array.from({ length }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+    
+    showAllLoadingOverlays(show) {
+        const overlays = document.querySelectorAll('.loading-overlay');
+        overlays.forEach(overlay => {
+            overlay.style.display = show ? 'flex' : 'none';
+        });
+    }
+    
+    hideLoadingOverlay(id) {
+        const overlay = document.getElementById(id);
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+    
+    updateLastUpdatedTime() {
+        const badge = document.getElementById('lastUpdated');
+        badge.textContent = '最後更新: ' + new Date().toLocaleTimeString('zh-TW');
+    }
+    
+    showAlert(message, type) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        const container = document.querySelector('.container-fluid');
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) alert.remove();
+        }, 5000);
+    }
+}
+
+// 全域函數
+function updateTimeRange() {
+    const days = document.getElementById('timeRange').value;
+    dashboard.currentDays = parseInt(days);
+    dashboard.loadDashboard();
+}
+
+function updateUser() {
+    const userId = document.getElementById('userSelect').value;
+    dashboard.currentUserId = userId || null;
+    dashboard.loadDashboard();
+}
+
+async function refreshAllCharts() {
+    await dashboard.loadDashboard();
+    dashboard.showAlert('圖表已刷新', 'success');
+}
+
+function exportDashboard() {
+    // 實現導出功能
+    dashboard.showAlert('導出功能開發中...', 'info');
+}
+
+function showTimeRangeModal() {
+    const modal = new bootstrap.Modal(document.getElementById('timeRangeModal'));
+    modal.show();
+}
+
+function showChartSettings() {
+    dashboard.showAlert('圖表設定功能開發中...', 'info');
+}
+
+function resetDashboard() {
+    if (confirm('確定要重置儀表板嗎？')) {
+        dashboard.currentUserId = {{ user_id if user_id else 'null' }};
+        dashboard.currentDays = {{ days }};
+        document.getElementById('timeRange').value = '{{ days }}';
+        document.getElementById('userSelect').value = '{{ user_id if user_id else "" }}';
+        dashboard.loadDashboard();
+    }
+}
+
+function applyCustomTimeRange() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    if (!startDate || !endDate) {
+        dashboard.showAlert('請選擇完整的日期範圍', 'warning');
+        return;
+    }
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    
+    if (days <= 0 || days > 365) {
+        dashboard.showAlert('日期範圍無效（1-365天）', 'warning');
+        return;
+    }
+    
+    dashboard.currentDays = days;
+    document.getElementById('timeRange').value = days;
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('timeRangeModal'));
+    modal.hide();
+    
+    dashboard.loadDashboard();
+}
+
+// 初始化
+let dashboard;
+document.addEventListener('DOMContentLoaded', function() {
+    dashboard = new AdvancedVisualizationDashboard();
+});
+</script>
+{% endblock %}

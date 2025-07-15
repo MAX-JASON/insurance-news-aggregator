@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}新聞列表 - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.news-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.news-title {
+    color: #2c3e50;
+    font-weight: 600;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-title:hover {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.news-summary {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+.source-badge {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+}
+
+.category-badge {
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    border: none;
+}
+
+.stats-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.filter-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+/* 列表視圖樣式 */
+.news-list .news-card {
+    display: flex;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+    flex-direction: row !important; /* 橫向排列 */
+}
+
+.news-list .news-card .card-img-top {
+    width: 30%;
+    min-width: 200px;
+    height: 200px !important;
+    object-fit: cover;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: calc(0.25rem - 1px);
+}
+
+.news-list .news-card .card-body {
+    width: 70%;
+    padding: 1rem !important;
+}
+
+.news-list .news-card .news-title {
+    font-size: 1.1rem;
+}
+
+.priority-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 頁面標題和篩選 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-newspaper text-primary me-2"></i>
+                        保險新聞列表
+                    </h2>
+                    <p class="text-muted">最新的台灣保險業新聞動態</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-primary" onclick="refreshNews()">
+                        <i class="fas fa-sync-alt me-1"></i>刷新
+                    </button>
+                    <button class="btn btn-outline-success" onclick="toggleViewMode()">
+                        <i class="fas fa-th-large me-1"></i>切換檢視
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 篩選區域 -->
+    <div class="filter-section">
+        <div class="row align-items-center">            <div class="col-md-3">
+                <label class="form-label small fw-bold">新聞分類</label>
+                <select class="form-select" id="categoryFilter" onchange="filterNews()">
+                    <option value="">所有分類</option>
+                    {% for category in all_categories %}
+                    <option value="{{ category.name }}" {{ 'selected' if current_category == category.name }}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">新聞來源</label>
+                <select class="form-select" id="sourceFilter" onchange="filterNews()">
+                    <option value="">所有來源</option>
+                    {% for source in all_sources %}
+                    <option value="{{ source.name }}" {{ 'selected' if current_source == source.name }}>
+                        {{ source.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>            <div class="col-md-3">
+                <label class="form-label small fw-bold">排序方式</label>
+                <select class="form-select" id="sortFilter" onchange="filterNews()">
+                    <option value="date" {{ 'selected' if current_sort == 'date' or not current_sort }}>最新發布</option>
+                    <option value="view" {{ 'selected' if current_sort == 'view' }}>瀏覽次數</option>
+                    <option value="importance" {{ 'selected' if current_sort == 'importance' }}>重要性</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">搜尋關鍵字</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜尋新聞..." 
+                           value="{{ current_search or '' }}" onkeyup="handleSearchInput(event)">
+                    <button class="btn btn-primary" onclick="searchNews()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新聞統計 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% if news_list %}
+                        找到 <strong>{{ news_list|length }}</strong> 篇新聞
+                        {% if current_category %}，分類：<strong>{{ current_category }}</strong>{% endif %}
+                        {% if current_source %}，來源：<strong>{{ current_source }}</strong>{% endif %}
+                    {% else %}
+                        目前沒有符合條件的新聞
+                    {% endif %}
+                </div>
+                <small class="text-muted">最後更新：{{ now.strftime('%Y-%m-%d %H:%M') if now else '2024-01-01 00:00' }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新聞列表 -->
+    <div class="news-grid" id="newsGrid">
+        {% if news_list %}
+            {% for news in news_list %}
+            <div class="news-card card h-100 position-relative" data-category="{{ news.category }}" data-source="{{ news.source }}">
+                <!-- 重要性指標 -->
+                {% if loop.index <= 3 %}
+                <div class="priority-indicator">熱門</div>
+                {% endif %}
+                
+                <!-- 新聞圖片 -->
+                <div class="card-img-top">
+                    {% if news.image_url and news.image_url.startswith('http') %}
+                    <img src="{{ news.image_url }}" class="img-fluid" alt="{{ news.title }}" style="height: 200px; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='/static/images/news-placeholder.jpg';">
+                    {% elif news.image_url %}
+                    <img src="{{ url_for('static', filename='images/' + news.image_url.split('/')[-1]) }}" class="img-fluid" alt="{{ news.title }}" style="height: 200px; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='/static/images/news-placeholder.jpg';">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- 新聞標題 -->
+                    <h5 class="news-title card-title mb-3">
+                        <a href="/news/{{ news.id }}" class="text-decoration-none news-title">
+                            {{ news.title }}
+                        </a>
+                    </h5>
+                    
+                    <!-- 新聞摘要 -->
+                    <p class="news-summary card-text mb-3">{{ news.summary }}</p>
+                    
+                    <!-- 新聞元資訊 -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="stats-text">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ news.published_date[:10] if news.published_date else '最近' }}
+                            </small>
+                            <div>
+                                <span class="badge source-badge me-1">{{ news.source }}</span>
+                                <span class="badge category-badge">{{ news.category }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="stats-text">
+                                <i class="fas fa-eye me-1"></i>{{ news.view_count }} 次瀏覽
+                            </small>
+                            <small class="stats-text">
+                                <i class="fas fa-clock me-1"></i>{{ news.published_date[:16].replace('T', ' ') if news.published_date else '剛剛' }}
+                            </small>
+                        </div>
+                        
+                        <!-- 操作按鈕 -->
+                        <div class="d-flex gap-2">
+                            <a href="/news/{{ news.id }}" class="btn btn-primary btn-sm flex-fill">
+                                <i class="fas fa-eye me-1"></i>閱讀全文
+                            </a>
+                            <button class="btn btn-outline-info btn-sm share-btn" data-id="{{ news.id }}" data-title="{{ news.title }}">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="btn btn-outline-success btn-sm bookmark-btn" data-id="{{ news.id }}">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-newspaper fa-4x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">暫無新聞</h4>
+                    <p class="text-muted">目前沒有符合條件的新聞文章。</p>
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-1"></i>返回首頁
+                        </a>
+                        <button class="btn btn-outline-primary" onclick="refreshNews()">
+                            <i class="fas fa-sync-alt me-1"></i>重新載入
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+<!-- 分頁 -->
+{% if pagination %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="新聞分頁">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ pagination.prev_num }}">上一頁</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != pagination.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ pagination.next_num }}">下一頁</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/global-script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/news-interaction.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('新聞列表頁面已載入');
+        
+        // 添加CSS規則，提供列表視圖樣式
+        const newsListStyleElement = document.createElement('style');
+        newsListStyleElement.textContent = `
+            .news-list .news-card {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+        `;
+        document.head.appendChild(newsListStyleElement);
+        
+        // 為分享按鈕添加事件監聽器
+        document.querySelectorAll('.share-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const newsId = this.dataset.id;
+                const newsTitle = this.dataset.title;
+                shareNews(newsId, newsTitle);
+            });
+        });
+        
+        // 為收藏按鈕添加事件監聽器
+        document.querySelectorAll('.bookmark-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const newsId = this.dataset.id;
+                bookmarkNews(newsId);
+            });
+        });
+    });
+</script>
+{% endblock %}

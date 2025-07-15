@@ -1,0 +1,290 @@
+{% extends "monitor/base.html" %}
+
+{% block title %}手動執行爬蟲 - 保險新聞聚合器{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-spider me-2"></i>手動執行爬蟲</h2>
+                <div class="badge bg-info fs-6">
+                    <i class="fas fa-clock me-1"></i>
+                    <span id="current-time">--:--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 爬蟲控制面板 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>爬蟲控制</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>立即執行爬蟲</h6>
+                            <p class="text-muted">手動觸發爬蟲執行，獲取最新新聞資訊</p>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="useMockData" checked>
+                                <label class="form-check-label" for="useMockData">
+                                    使用模擬數據（避免頻繁爬取導致被封鎖）
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" id="startCrawlerBtn">
+                                    <i class="fas fa-play me-2"></i>開始爬取
+                                </button>
+                                <button class="btn btn-secondary" id="stopCrawlerBtn" disabled>
+                                    <i class="fas fa-stop me-2"></i>停止爬取
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>自動爬蟲設定</h6>
+                            <p class="text-muted">設定定時爬蟲運行間隔</p>
+                            
+                            <div class="mb-3">
+                                <label for="crawlInterval" class="form-label">執行間隔（分鐘）</label>
+                                <input type="number" class="form-control" id="crawlInterval" value="30" min="5" max="1440">
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" id="enableAutoBtn">
+                                    <i class="fas fa-clock me-2"></i>啟用自動爬蟲
+                                </button>
+                                <button class="btn btn-warning" id="disableAutoBtn">
+                                    <i class="fas fa-pause me-2"></i>禁用自動爬蟲
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 執行結果 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>執行結果</h5>
+                </div>
+                <div class="card-body">
+                    <div id="crawlerResults" class="alert alert-info d-none">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>爬蟲執行中，請稍候...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="crawlerLogs" class="bg-dark text-light p-3 rounded" style="height: 300px; overflow-y: auto; font-family: monospace;">
+                        <div class="text-success">系統就緒，等待執行爬蟲...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 爬蟲狀態統計 -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                    <h4 id="totalNews" class="card-title">--</h4>
+                    <p class="card-text">總新聞數</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-plus-circle fa-2x text-success mb-2"></i>
+                    <h4 id="todayNews" class="card-title">--</h4>
+                    <p class="card-text">今日新增</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-globe fa-2x text-info mb-2"></i>
+                    <h4 id="activeSources" class="card-title">--</h4>
+                    <p class="card-text">活躍來源</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                    <h4 id="successRate" class="card-title">--</h4>
+                    <p class="card-text">成功率</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 更新當前時間
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('zh-TW');
+    document.getElementById('current-time').textContent = timeString;
+}
+
+// 添加日誌
+function addLog(message, type = 'info') {
+    const logsElement = document.getElementById('crawlerLogs');
+    const timestamp = new Date().toLocaleTimeString();
+    const colorClass = {
+        'info': 'text-info',
+        'success': 'text-success',
+        'warning': 'text-warning',
+        'error': 'text-danger'
+    }[type] || 'text-light';
+    
+    const logEntry = document.createElement('div');
+    logEntry.className = colorClass;
+    logEntry.innerHTML = `[${timestamp}] ${message}`;
+    
+    logsElement.appendChild(logEntry);
+    logsElement.scrollTop = logsElement.scrollHeight;
+}
+
+// 載入爬蟲狀態
+async function loadCrawlerStats() {
+    try {
+        const response = await fetch('/api/v1/crawler/status');
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.data) {
+            const stats = data.data;
+            
+            // 更新統計數字
+            document.getElementById('totalNews').textContent = stats.total_news || 0;
+            document.getElementById('todayNews').textContent = stats.today_news || 0;
+            
+            // 計算活躍來源
+            const activeSources = stats.source_totals ? stats.source_totals.length : 0;
+            document.getElementById('activeSources').textContent = activeSources;
+            
+            // 計算成功率
+            const recentRuns = stats.recent_runs || [];
+            const successCount = recentRuns.filter(run => run.status === 'success').length;
+            const successRate = recentRuns.length > 0 ? Math.round(successCount / recentRuns.length * 100) : 0;
+            document.getElementById('successRate').textContent = successRate + '%';
+        }
+    } catch (error) {
+        console.error('載入爬蟲統計失敗:', error);
+    }
+}
+
+// 手動執行爬蟲
+async function startCrawler() {
+    const useMock = document.getElementById('useMockData').checked;
+    const resultsElement = document.getElementById('crawlerResults');
+    const startBtn = document.getElementById('startCrawlerBtn');
+    const stopBtn = document.getElementById('stopCrawlerBtn');
+    
+    // 顯示執行中狀態
+    resultsElement.classList.remove('d-none');
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    
+    addLog('開始執行爬蟲...', 'info');
+    addLog(`使用模式: ${useMock ? '模擬數據' : '真實爬取'}`, 'info');
+    
+    try {
+        const response = await fetch('/api/v1/crawler/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                use_mock: useMock
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            addLog('爬蟲執行成功!', 'success');
+            addLog(`回應訊息: ${result.message}`, 'success');
+            
+            // 重新載入統計數據
+            setTimeout(loadCrawlerStats, 2000);
+        } else {
+            addLog(`爬蟲執行失敗: ${result.message}`, 'error');
+        }
+    } catch (error) {
+        addLog(`爬蟲執行錯誤: ${error.message}`, 'error');
+    } finally {
+        // 恢復按鈕狀態
+        resultsElement.classList.add('d-none');
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
+}
+
+// 控制自動爬蟲
+async function toggleAutoCrawler(enable) {
+    const action = enable ? 'enable_auto' : 'disable_auto';
+    const interval = document.getElementById('crawlInterval').value;
+    
+    addLog(`${enable ? '啟用' : '禁用'}自動爬蟲...`, 'info');
+    
+    try {
+        const response = await fetch('/monitor/api/crawler/control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: action,
+                interval: parseInt(interval)
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            addLog(result.message, 'success');
+        } else {
+            addLog(`操作失敗: ${result.message}`, 'error');
+        }
+    } catch (error) {
+        addLog(`操作錯誤: ${error.message}`, 'error');
+    }
+}
+
+// 頁面載入完成後的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 更新時間
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+    
+    // 載入初始統計
+    loadCrawlerStats();
+    
+    // 綁定事件
+    document.getElementById('startCrawlerBtn').addEventListener('click', startCrawler);
+    document.getElementById('enableAutoBtn').addEventListener('click', () => toggleAutoCrawler(true));
+    document.getElementById('disableAutoBtn').addEventListener('click', () => toggleAutoCrawler(false));
+    
+    addLog('手動爬蟲頁面載入完成', 'success');
+});
+</script>
+{% endblock %}

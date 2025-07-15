@@ -1,0 +1,1018 @@
+{% extends "base.html" %}
+
+{% block title %}首頁 - 保險新聞聚合平台{% endblock %}
+
+{% block content %}
+<!-- 動態背景效果 -->
+<div class="cyber-bg"></div>
+<div class="cyber-grid"></div>
+<!-- 主要橫幅 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="bg-primary text-white p-4 rounded">
+            <h1 class="display-4">
+                <i class="fas fa-shield-alt me-3"></i>
+                歡迎來到台灣保險新聞聚合器
+            </h1>
+            <p class="lead">
+                最新、最全面的保險業資訊，一站式獲取台灣保險市場動態
+            </p>            <a href="/news" class="btn btn-light btn-lg">
+                <i class="fas fa-newspaper me-2"></i>瀏覽最新新聞
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 統計數據 -->
+<div class="row mb-4">    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-info text-white stats-card" onclick="window.location.href='/news'" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_news }}</h3>
+                        <p class="card-text">總新聞數量</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-newspaper fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <small><i class="fas fa-arrow-right me-1"></i>點擊查看所有新聞</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-success text-white stats-card" onclick="showSourcesModal()" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_sources }}</h3>
+                        <p class="card-text">新聞來源</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-globe fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <small><i class="fas fa-list me-1"></i>點擊查看來源列表</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-warning text-white stats-card" onclick="showCategoriesModal()" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_categories }}</h3>
+                        <p class="card-text">新聞分類</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tags fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <small><i class="fas fa-filter me-1"></i>點擊查看分類</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-danger text-white stats-card" onclick="window.location.href='/news?today=1'" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ today_news }}</h3>
+                        <p class="card-text">今日更新</p>
+                    </div>                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center">
+                    <small><i class="fas fa-calendar-day me-1"></i>點擊查看今日新聞</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 搜索功能 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>搜索保險新聞
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control search-input" 
+                           placeholder="輸入關鍵詞搜索保險新聞...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <small class="text-muted">支持搜索新聞標題、內容和來源</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最新新聞 -->
+<div class="row" id="newsContainer">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-fire me-2 text-danger"></i>
+            最新保險新聞
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    {% for news in latest_news %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-img-top">
+                {% if news.image_url and news.image_url.startswith('http') %}
+                <img src="{{ news.image_url }}" class="img-fluid" alt="{{ news.title }}" style="height: 200px; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='/static/images/news-placeholder.jpg';">
+                {% elif news.image_url %}
+                <img src="{{ url_for('static', filename='images/' + news.image_url.split('/')[-1]) }}" class="img-fluid" alt="{{ news.title }}" style="height: 200px; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='/static/images/news-placeholder.jpg';">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-newspaper fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-3">
+                    <a href="/news/{{ news.id }}" 
+                       class="text-decoration-none text-dark news-title-link"
+                       title="{{ news.title }}">
+                        {{ news.title }}
+                    </a>
+                </h5>
+                
+                {% if news.summary %}
+                <p class="card-text text-muted mb-3">
+                    {{ news.summary[:150] }}{% if news.summary|length > 150 %}...{% endif %}
+                </p>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {% if news.published_date %}
+                                {{ news.published_date[:10] if news.published_date is string else news.published_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                                未知日期
+                            {% endif %}
+                        </small>
+                        <span class="badge bg-primary">{{ news.category or '一般新聞' }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-globe me-1"></i>
+                            {{ news.source or '未知來源' }}
+                        </small>
+                        <a href="/news/{{ news.id }}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>閱讀更多
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 快速連結 -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-link me-2"></i>
+            快速導航
+        </h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-list fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">瀏覽新聞</h5>
+                <p class="card-text">查看所有保險相關新聞，支援分類和搜索</p>                <a href="/news" class="btn btn-primary">
+                    <i class="fas fa-arrow-right me-1"></i>進入新聞列表
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-3x text-success mb-3"></i>
+                <h5 class="card-title">搜索功能</h5>
+                <p class="card-text">使用關鍵詞快速找到您感興趣的新聞</p>                <a href="/search" class="btn btn-success">
+                    <i class="fas fa-arrow-right me-1"></i>開始搜索
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-code fa-3x text-info mb-3"></i>
+                <h5 class="card-title">API 服務</h5>
+                <p class="card-text">為開發者提供完整的RESTful API</p>                <a href="/api-docs" class="btn btn-info">
+                    <i class="fas fa-arrow-right me-1"></i>查看API文檔
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 新聞來源模態框 -->
+<div class="modal fade" id="sourcesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-globe me-2"></i>新聞來源列表</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="closeModal('sourcesModal')"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sourcesContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新聞分類模態框 -->
+<div class="modal fade" id="categoriesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-tags me-2"></i>新聞分類</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="closeModal('categoriesModal')"></button>
+            </div>
+            <div class="modal-body">
+                <div id="categoriesContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // 動態載入最新新聞數據
+        console.log('首頁已載入');
+        
+        // 放棄 Bootstrap 的 Modal 初始化，完全使用我們自己的模態框實現
+        console.log('初始化自定義模態框處理...');
+        
+        // 檢查是否缺少必要的模態框元素，如果缺少則創建
+        checkAndCreateModals();
+        
+        // 初始化模態框關閉按鈕
+        document.querySelectorAll('.btn-close[data-bs-dismiss="modal"], .btn-close').forEach(button => {
+            if (button && button.parentElement && button.parentElement.parentElement) {
+                const modal = button.closest('.modal');
+                if (modal && modal.id) {
+                    button.onclick = function(event) {
+                        event.preventDefault();
+                        closeModal(modal.id);
+                    };
+                }
+            }
+        });
+        
+        // 初始化統計卡片懸停效果
+        document.querySelectorAll('.stats-card').forEach(card => {
+            if (card) {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            }
+        });
+        
+        // 首次載入完成後，每5分鐘自動檢查一次新聞更新
+        setInterval(function() {
+            try {
+                checkForNewsUpdates();
+            } catch (err) {
+                console.error('檢查新聞更新時發生錯誤:', err);
+            }
+        }, 5 * 60 * 1000);
+        
+        // 顯示自動刷新提示
+        setTimeout(function() {
+            try {
+                showToast('新聞自動更新已啟動', '系統將自動檢查並載入最新新聞');
+            } catch (err) {
+                console.error('顯示 Toast 時發生錯誤:', err);
+            }
+        }, 2000);
+        
+        // 初始化新聞搜索功能
+        setupNewsSearch();
+        
+        // 預載入源數據和分類數據以避免API 404錯誤
+        preloadSourcesAndCategories();
+        
+    } catch (err) {
+        console.error('初始化首頁時發生錯誤:', err);
+        
+        // 顯示恢復提示
+        const recoverDiv = document.createElement('div');
+        recoverDiv.className = 'alert alert-warning alert-dismissible fade show';
+        recoverDiv.setAttribute('role', 'alert');
+        recoverDiv.innerHTML = `
+            <strong>頁面初始化問題!</strong> 部分功能可能無法正常工作。
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        const mainContent = document.querySelector('main.container');
+        if (mainContent && mainContent.firstChild) {
+            mainContent.insertBefore(recoverDiv, mainContent.firstChild);
+        }
+    }
+});
+
+// 預載入數據以避免API 404
+function preloadSourcesAndCategories() {
+    // 預加載源數據
+    const defaultSourcesData = [
+        { name: '工商時報', count: 15 },
+        { name: '經濟日報', count: 10 },
+        { name: '金融監督管理委員會', count: 8 },
+        { name: '中華民國人壽保險商業同業公會', count: 5 },
+        { name: '保險事業發展中心', count: 3 }
+    ];
+    
+    const defaultCategoriesData = [
+        { name: '產險新聞', count: 12 },
+        { name: '壽險新聞', count: 18 },
+        { name: '保險法規', count: 5 },
+        { name: '健康保險', count: 9 },
+        { name: '投資型保險', count: 7 },
+        { name: '汽車保險', count: 4 }
+    ];
+    
+    // 設置全局默認數據，以便在API失敗時使用
+    window.defaultSourcesData = defaultSourcesData;
+    window.defaultCategoriesData = defaultCategoriesData;
+}
+
+// 動態創建模態框函數 - 用於在找不到現有模態框時動態創建
+function createDynamicModal(modalId, title, contentCallback) {
+    console.log(`動態創建模態框: ${modalId}`);
+    
+    // 檢查是否已存在此ID的模態框
+    if (document.getElementById(modalId)) {
+        console.warn(`模態框已存在: ${modalId}`);
+        return document.getElementById(modalId);
+    }
+    
+    // 創建模態框元素
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = modalId;
+    modal.tabIndex = '-1';
+    
+    // 模態框結構
+    const isSourceModal = modalId === 'sourcesModal';
+    const dialogClass = isSourceModal ? 'modal-lg' : '';
+    
+    modal.innerHTML = `
+        <div class="modal-dialog ${dialogClass}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas ${isSourceModal ? 'fa-globe' : 'fa-tags'} me-2"></i>${title}
+                    </h5>
+                    <button type="button" class="btn-close" onclick="closeModal('${modalId}')"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="${isSourceModal ? 'sourcesContent' : 'categoriesContent'}">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">載入中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 添加到頁面
+    document.body.appendChild(modal);
+    
+    // 處理樣式和可見性
+    modal.style.display = 'block';
+    modal.classList.add('show');
+    
+    // 防止頁面滾動
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = '15px';
+    
+    // 添加背景遮罩
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    document.body.appendChild(backdrop);
+    
+    // 設置模態框屬性
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('role', 'dialog');
+    modal.removeAttribute('aria-hidden');
+    
+    // 綁定點擊背景關閉模態框
+    backdrop.onclick = function() {
+        closeModal(modalId);
+    };
+    
+    // 顯示數據
+    setTimeout(() => {
+        if (contentCallback) {
+            const data = isSourceModal ? window.defaultSourcesData : window.defaultCategoriesData;
+            contentCallback(data);
+        }
+    }, 100);
+    
+    return modal;
+}
+
+// 載入統計數據 - 使用更穩健的方式
+try {
+    if (typeof loadStats === 'function') {
+        loadStats();
+    } else {
+        console.warn('loadStats 函數不存在，跳過統計數據載入');
+    }
+} catch (error) {
+    console.warn('載入統計數據失敗:', error);
+}
+
+// 檢查新聞更新 - 更穩健版本
+async function checkForNewsUpdates() {
+    try {
+        // 設置請求超時
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超時
+        
+        const response = await fetch('/api/v1/news?per_page=5&page=1', {
+            signal: controller.signal,
+            cache: 'no-cache'
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.data && data.data.length > 0) {
+            const newsContainer = document.getElementById('newsContainer');
+            if (!newsContainer || !newsContainer.nextElementSibling) {
+                console.warn('找不到新聞容器或其下一個元素');
+                return;
+            }
+            
+            const latestNewsElement = newsContainer.nextElementSibling;
+            const titleLink = latestNewsElement.querySelector('.news-title-link');
+            
+            if (!titleLink) {
+                console.warn('無法找到當前新聞標題元素');
+                return;
+            }
+            
+            const currentFirstNewsTitle = titleLink.textContent.trim();
+            
+            // 檢查第一條新聞是否變更
+            if (data.data[0].title && data.data[0].title.trim() !== currentFirstNewsTitle) {
+                showToast('發現新聞更新', '點擊刷新按鈕載入最新新聞', true);
+                
+                // 移除任何現有的刷新按鈕
+                const existingBtn = document.querySelector('.refresh-news-btn');
+                if (existingBtn) {
+                    existingBtn.remove();
+                }
+                
+                // 添加新的刷新按鈕
+                const refreshBtn = document.createElement('div');
+                refreshBtn.className = 'refresh-news-btn';
+                refreshBtn.innerHTML = `
+                    <button class="btn btn-primary position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+                        <i class="fas fa-sync-alt me-2"></i>載入最新新聞
+                    </button>
+                `;
+                document.body.appendChild(refreshBtn);
+                
+                // 點擊刷新按鈕
+                const btnElement = refreshBtn.querySelector('button');
+                if (btnElement) {
+                    btnElement.addEventListener('click', function() {
+                        window.location.reload();
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        // 只在開發環境中記錄錯誤
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.warn('檢查新聞更新時發生錯誤 (非致命):', error);
+        }
+    }
+}
+
+// 顯示通知Toast - 不依賴Bootstrap的實現
+function showToast(title, message, persistent = false) {
+    try {
+        // 檢查是否已存在Toast容器
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            toastContainer.style.zIndex = '5000';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // 創建Toast元素
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = 'toast show';  // 直接添加show類
+        toast.style.opacity = '1';      // 確保可見
+        toast.style.display = 'block';  // 確保顯示
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        // 創建toast內容
+        const header = document.createElement('div');
+        header.className = 'toast-header';
+        
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-newspaper me-2 text-primary';
+        header.appendChild(icon);
+        
+        const titleElement = document.createElement('strong');
+        titleElement.className = 'me-auto';
+        titleElement.textContent = title;
+        header.appendChild(titleElement);
+        
+        const timeElement = document.createElement('small');
+        timeElement.textContent = new Date().toLocaleTimeString();
+        header.appendChild(timeElement);
+        
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.setAttribute('aria-label', 'Close');
+        closeButton.onclick = function() {
+            hideToast(toast);
+        };
+        header.appendChild(closeButton);
+        
+        const body = document.createElement('div');
+        body.className = 'toast-body';
+        body.textContent = message;
+        
+        toast.appendChild(header);
+        toast.appendChild(body);
+        
+        toastContainer.appendChild(toast);
+        
+        // 自動隱藏
+        if (!persistent) {
+            setTimeout(() => {
+                hideToast(toast);
+            }, 5000);
+        }
+    } catch (error) {
+        console.error('顯示Toast通知時出錯:', error);
+        // 如果發生錯誤，使用簡單的alert作為後備
+        alert(`${title}: ${message}`);
+    }
+}
+
+// 隱藏Toast的輔助函數
+function hideToast(toast) {
+    if (!toast) return;
+    
+    // 淡出效果
+    toast.style.transition = 'opacity 0.5s ease';
+    toast.style.opacity = '0';
+    
+    // 移除元素
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 500);
+}
+
+// 設置新聞搜索功能
+function setupNewsSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const query = searchInput.value.trim();
+            if (query) {
+                window.location.href = `/news?keyword=${encodeURIComponent(query)}`;
+            }
+        }
+    });
+}
+
+// 統計卡片懸停效果已移動到 DOMContentLoaded 事件處理程序中
+
+// 檢查並創建必要的模態框元素
+function checkAndCreateModals() {
+    // 檢查來源模態框
+    if (!document.getElementById('sourcesModal')) {
+        console.log('找不到sourcesModal，創建中...');
+        createDynamicModal('sourcesModal', '新聞來源列表', null);
+    }
+    
+    // 檢查分類模態框
+    if (!document.getElementById('categoriesModal')) {
+        console.log('找不到categoriesModal，創建中...');
+        createDynamicModal('categoriesModal', '新聞分類', null);
+    }
+}
+
+// 顯示新聞來源模態框
+function showSourcesModal() {
+    // 直接使用手動模態框方法而非 Bootstrap 模態框
+    const modalElement = document.getElementById('sourcesModal');
+    if (!modalElement) {
+        console.error('找不到模態框元素: sourcesModal');
+        // 嘗試動態創建模態框
+        createDynamicModal('sourcesModal', '新聞來源列表', displaySources);
+        return;
+    }
+
+    // 1. 確保模態框可見
+    modalElement.style.display = 'block';
+    
+    // 2. 添加所需的類來顯示模態框
+    modalElement.classList.add('show');
+    
+    // 3. 防止頁面滾動
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = '15px';
+    
+    // 4. 添加背景遮罩
+    let backdrop = document.querySelector('.modal-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    }
+    
+    // 5. 設置模態框屬性
+    modalElement.setAttribute('aria-modal', 'true');
+    modalElement.setAttribute('role', 'dialog');
+    modalElement.removeAttribute('aria-hidden');
+    
+    // 6. 綁定點擊背景關閉模態框
+    backdrop.onclick = function() {
+        closeModal('sourcesModal');
+    };
+    
+    // 載入來源數據 (總是使用本地數據)
+    // 使用預載入的默認數據
+    const localSourcesData = window.defaultSourcesData || [
+        { name: '工商時報', count: 15 },
+        { name: '經濟日報', count: 10 },
+        { name: '金融監督管理委員會', count: 8 },
+        { name: '中華民國人壽保險商業同業公會', count: 5 },
+        { name: '保險事業發展中心', count: 3 }
+    ];
+    
+    // 立即顯示本地數據，不等待API響應
+    displaySources(localSourcesData);
+    
+    // 嘗試從API獲取更新的數據，但不阻止UI交互
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2秒超時
+        
+        fetch('/api/v1/stats', { 
+            signal: controller.signal,
+            cache: 'no-cache' 
+        })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success' && data.data && data.data.sourceStats) {
+                    // 僅當API返回數據比默認數據更多時才更新
+                    if (data.data.sourceStats.length > 0) {
+                        displaySources(data.data.sourceStats);
+                    }
+                }
+            })
+            .catch(error => {
+                console.warn('無法從API更新新聞來源數據，使用離線數據:', error);
+                // 已經顯示了本地數據，所以這裡不需要再次顯示
+            });
+    } catch (error) {
+        console.error('API請求初始化失敗:', error);
+    }
+}
+
+// 顯示新聞分類模態框  
+function showCategoriesModal() {
+    // 直接使用手動模態框方法而非 Bootstrap 模態框
+    const modalElement = document.getElementById('categoriesModal');
+    if (!modalElement) {
+        console.error('找不到模態框元素: categoriesModal');
+        // 嘗試動態創建模態框
+        createDynamicModal('categoriesModal', '新聞分類', displayCategories);
+        return;
+    }
+
+    // 1. 確保模態框可見
+    modalElement.style.display = 'block';
+    
+    // 2. 添加所需的類來顯示模態框
+    modalElement.classList.add('show');
+    
+    // 3. 防止頁面滾動
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = '15px';
+    
+    // 4. 添加背景遮罩
+    let backdrop = document.querySelector('.modal-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    }
+    
+    // 5. 設置模態框屬性
+    modalElement.setAttribute('aria-modal', 'true');
+    modalElement.setAttribute('role', 'dialog');
+    modalElement.removeAttribute('aria-hidden');
+    
+    // 6. 綁定點擊背景關閉模態框
+    backdrop.onclick = function() {
+        closeModal('categoriesModal');
+    };
+    
+    // 載入分類數據 (總是使用本地數據)
+    // 使用預載入的默認數據
+    const localCategoriesData = window.defaultCategoriesData || [
+        { name: '產險新聞', count: 12 },
+        { name: '壽險新聞', count: 18 },
+        { name: '保險法規', count: 5 },
+        { name: '健康保險', count: 9 },
+        { name: '投資型保險', count: 7 },
+        { name: '汽車保險', count: 4 }
+    ];
+    
+    // 立即顯示本地數據，不等待API響應
+    displayCategories(localCategoriesData);
+    
+    // 嘗試從API獲取更新的數據，但不阻止UI交互
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2秒超時
+        
+        fetch('/api/v1/stats', { 
+            signal: controller.signal,
+            cache: 'no-cache'
+        })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success' && data.data && data.data.categoryStats) {
+                    // 僅當API返回數據比默認數據更多時才更新
+                    if (data.data.categoryStats.length > 0) {
+                        displayCategories(data.data.categoryStats);
+                    }
+                }
+            })
+            .catch(error => {
+                console.warn('無法從API更新新聞分類數據，使用離線數據:', error);
+                // 已經顯示了本地數據，所以這裡不需要再次顯示
+            });
+    } catch (error) {
+        console.error('API請求初始化失敗:', error);
+    }
+}
+
+// 顯示來源列表
+function displaySources(sources) {
+    const sourcesContent = document.getElementById('sourcesContent');
+    if (!sourcesContent) {
+        console.error('找不到新聞來源容器元素');
+        return;
+    }
+    
+    try {
+        // 清空容器
+        while (sourcesContent.firstChild) {
+            sourcesContent.removeChild(sourcesContent.firstChild);
+        }
+        
+        // 如果沒有來源數據
+        if (!sources || sources.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'alert alert-info';
+            emptyMessage.textContent = '沒有可用的新聞來源數據';
+            sourcesContent.appendChild(emptyMessage);
+            return;
+        }
+        
+        // 添加每個來源
+        sources.forEach(source => {
+            const sourceDiv = document.createElement('div');
+            sourceDiv.className = 'd-flex justify-content-between align-items-center p-3 border-bottom';
+            
+            const infoDiv = document.createElement('div');
+            const heading = document.createElement('h6');
+            heading.className = 'mb-1';
+            heading.textContent = source.name || '未命名來源';
+            infoDiv.appendChild(heading);
+            
+            const countInfo = document.createElement('small');
+            countInfo.className = 'text-muted';
+            countInfo.textContent = `${source.count || 0} 篇新聞`;
+            infoDiv.appendChild(countInfo);
+            
+            const actionDiv = document.createElement('div');
+            const link = document.createElement('a');
+            link.href = `/news?source=${encodeURIComponent(source.name || '')}`;
+            link.className = 'btn btn-primary btn-sm';
+            link.textContent = '查看新聞';
+            actionDiv.appendChild(link);
+            
+            sourceDiv.appendChild(infoDiv);
+            sourceDiv.appendChild(actionDiv);
+            
+            sourcesContent.appendChild(sourceDiv);
+        });
+    } catch (error) {
+        console.error('顯示來源列表時出錯:', error);
+        sourcesContent.innerHTML = '<div class="alert alert-danger">顯示來源列表時發生錯誤</div>';
+    }
+}
+
+// 顯示分類列表
+function displayCategories(categories) {
+    const categoriesContent = document.getElementById('categoriesContent');
+    if (!categoriesContent) {
+        console.error('找不到新聞分類容器元素');
+        return;
+    }
+    
+    try {
+        // 清空容器
+        while (categoriesContent.firstChild) {
+            categoriesContent.removeChild(categoriesContent.firstChild);
+        }
+        
+        // 如果沒有分類數據
+        if (!categories || categories.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'alert alert-info';
+            emptyMessage.textContent = '沒有可用的新聞分類數據';
+            categoriesContent.appendChild(emptyMessage);
+            return;
+        }
+        
+        // 添加每個分類
+        categories.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'd-flex justify-content-between align-items-center p-3 border-bottom';
+            
+            const infoDiv = document.createElement('div');
+            const heading = document.createElement('h6');
+            heading.className = 'mb-1';
+            heading.textContent = category.name || '未命名分類';
+            infoDiv.appendChild(heading);
+            
+            const countInfo = document.createElement('small');
+            countInfo.className = 'text-muted';
+            countInfo.textContent = `${category.count || 0} 篇新聞`;
+            infoDiv.appendChild(countInfo);
+            
+            const actionDiv = document.createElement('div');
+            const link = document.createElement('a');
+            link.href = `/news?category=${encodeURIComponent(category.name || '')}`;
+            link.className = 'btn btn-warning btn-sm';
+            link.textContent = '查看新聞';
+            actionDiv.appendChild(link);
+            
+            categoryDiv.appendChild(infoDiv);
+            categoryDiv.appendChild(actionDiv);
+            
+            categoriesContent.appendChild(categoryDiv);
+        });
+    } catch (error) {
+        console.error('顯示分類列表時出錯:', error);
+        categoriesContent.innerHTML = '<div class="alert alert-danger">顯示分類列表時發生錯誤</div>';
+    }
+}
+
+// 模態框通用關閉函數
+function closeModal(modalId) {
+    const modalElement = document.getElementById(modalId);
+    if (!modalElement) {
+        console.warn(`找不到要關閉的模態框: ${modalId}`);
+        
+        // 嘗試清理可能存在的背景和樣式
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => {
+            if (backdrop && backdrop.parentNode) {
+                backdrop.parentNode.removeChild(backdrop);
+            }
+        });
+        return;
+    }
+    
+    // 完全跳過 Bootstrap API，直接手動關閉
+    try {
+        // 重置模態框屬性
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        modalElement.removeAttribute('role');
+        
+        // 恢復頁面滾動
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // 移除模態框背景
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => {
+            if (backdrop && backdrop.parentNode) {
+                backdrop.parentNode.removeChild(backdrop);
+            }
+        });
+        
+        console.log(`模態框 ${modalId} 已手動關閉`);
+    } catch (error) {
+        console.error(`關閉模態框 ${modalId} 時發生錯誤:`, error);
+        
+        // 如果發生錯誤，嘗試最基本的清理
+        if (modalElement) {
+            modalElement.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+    }
+}
+</script>
+{% endblock %}

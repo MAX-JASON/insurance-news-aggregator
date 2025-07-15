@@ -1,0 +1,352 @@
+# 保險新聞來源配置
+# Insurance News Sources Configuration
+
+sources:
+  insurance_cloud:
+    name: "保險雲世代"
+    base_url: "https://www.insurance-cloud.com.tw"
+    description: "專業的保險業資訊平台"
+    active: true
+    list_urls:
+      - "https://www.insurance-cloud.com.tw/news"
+      - "https://www.insurance-cloud.com.tw/industry"
+    
+    # 列表頁選擇器
+    list_selectors:
+      item: ".news-list li, .article-item, .news-item"
+      title: ".title a, h3 a, .article-title"
+      link: ".title a, h3 a, .article-title"
+      summary: ".summary, .excerpt, .description"
+      date: ".date, .time, .publish-time"
+      category: ".category, .tag"
+    
+    # 詳情頁選擇器
+    detail_selectors:
+      title: "h1.article-title, .post-title h1, h1"
+      content: ".article-content, .post-content, .content-body, .news-content"
+      date: ".publish-time, .article-date, .news-date"
+      author: ".author-name, .writer, .author"
+      tags: ".tags a, .tag-list a"
+    
+    # 爬取設置
+    crawl_settings:
+      delay_min: 1
+      delay_max: 3
+      timeout: 30
+      retry_count: 3
+
+  modern_insurance:
+    name: "現代保險"
+    base_url: "https://www.rmim.com.tw"
+    description: "現代保險雜誌官方網站"
+    active: true
+    list_urls:
+      - "https://www.rmim.com.tw/news"
+      - "https://www.rmim.com.tw/magazine"
+    
+    list_selectors:
+      item: ".news-item, .article-list li, .post-item"
+      title: ".news-title a, h4 a, .post-title"
+      link: ".news-title a, h4 a, .post-title"
+      summary: ".news-summary, .excerpt"
+      date: ".news-date, .date"
+      category: ".news-category, .category"
+    
+    detail_selectors:
+      title: "h1.news-title, h1.post-title, h1"
+      content: ".news-content, .post-content, .article-body"
+      date: ".news-date, .post-date"
+      author: ".news-author, .author"
+      tags: ".tags a, .tag a"
+    
+    crawl_settings:
+      delay_min: 2
+      delay_max: 4
+      timeout: 30
+      retry_count: 3
+
+  insurance_marketing:
+    name: "保險行銷"
+    base_url: "https://www.rimag.com.tw"
+    description: "保險行銷雜誌"
+    active: true
+    list_urls:
+      - "https://www.rimag.com.tw/news"
+    
+    list_selectors:
+      item: ".news-list .item, .article-item"
+      title: ".title, h3"
+      link: ".title a, h3 a"
+      summary: ".intro, .summary"
+      date: ".date"
+      category: ".category"
+    
+    detail_selectors:
+      title: "h1, .article-title"
+      content: ".article-content, .content"
+      date: ".article-date"
+      author: ".author"
+      tags: ".tags a"
+    
+    crawl_settings:
+      delay_min: 1
+      delay_max: 2
+      timeout: 25
+      retry_count: 2
+
+  insurance_bureau:
+    name: "保險局"
+    base_url: "https://www.ib.gov.tw"
+    description: "金管會保險局官方網站"
+    active: true
+    list_urls:
+      - "https://www.ib.gov.tw/ch/home.jsp?id=59&parentpath=0,4"
+    
+    list_selectors:
+      item: ".news_list li, .list-item"
+      title: ".title a, .news-title"
+      link: ".title a, .news-title"
+      summary: ".summary"
+      date: ".date, .time"
+      category: ".type"
+    
+    detail_selectors:
+      title: "h1, .content-title"
+      content: ".content-body, .article-content"
+      date: ".publish-date"
+      author: ".author"
+    
+    crawl_settings:
+      delay_min: 2
+      delay_max: 5
+      timeout: 30
+      retry_count: 3
+
+  fsc_gov:
+    name: "金管會"
+    base_url: "https://www.fsc.gov.tw"
+    description: "金融監督管理委員會"
+    active: true
+    list_urls:
+      - "https://www.fsc.gov.tw/ch/home.jsp?id=96&parentpath=0,2"
+    
+    list_selectors:
+      item: ".news_list li"
+      title: ".title"
+      link: ".title a"
+      summary: ".summary"
+      date: ".date"
+    
+    detail_selectors:
+      title: "h1, .page-title"
+      content: ".page-content, .content"
+      date: ".date"
+    
+    crawl_settings:
+      delay_min: 3
+      delay_max: 6
+      timeout: 30
+      retry_count: 2
+
+  # 民間新聞媒體 - 更容易抓取
+  udn_money:
+    name: "聯合新聞網財經頻道"
+    base_url: "https://udn.com"
+    description: "聯合新聞網財經保險相關新聞"
+    active: true
+    list_urls:
+      - "https://udn.com/news/cate/2/6644"  # 保險類別
+    
+    list_selectors:
+      item: ".story-list__item, .story-list .story-list__item"
+      title: ".story-list__text a, h3 a"
+      link: ".story-list__text a, h3 a"
+      summary: ".story-list__intro, .story-list__summary"
+      date: ".story-list__time, .story-list__date"
+      category: ".story-list__tag"
+    
+    detail_selectors:
+      title: "#story_art_title, h1.article-content__title"
+      content: "#story_body_content, .article-content__editor"
+      date: ".article-content__time time, .story-publish-time"
+      author: ".article-content__author, .story-byline"
+      tags: ".article-content__tag a, .story-tags a"
+    
+    crawl_settings:
+      delay_min: 1
+      delay_max: 3
+      timeout: 20
+      retry_count: 3
+
+  ctee_insurance:
+    name: "工商時報保險"
+    base_url: "https://ctee.com.tw"
+    description: "工商時報保險專區"
+    active: true
+    list_urls:
+      - "https://ctee.com.tw/category/insurance"
+    
+    list_selectors:
+      item: ".post-item, .article-item"
+      title: ".post-title a, h3 a"
+      link: ".post-title a, h3 a"
+      summary: ".post-excerpt, .excerpt"
+      date: ".post-date, .date"
+    
+    detail_selectors:
+      title: ".entry-title, h1.post-title"
+      content: ".entry-content, .post-content"
+      date: ".entry-meta time, .post-date"
+      author: ".entry-author, .author"
+      tags: ".entry-tags a, .post-tags a"
+    
+    crawl_settings:
+      delay_min: 1
+      delay_max: 2
+      timeout: 15
+      retry_count: 2
+
+  # 財經媒體
+  money_udn:
+    name: "經濟日報"
+    base_url: "https://money.udn.com"
+    description: "經濟日報保險理財新聞"
+    active: true
+    list_urls:
+      - "https://money.udn.com/money/story/5613"  # 保險稅務
+    
+    list_selectors:
+      item: ".story-list__item"
+      title: ".story-list__text a"
+      link: ".story-list__text a"
+      summary: ".story-list__intro"
+      date: ".story-list__time"
+    
+    detail_selectors:
+      title: "#story_art_title"
+      content: "#story_body_content"
+      date: ".story-list__time time"
+      author: ".story-byline"
+    
+    crawl_settings:
+      delay_min: 2
+      delay_max: 4
+      timeout: 25
+      retry_count: 3
+
+  # 專業部落格和自媒體
+  smart_blog:
+    name: "Smart自學網"
+    base_url: "https://smart.businessweekly.com.tw"
+    description: "Smart智富保險理財文章"
+    active: true
+    list_urls:
+      - "https://smart.businessweekly.com.tw/Search/保險"
+    
+    list_selectors:
+      item: ".search-result-item, .article-item"
+      title: ".item-title a, h3 a"
+      link: ".item-title a, h3 a"
+      summary: ".item-content, .summary"
+      date: ".item-date, .date"
+    
+    detail_selectors:
+      title: ".article-title h1, h1"
+      content: ".article-content, .post-content"
+      date: ".article-info .date"
+      author: ".article-info .author"
+    
+    crawl_settings:
+      delay_min: 1
+      delay_max: 3
+      timeout: 20
+      retry_count: 2
+
+  # 簡單的RSS feed 來源
+  yahoo_finance:
+    name: "Yahoo財經"
+    base_url: "https://tw.finance.yahoo.com"
+    description: "Yahoo財經保險新聞"
+    active: true
+    list_urls:
+      - "https://tw.finance.yahoo.com/topic/insurance"
+    
+    list_selectors:
+      item: ".js-stream-content li, .story-item"
+      title: ".story-title a, h3 a"
+      link: ".story-title a, h3 a"
+      summary: ".story-summary, .summary"
+      date: ".story-timestamp, .timestamp"
+    
+    detail_selectors:
+      title: ".canvas-header h1, h1"
+      content: ".canvas-body, .article-body"
+      date: ".byline-attr time, .timestamp"
+      author: ".byline-attr .author"
+    
+    crawl_settings:
+      delay_min: 1
+      delay_max: 2
+      timeout: 15
+      retry_count: 2
+
+  # 測試用的簡單新聞網站
+  chinatimes_money:
+    name: "中時新聞網財經"
+    base_url: "https://www.chinatimes.com"
+    description: "中時新聞網財經保險新聞"
+    active: true
+    list_urls:
+      - "https://www.chinatimes.com/money"
+    
+    list_selectors:
+      item: ".article-list li, .story-list li"
+      title: ".title a, h3 a"
+      link: ".title a, h3 a"
+      summary: ".summary, .intro"
+      date: ".date, .time"
+    
+    detail_selectors:
+      title: ".article-title, h1"
+      content: ".article-body, .article-content"
+      date: ".meta-info .date"
+      author: ".meta-info .author"
+      crawl_settings:
+      delay_min: 1
+      delay_max: 3
+      timeout: 20
+      retry_count: 2
+
+# 全域設置
+global_settings:
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.59"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  
+  headers:
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+    Accept-Language: "zh-TW,zh;q=0.9,en;q=0.8"
+    Accept-Encoding: "gzip, deflate, br"
+    Connection: "keep-alive"
+    Upgrade-Insecure-Requests: "1"
+  
+  retry_settings:
+    max_retries: 3
+    retry_delay: 5
+    backoff_factor: 2
+  
+  content_filters:
+    min_title_length: 5
+    min_content_length: 50
+    max_content_length: 50000
+    skip_keywords:
+      - "廣告"
+      - "贊助"
+      - "404"
+      - "not found"
+  
+  storage_settings:
+    auto_save: true
+    batch_size: 10
+    duplicate_check: true

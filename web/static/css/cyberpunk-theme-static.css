@@ -1,0 +1,441 @@
+/* 
+ * 賽博朋克風格CSS框架 - 靜態版本
+ * Cyberpunk Style Framework - Static Version (No Animations)
+ * 專為業務員工作環境設計，無動態效果干擾
+ */
+
+/* ==================== 基礎變數定義 ==================== */
+:root {
+  /* 霓虹色彩調色板 */
+  --neon-purple: #8B5FBF;
+  --neon-blue: #00D4FF;
+  --neon-green: #39FF14;
+  --neon-pink: #FF073A;
+  --neon-orange: #FF8C00;
+  --neon-cyan: #00FFFF;
+  
+  /* 深色基調 */
+  --bg-primary: rgba(11, 15, 25, 0.95);
+  --bg-secondary: rgba(18, 24, 38, 0.9);
+  --bg-tertiary: rgba(25, 35, 55, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.1);
+  
+  /* 文字色彩 */
+  --text-primary: #E0E6ED;
+  --text-secondary: #A8B2C7;
+  --text-accent: var(--neon-cyan);
+  --text-success: var(--neon-green);
+  --text-warning: var(--neon-orange);
+  --text-danger: var(--neon-pink);
+  
+  /* 邊框和陰影 - 靜態發光效果 */
+  --border-glow: 0 0 5px currentColor;
+  --box-shadow-neon: 0 0 15px rgba(0, 212, 255, 0.4);
+  --box-shadow-glass: 0 4px 16px rgba(31, 38, 135, 0.3);
+  
+  /* 間距系統 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+}
+
+/* ==================== 基礎重置 ==================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==================== 主體背景 - 靜態版本 ==================== */
+body.cyberpunk-theme {
+  background: linear-gradient(135deg, 
+    rgba(11, 15, 25, 1) 0%,
+    rgba(18, 24, 38, 1) 25%,
+    rgba(15, 20, 35, 1) 50%,
+    rgba(20, 25, 40, 1) 75%,
+    rgba(11, 15, 25, 1) 100%);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 靜態網格背景 */
+body.cyberpunk-theme::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  opacity: 0.15;
+  background-image: 
+    linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ==================== 卡片樣式 ==================== */
+.cyber-card {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 8px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--box-shadow-glass);
+}
+
+.cyber-card:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.2);
+}
+
+/* ==================== 按鈕樣式 ==================== */
+.btn-cyber {
+  background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(139, 95, 191, 0.2));
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.btn-cyber:hover {
+  background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(139, 95, 191, 0.3));
+  color: #ffffff;
+  box-shadow: var(--border-glow);
+}
+
+.btn-cyber-danger {
+  border-color: var(--neon-pink);
+  color: var(--neon-pink);
+}
+
+.btn-cyber-success {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* ==================== 輸入框樣式 ==================== */
+.form-control.cyber-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: var(--text-primary);
+  border-radius: 4px;
+}
+
+.form-control.cyber-input:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--neon-cyan);
+  box-shadow: var(--border-glow);
+  color: var(--text-primary);
+}
+
+/* ==================== 導航欄樣式 ==================== */
+.navbar.cyber-nav {
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  backdrop-filter: blur(15px);
+}
+
+.navbar.cyber-nav .navbar-brand {
+  color: var(--neon-cyan) !important;
+  font-weight: bold;
+  text-shadow: var(--border-glow);
+}
+
+.navbar.cyber-nav .nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+}
+
+.navbar.cyber-nav .nav-link:hover,
+.navbar.cyber-nav .nav-link.active {
+  color: var(--neon-cyan) !important;
+  text-shadow: var(--border-glow);
+}
+
+/* ==================== 表格樣式 ==================== */
+.table.cyber-table {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.table.cyber-table th {
+  background: var(--bg-secondary);
+  border-color: rgba(0, 212, 255, 0.3);
+  color: var(--neon-cyan);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table.cyber-table td {
+  border-color: rgba(0, 212, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.table.cyber-table tr:hover td {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+/* ==================== 徽章樣式 ==================== */
+.badge.cyber-badge {
+  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-blue));
+  color: #000000;
+  font-weight: bold;
+  padding: 0.4em 0.8em;
+  border-radius: 3px;
+}
+
+.badge.cyber-badge-success {
+  background: linear-gradient(45deg, var(--neon-green), #32CD32);
+}
+
+.badge.cyber-badge-warning {
+  background: linear-gradient(45deg, var(--neon-orange), #FFD700);
+}
+
+.badge.cyber-badge-danger {
+  background: linear-gradient(45deg, var(--neon-pink), #FF6B6B);
+}
+
+/* ==================== 進度條樣式 ==================== */
+.progress.cyber-progress {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  height: 12px;
+  border-radius: 6px;
+}
+
+.progress.cyber-progress .progress-bar {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* ==================== 模態框樣式 ==================== */
+.modal.cyber-modal .modal-content {
+  background: var(--bg-primary);
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.modal.cyber-modal .modal-header {
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  background: var(--bg-secondary);
+}
+
+.modal.cyber-modal .modal-title {
+  color: var(--neon-cyan);
+  font-weight: bold;
+}
+
+.modal.cyber-modal .modal-footer {
+  border-top: 1px solid rgba(0, 212, 255, 0.3);
+  background: var(--bg-secondary);
+}
+
+/* ==================== 側邊欄樣式 ==================== */
+.sidebar.cyber-sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid rgba(0, 212, 255, 0.3);
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar.cyber-sidebar .nav-link {
+  color: var(--text-secondary);
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.sidebar.cyber-sidebar .nav-link:hover,
+.sidebar.cyber-sidebar .nav-link.active {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--neon-cyan);
+  border-left: 3px solid var(--neon-cyan);
+}
+
+/* ==================== 文字樣式 ==================== */
+.text-cyber-primary { color: var(--neon-cyan) !important; }
+.text-cyber-success { color: var(--neon-green) !important; }
+.text-cyber-warning { color: var(--neon-orange) !important; }
+.text-cyber-danger { color: var(--neon-pink) !important; }
+.text-cyber-purple { color: var(--neon-purple) !important; }
+
+/* ==================== 邊框樣式 ==================== */
+.border-cyber { border: 1px solid rgba(0, 212, 255, 0.3) !important; }
+.border-cyber-glow { 
+  border: 1px solid var(--neon-cyan) !important;
+  box-shadow: var(--border-glow);
+}
+
+/* ==================== 背景樣式 ==================== */
+.bg-cyber-dark { background: var(--bg-primary) !important; }
+.bg-cyber-glass { 
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ==================== 特殊效果類 ==================== */
+.cyber-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.cyber-border-glow {
+  box-shadow: var(--border-glow);
+}
+
+/* ==================== 新聞卡片專用樣式 ==================== */
+.news-card.cyber-news-card {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 6px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(8px);
+}
+
+.news-card.cyber-news-card:hover {
+  border-color: rgba(0, 212, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.news-card.cyber-news-card .news-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.news-card.cyber-news-card .news-source {
+  color: var(--neon-cyan);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.news-card.cyber-news-card .news-time {
+  color: var(--text-secondary);
+  font-size: 0.85em;
+}
+
+/* ==================== 響應式設計 ==================== */
+@media (max-width: 768px) {
+  .cyber-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .btn-cyber {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: 0.9em;
+  }
+}
+
+/* ==================== 頁尾樣式 ==================== */
+.footer.cyber-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--text-secondary);
+  margin-top: auto;
+}
+
+/* ==================== 滾動條樣式 ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--neon-cyan), var(--neon-blue));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+}
+
+/* ==================== 禁用所有動畫和過渡效果 ==================== */
+*, *::before, *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* ==================== 主題切換器樣式 ==================== */
+.theme-switcher {
+  cursor: pointer;
+}
+
+.theme-switcher:hover {
+  color: var(--neon-cyan) !important;
+  background: rgba(0, 212, 255, 0.1) !important;
+}
+
+/* ==================== 專業工作界面優化 ==================== */
+.work-panel {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  backdrop-filter: blur(8px);
+}
+
+.work-panel .panel-title {
+  color: var(--neon-cyan);
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: var(--spacing-sm);
+}
+
+/* ==================== 按鈕群組優化 ==================== */
+.btn-group-cyber .btn {
+  border-color: rgba(0, 212, 255, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+}
+
+.btn-group-cyber .btn:hover,
+.btn-group-cyber .btn.active {
+  background: rgba(0, 212, 255, 0.2);
+  color: var(--neon-cyan);
+  border-color: var(--neon-cyan);
+}
+
+/* ==================== 資訊提示優化 ==================== */
+.alert.cyber-alert {
+  background: var(--bg-glass);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: var(--text-primary);
+  backdrop-filter: blur(8px);
+}
+
+.alert.cyber-alert-success {
+  border-color: var(--neon-green);
+  background: rgba(57, 255, 20, 0.1);
+}
+
+.alert.cyber-alert-warning {
+  border-color: var(--neon-orange);
+  background: rgba(255, 140, 0, 0.1);
+}
+
+.alert.cyber-alert-danger {
+  border-color: var(--neon-pink);
+  background: rgba(255, 7, 58, 0.1);
+}

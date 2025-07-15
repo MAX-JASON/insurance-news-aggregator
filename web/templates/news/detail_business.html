@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}{{ news.title }} - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.business-insights {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.insight-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.importance-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #ff6b6b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.business-action-panel {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.quick-share-btn {
+    margin: 0.25rem;
+    border-radius: 20px;
+}
+
+.client-question {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.opportunity-highlight {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.trend-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.trend-up { background: #28a745; color: white; }
+.trend-down { background: #dc3545; color: white; }
+.trend-stable { background: #6c757d; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 主要內容 -->
+    <div class="col-lg-8">
+        <div class="card position-relative">
+            <!-- 重要性標記 -->
+            <div class="importance-badge">
+                {% if news.importance_score and news.importance_score >= 0.8 %}
+                    ★★★ 高度重要
+                {% elif news.importance_score and news.importance_score >= 0.5 %}
+                    ★★☆ 中度重要
+                {% else %}
+                    ★☆☆ 一般重要
+                {% endif %}
+            </div>
+
+            <div class="card-body">
+                <h1 class="card-title mb-3">{{ news.title }}</h1>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge bg-primary me-2">
+                            {{ news.source.name if news.source else '未知來源' }}
+                        </span>
+                        <span class="badge bg-secondary me-2">
+                            {{ news.category.name if news.category else '未分類' }}
+                        </span>
+                        {% if news.published_date %}
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ news.published_date.strftime('%Y-%m-%d %H:%M') }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <span class="text-muted">
+                            <i class="fas fa-eye me-1"></i>{{ news.view_count or 0 }} 次瀏覽
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 新聞摘要 -->
+                {% if news.summary %}
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>新聞摘要</h6>
+                    <p class="mb-0">{{ news.summary }}</p>
+                </div>
+                {% endif %}
+
+                <!-- 新聞內容 -->
+                <div class="news-content">
+                    {% if news.content %}
+                        {{ news.content | safe }}
+                    {% else %}
+                        <p class="text-muted">新聞內容正在載入中...</p>
+                    {% endif %}
+                </div>
+
+                <!-- 原文連結 -->
+                {% if news.url %}
+                <div class="mt-4">
+                    <a href="{{ news.url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-2"></i>查看原文
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 業務員工具側邊欄 -->
+    <div class="col-lg-4">
+        <!-- 業務洞察 -->
+        <div class="business-insights">
+            <h5><i class="fas fa-lightbulb me-2"></i>業務洞察</h5>
+            
+            <div class="insight-card">
+                <h6><i class="fas fa-users me-2"></i>客戶關注度</h6>
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-success" style="width: {{ (news.view_count or 0) * 2 if (news.view_count or 0) < 50 else 100 }}%"></div>
+                </div>
+                <small>預估 {{ ((news.view_count or 0) * 0.1) | round | int }} 位客戶可能詢問</small>
+            </div>
+
+            <div class="insight-card">
+                <h6><i class="fas fa-coins me-2"></i>商機評分</h6>
+                {% set opportunity_score = (news.importance_score or 0) * 100 %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="h4 mb-0">{{ opportunity_score | round | int }}分</span>
+                    {% if opportunity_score >= 70 %}
+                        <span class="trend-indicator trend-up">高商機</span>
+                    {% elif opportunity_score >= 40 %}
+                        <span class="trend-indicator trend-stable">中商機</span>
+                    {% else %}
+                        <span class="trend-indicator trend-down">低商機</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <h6><i class="fas fa-chart-line me-2"></i>市場影響</h6>
+                <p class="mb-0 small">
+                    {% if '理賠' in news.title %}
+                        客戶服務流程可能受影響，建議準備相關說明
+                    {% elif '保費' in news.title %}
+                        定價策略調整，可能影響商品銷售
+                    {% elif '法規' in news.title %}
+                        合規要求更新，需要團隊培訓
+                    {% else %}
+                        一般市場資訊，持續關注發展
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- 客戶常見問題 -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-question-circle me-2"></i>客戶可能的問題</h6>
+            </div>
+            <div class="card-body">
+                <div class="client-question">
+                    <strong>Q: 這個新聞對我的保單有什麼影響？</strong>
+                    <p class="mb-0 mt-2 small">
+                        {% if '理賠' in news.title %}
+                            A: 新的理賠流程將讓您的理賠申請更便捷，我們會為您詳細說明新的操作方式。
+                        {% elif '保費' in news.title %}
+                            A: 保費調整主要反映風險成本變化，我們會分析對您個人保單的具體影響。
+                        {% else %}
+                            A: 我會根據您的具體保單情況，為您分析這項變動的影響並提供專業建議。
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div class="client-question">
+                    <strong>Q: 需要調整我的保險規劃嗎？</strong>
+                    <p class="mb-0 mt-2 small">A: 讓我們安排時間詳細分析您目前的保障需求，並根據最新情況調整規劃建議。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相關商品推薦 -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>相關商品</h6>
+            </div>
+            <div class="card-body">
+                {% if '長照' in news.title %}
+                    <div class="opportunity-highlight">
+                        <h6>長期照護保險</h6>
+                        <p class="small mb-2">根據新聞趨勢，長照需求持續增加</p>
+                        <button class="btn btn-sm btn-success">了解方案</button>
+                    </div>
+                {% elif '醫療' in news.title %}
+                    <div class="opportunity-highlight">
+                        <h6>醫療保險升級</h6>
+                        <p class="small mb-2">醫療技術進步，保障需要同步升級</p>
+                        <button class="btn btn-sm btn-success">了解方案</button>
+                    </div>
+                {% else %}
+                    <div class="opportunity-highlight">
+                        <h6>個人風險分析</h6>
+                        <p class="small mb-2">根據最新市場變化，重新檢視保障需求</p>
+                        <button class="btn btn-sm btn-success">預約諮詢</button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 業務行動面板 -->
+        <div class="business-action-panel">
+            <h6><i class="fas fa-tools me-2"></i>業務工具</h6>
+            
+            <div class="mb-3">
+                <label class="form-label small">快速分享</label>
+                <div>
+                    <button class="btn btn-success btn-sm quick-share-btn" onclick="shareToLine()">
+                        <i class="fab fa-line me-1"></i>LINE
+                    </button>
+                    <button class="btn btn-primary btn-sm quick-share-btn" onclick="shareToEmail()">
+                        <i class="fas fa-envelope me-1"></i>郵件
+                    </button>
+                    <button class="btn btn-info btn-sm quick-share-btn" onclick="shareToWechat()">
+                        <i class="fab fa-weixin me-1"></i>微信
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small">客戶管理</label>
+                <div>
+                    <button class="btn btn-warning btn-sm quick-share-btn" onclick="addToFollowUp()">
+                        <i class="fas fa-bookmark me-1"></i>加入追蹤
+                    </button>
+                    <button class="btn btn-secondary btn-sm quick-share-btn" onclick="createReminder()">
+                        <i class="fas fa-bell me-1"></i>設提醒
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label small">報告工具</label>
+                <div>
+                    <button class="btn btn-danger btn-sm quick-share-btn" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf me-1"></i>PDF摘要
+                    </button>
+                    <button class="btn btn-dark btn-sm quick-share-btn" onclick="addToReport()">
+                        <i class="fas fa-plus me-1"></i>加入週報
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分享模態框 -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">分享給客戶</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">分享標題</label>
+                    <input type="text" class="form-control" id="shareTitle" value="📰 重要保險新聞">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">分享內容</label>
+                    <textarea class="form-control" id="shareContent" rows="5">{{ news.title }}
+
+{{ news.summary[:100] }}...
+
+如有任何疑問，歡迎隨時聯繫您的保險顧問。</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="confirmShare()">確認分享</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentSharePlatform = '';
+
+function shareToLine() {
+    currentSharePlatform = 'line';
+    $('#shareModal').modal('show');
+}
+
+function shareToEmail() {
+    currentSharePlatform = 'email';
+    document.getElementById('shareTitle').value = '保險新聞快報：{{ news.title[:30] }}...';
+    $('#shareModal').modal('show');
+}
+
+function shareToWechat() {
+    currentSharePlatform = 'wechat';
+    $('#shareModal').modal('show');
+}
+
+function confirmShare() {
+    const title = document.getElementById('shareTitle').value;
+    const content = document.getElementById('shareContent').value;
+    
+    // 這裡可以整合實際的分享API
+    alert(`已準備分享到${currentSharePlatform}:\n\n${title}\n\n${content}`);
+    $('#shareModal').modal('hide');
+}
+
+function addToFollowUp() {
+    // 加入追蹤清單
+    fetch('/business/api/add-follow-up', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            news_id: {{ news.id }},
+            title: '{{ news.title }}'
+        })
+    }).then(response => {
+        if (response.ok) {
+            alert('已加入追蹤清單');
+        }
+    });
+}
+
+function createReminder() {
+    const reminderDate = prompt('請設定提醒日期 (YYYY-MM-DD):');
+    if (reminderDate) {
+        // 創建提醒
+        fetch('/business/api/create-reminder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                news_id: {{ news.id }},
+                reminder_date: reminderDate,
+                title: '{{ news.title }}'
+            })
+        }).then(response => {
+            if (response.ok) {
+                alert('提醒已設定');
+            }
+        });
+    }
+}
+
+function generatePDF() {
+    // 生成PDF摘要
+    window.open('/business/tools/pdf-summary/{{ news.id }}', '_blank');
+}
+
+function addToReport() {
+    // 加入週報
+    fetch('/business/api/add-to-report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            news_id: {{ news.id }},
+            title: '{{ news.title }}'
+        })
+    }).then(response => {
+        if (response.ok) {
+            alert('已加入週報');
+        }
+    });
+}
+
+// 增加瀏覽次數
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/v1/news/{{ news.id }}/view', { method: 'POST' });
+});
+</script>
+{% endblock %}

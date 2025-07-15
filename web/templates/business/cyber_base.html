@@ -1,0 +1,189 @@
+{% extends "layout.html" %}
+
+{% block title %}業務員工具 - 賽博朋克風格 - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyberpunk-theme.css') }}">
+<style>
+/* 賽博朋克業務員專用布局 */
+.business-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr 250px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+        "header header header"
+        "sidebar main aside";
+    height: 100vh;
+    gap: 1px;
+}
+
+@media (max-width: 1200px) {
+    .business-layout {
+        grid-template-columns: 250px 1fr;
+        grid-template-areas: 
+            "header header"
+            "sidebar main";
+    }
+    
+    .cyber-aside {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .business-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "header"
+            "main";
+    }
+    
+    .cyber-sidebar {
+        display: none;
+    }
+}
+
+/* 頂部導航樣式 */
+.cyber-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(11, 15, 25, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+}
+
+.cyber-logo {
+    display: flex;
+    align-items: center;
+}
+
+.cyber-menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.cyber-menu a {
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.cyber-menu a:hover, .cyber-menu a.active {
+    background: rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    color: var(--neon-cyan);
+}
+
+/* 動態背景元素 */
+.cyber-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    z-index: -10;
+}
+
+.cyber-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -5;
+}
+
+/* 通用賽博朋克卡片樣式 */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* 霓虹按鈕 */
+.neon-btn {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.neon-btn:hover {
+    background: rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    color: white;
+}
+
+.neon-btn.green {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+.neon-btn.green:hover {
+    background: rgba(57, 255, 20, 0.2);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+}
+
+.neon-btn.purple {
+    border-color: var(--neon-purple);
+    color: var(--neon-purple);
+}
+
+.neon-btn.purple:hover {
+    background: rgba(139, 95, 191, 0.2);
+    box-shadow: 0 0 15px rgba(139, 95, 191, 0.5);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 動態背景 -->
+<div class="cyber-bg"></div>
+<div class="cyber-grid"></div>
+
+<!-- 業務員內容區塊 -->
+<div class="container py-5">
+    {% block business_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cyberpunk-effects.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🤖 啟動賽博朋克視覺效果系統...');
+    
+    // 初始化賽博朋克效果
+    if (typeof CyberpunkEffects !== 'undefined') {
+        window.cyberpunkEffects = new CyberpunkEffects();
+    } else {
+        console.log('載入賽博朋克效果...');
+        // 動態載入賽博朋克特效
+        const script = document.createElement('script');
+        script.src = '/static/js/cyberpunk-effects.js';
+        document.head.appendChild(script);
+    }
+});
+</script>
+{% block business_scripts %}{% endblock %}
+{% endblock %}

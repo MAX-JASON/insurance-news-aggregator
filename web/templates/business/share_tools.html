@@ -1,0 +1,572 @@
+{% extends "business/base.html" %}
+
+{% block title %}分享工具 - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+.share-card {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.share-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #00ffff22 0%, #ff00ff22 100%);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+}
+
+.share-template {
+    background: rgba(0, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.share-template-line {
+    background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 255, 0.05) 100%);
+    border-left: 4px solid #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.share-template-email {
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.1) 0%, rgba(0, 255, 255, 0.05) 100%);
+    border-left: 4px solid #0096ff;
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+}
+
+.share-template-wechat {
+    background: linear-gradient(135deg, rgba(103, 194, 58, 0.1) 0%, rgba(0, 255, 255, 0.05) 100%);
+    border-left: 4px solid #67c23a;
+    box-shadow: 0 0 10px rgba(103, 194, 58, 0.3);
+}
+
+.share-action-btn {
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #00ffff22 0%, #ff00ff22 100%);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    color: #00ffff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.share-action-btn:hover {
+    background: linear-gradient(135deg, #00ffff44 0%, #ff00ff44 100%);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    color: #ffffff;
+}
+
+.copy-btn {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+}
+
+.preview-container {
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.phone-header {
+    background: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.chat-bubble {
+    background: #00B900;
+    color: white;
+    border-radius: 18px;
+    padding: 10px 15px;
+    margin: 10px;
+    max-width: 70%;
+    position: relative;
+}
+
+.form-container {
+    border-radius: 10px;
+    background: #f8f9fa;
+    padding: 1.5rem;
+}
+
+.share-preview {
+    margin-bottom: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('business.dashboard') }}">業務員儀表板</a></li>
+            <li class="breadcrumb-item active" aria-current="page">分享工具</li>
+        </ol>
+    </nav>
+    
+    <div class="share-card">
+        <div class="share-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-share-alt me-3"></i>新聞分享工具</h2>
+                    <p class="mb-0">為您的客戶量身訂製專業資訊</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-1"></i>返回
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h4>{{ news.title }}</h4>
+                    <div class="text-muted">
+                        <i class="fas fa-newspaper me-1"></i>
+                        {% if news.source %}{{ news.source.name }}{% else %}未知來源{% endif %} | 
+                        <i class="far fa-calendar-alt me-1"></i>
+                        {% if news.published_date %}{{ news.published_date.strftime('%Y-%m-%d') }}{% else %}未知日期{% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge bg-primary">重要度: 
+                        {% if news.importance_score >= 0.8 %}★★★
+                        {% elif news.importance_score >= 0.5 %}★★☆
+                        {% else %}★☆☆
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col">
+                    <h5>新聞摘要</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            {{ news.summary or "無摘要內容" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col">
+                    <h5>業務影響分析</h5>
+                    <div class="alert alert-info">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <strong>可能影響:</strong> {{ business_impact|default('該新聞可能對客戶的保險規劃有一定影響，建議作為參考資訊分享。') }}
+                    </div>
+                </div>
+            </div>
+            
+            <ul class="nav nav-tabs" id="shareTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="line-tab" data-bs-toggle="tab" data-bs-target="#line" type="button" role="tab" aria-controls="line" aria-selected="true">
+                        <i class="fab fa-line me-1"></i>LINE
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab" aria-controls="email" aria-selected="false">
+                        <i class="fas fa-envelope me-1"></i>電子郵件
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="wechat-tab" data-bs-toggle="tab" data-bs-target="#wechat" type="button" role="tab" aria-controls="wechat" aria-selected="false">
+                        <i class="fab fa-weixin me-1"></i>WeChat
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content p-4" id="shareTabContent">
+                <!-- LINE 分享模板 -->
+                <div class="tab-pane fade show active" id="line" role="tabpanel" aria-labelledby="line-tab" tabindex="0">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="share-template share-template-line">
+                                <button class="btn btn-outline-success btn-sm copy-btn" onclick="copyText('line-text')">
+                                    <i class="fas fa-copy"></i> 複製
+                                </button>
+                                <h6>{{ share_templates.line.title }}</h6>
+                                <div id="line-text">{{ share_templates.line.content }}</div>
+                            </div>
+                            
+                            <div class="form-container">
+                                <h6>自訂LINE訊息</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">標題</label>
+                                    <input type="text" class="form-control" id="line-title" value="{{ share_templates.line.title }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">內容</label>
+                                    <textarea class="form-control" id="line-content" rows="5">{{ share_templates.line.content }}</textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-success" onclick="updateShare('line')">更新訊息</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-center mb-3">LINE 預覽</h6>
+                            <div class="share-preview">
+                                <div class="preview-container">
+                                    <div class="phone-header">
+                                        <i class="fab fa-line me-1"></i> LINE
+                                    </div>
+                                    <div style="background: #fff; padding: 15px;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;" id="line-preview-title">{{ share_templates.line.title }}</div>
+                                        <div class="chat-bubble" id="line-preview-content">
+                                            {{ share_templates.line.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="share('line')">
+                                    <i class="fab fa-line me-1"></i> 分享至LINE
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="exportPDF('line')">
+                                    <i class="fas fa-file-pdf me-1"></i> 匯出PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 電子郵件分享模板 -->
+                <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab" tabindex="0">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="share-template share-template-email">
+                                <button class="btn btn-outline-primary btn-sm copy-btn" onclick="copyText('email-text')">
+                                    <i class="fas fa-copy"></i> 複製
+                                </button>
+                                <h6>主旨: {{ share_templates.email.subject }}</h6>
+                                <div id="email-text">{{ share_templates.email.content }}</div>
+                            </div>
+                            
+                            <div class="form-container">
+                                <h6>自訂電子郵件</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">主旨</label>
+                                    <input type="text" class="form-control" id="email-subject" value="{{ share_templates.email.subject }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">內容</label>
+                                    <textarea class="form-control" id="email-content" rows="7">{{ share_templates.email.content }}</textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary" onclick="updateShare('email')">更新郵件</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-center mb-3">電子郵件預覽</h6>
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <div class="mb-1">
+                                        <strong>寄件者:</strong> 您的業務專員
+                                    </div>
+                                    <div class="mb-1">
+                                        <strong>主旨:</strong> <span id="email-preview-subject">{{ share_templates.email.subject }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body" id="email-preview-content">
+                                    {{ share_templates.email.content|nl2br }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <button class="btn btn-primary" onclick="share('email')">
+                                    <i class="fas fa-envelope me-1"></i> 透過郵件分享
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="exportPDF('email')">
+                                    <i class="fas fa-file-pdf me-1"></i> 匯出PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- WeChat 分享模板 -->
+                <div class="tab-pane fade" id="wechat" role="tabpanel" aria-labelledby="wechat-tab" tabindex="0">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="share-template share-template-wechat">
+                                <button class="btn btn-outline-success btn-sm copy-btn" onclick="copyText('wechat-text')">
+                                    <i class="fas fa-copy"></i> 複製
+                                </button>
+                                <h6>{{ share_templates.wechat.title }}</h6>
+                                <div id="wechat-text">{{ share_templates.wechat.content }}</div>
+                            </div>
+                            
+                            <div class="form-container">
+                                <h6>自訂WeChat訊息</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">標題</label>
+                                    <input type="text" class="form-control" id="wechat-title" value="{{ share_templates.wechat.title }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">內容</label>
+                                    <textarea class="form-control" id="wechat-content" rows="5">{{ share_templates.wechat.content }}</textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-success" onclick="updateShare('wechat')">更新訊息</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-center mb-3">WeChat 預覽</h6>
+                            <div class="share-preview">
+                                <div class="preview-container" style="background: #ededed;">
+                                    <div class="phone-header" style="background: #66C655;">
+                                        <i class="fab fa-weixin me-1"></i> WeChat
+                                    </div>
+                                    <div style="padding: 15px;">
+                                        <div class="chat-bubble" style="background: #a0e759; margin-left: auto;" id="wechat-preview-content">
+                                            <div style="font-weight: bold; margin-bottom: 5px;" id="wechat-preview-title">{{ share_templates.wechat.title }}</div>
+                                            {{ share_templates.wechat.content }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="share('wechat')">
+                                    <i class="fab fa-weixin me-1"></i> 分享至WeChat
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="exportPDF('wechat')">
+                                    <i class="fas fa-file-pdf me-1"></i> 匯出PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Tab Fixes for improved accessibility -->
+<script src="{{ url_for('static', filename='js/tab-fixes.js') }}"></script>
+
+<script>
+// 複製文字
+function copyText(elementId) {
+    const copyText = document.getElementById(elementId);
+    const textArea = document.createElement('textarea');
+    textArea.value = copyText.textContent;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    // 顯示提示
+    showAlert('已複製至剪貼簿', 'success');
+}
+
+// 顯示通知
+function showAlert(message, type='success') {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type} alert-dismissible fade show fixed-top m-3`;
+    alertBox.setAttribute('role', 'alert');
+    alertBox.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alertBox);
+    
+    // 3秒後自動消失
+    setTimeout(() => {
+        alertBox.remove();
+    }, 3000);
+}
+
+// 更新分享內容
+function updateShare(type) {
+    if (type === 'line') {
+        const title = document.getElementById('line-title').value;
+        const content = document.getElementById('line-content').value;
+        document.getElementById('line-preview-title').textContent = title;
+        document.getElementById('line-preview-content').innerHTML = content.replace(/\n/g, '<br>');
+    } else if (type === 'email') {
+        const subject = document.getElementById('email-subject').value;
+        const content = document.getElementById('email-content').value;
+        document.getElementById('email-preview-subject').textContent = subject;
+        document.getElementById('email-preview-content').innerHTML = content.replace(/\n/g, '<br>');
+    } else if (type === 'wechat') {
+        const title = document.getElementById('wechat-title').value;
+        const content = document.getElementById('wechat-content').value;
+        document.getElementById('wechat-preview-title').textContent = title;
+        document.getElementById('wechat-preview-content').innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 5px;">${title}</div>
+            ${content.replace(/\n/g, '<br>')}
+        `;
+    }
+    showAlert('內容已更新', 'info');
+}
+
+// 分享功能
+function share(type) {
+    // 實際應用中，這裡會與後端API互動來實現分享功能
+    if (type === 'line') {
+        const title = document.getElementById('line-title').value;
+        const content = document.getElementById('line-content').value;
+        // 這裡模擬分享到LINE的功能
+        showAlert('已準備LINE分享內容，實際功能需要與LINE API整合', 'info');
+    } else if (type === 'email') {
+        const subject = document.getElementById('email-subject').value;
+        const content = document.getElementById('email-content').value;
+        // 創建mailto連結
+        const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(content)}`;
+        window.open(mailtoLink);
+    } else if (type === 'wechat') {
+        showAlert('已準備WeChat分享內容，實際功能需要與WeChat API整合', 'info');
+    }
+}
+
+// 匯出PDF功能
+function exportPDF(type) {
+    // 準備內容
+    let title, content, newsTitle, newsSource, newsDate, newsImportance;
+    const newsElement = document.querySelector('.row.mb-4 h4');
+    const newsSourceElement = document.querySelector('.row.mb-4 .text-muted');
+    const summaryElement = document.querySelector('.row.mb-4 .card-body');
+    const importanceElement = document.querySelector('.badge.bg-primary');
+    
+    newsTitle = newsElement ? newsElement.textContent.trim() : '';
+    newsSource = newsSourceElement ? newsSourceElement.textContent.trim() : '';
+    const summaryContent = summaryElement ? summaryElement.textContent.trim() : '';
+    newsImportance = importanceElement ? importanceElement.textContent.trim() : '';
+    
+    if (type === 'line') {
+        title = document.getElementById('line-title').value;
+        content = document.getElementById('line-content').value;
+    } else if (type === 'email') {
+        title = document.getElementById('email-subject').value;
+        content = document.getElementById('email-content').value;
+    } else if (type === 'wechat') {
+        title = document.getElementById('wechat-title').value;
+        content = document.getElementById('wechat-content').value;
+    }
+    
+    // 顯示載入中提示
+    showAlert('正在生成PDF...', 'info');
+    
+    // 呼叫後端API生成PDF
+    fetch('/business/api/generate-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: type,
+            title: title,
+            content: content,
+            newsTitle: newsTitle,
+            newsSource: newsSource,
+            newsSummary: summaryContent,
+            newsImportance: newsImportance
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('無法生成PDF');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // 建立一個暫時的下載連結
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        // 生成檔名
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        a.download = `保險新聞分享_${timestamp}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        showAlert('PDF已成功生成並下載', 'success');
+    })
+    .catch(error => {
+        console.error('PDF生成錯誤:', error);
+        
+        // 替代方案：使用客戶端生成解決方案
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; padding: 10px 0; border-bottom: 2px solid #3498db;">
+                    <h1 style="color: #3498db;">保險新聞專業分享</h1>
+                </div>
+                <div style="margin: 20px 0;">
+                    <h2>${newsTitle}</h2>
+                    <p style="color: #666;">來源: ${newsSource}</p>
+                    <p style="color: #666;">重要性: ${newsImportance}</p>
+                </div>
+                <div style="border-left: 4px solid #3498db; padding-left: 15px; margin: 20px 0;">
+                    <h3>新聞摘要</h3>
+                    <p>${summaryContent}</p>
+                </div>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px;">
+                    <h3>${title}</h3>
+                    <div>${content.replace(/\n/g, '<br>')}</div>
+                </div>
+                <div style="margin-top: 30px; font-style: italic; color: #666;">
+                    <p>此份資料由您的保險業務專員提供</p>
+                    <p>如有任何問題，歡迎隨時聯繫</p>
+                </div>
+            </div>
+        `;
+        
+        // 使用打印功能作為備用方案
+        const printWindow = window.open('', '_blank');
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>保險新聞專業分享 - ${newsTitle}</title>
+            </head>
+            <body>
+                ${element.innerHTML}
+                <` + `script>
+                window.onload = function() {
+                    window.print();
+                }
+                </` + `script>
+            </body>
+            </html>
+        `;
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        showAlert('PDF伺服器功能暫不可用，已使用打印預覽作為替代方案', 'warning');
+    });
+}
+
+// 過濾器，將\n轉為<br>
+function nl2br(text) {
+    return text.replace(/\n/g, '<br>');
+}
+</script>
+{% endblock %}

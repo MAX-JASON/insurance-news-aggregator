@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}智能分析儀表板 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5">
+                <i class="fas fa-chart-line text-primary me-3"></i>
+                智能分析儀表板
+            </h1>
+            <p class="lead text-muted">
+                透過數據分析，更深入理解台灣保險市場趨勢與輿情
+            </p>
+        </div>
+    </div>
+
+    <!-- 儀表板卡片區域 -->
+    <div class="row">
+        <!-- 熱門關鍵詞卡片 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags me-2"></i>熱門關鍵詞
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="keywordsCloud" style="height: 300px;" class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/analysis/keywords" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-chart-bar me-1"></i>詳細關鍵詞分析
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 趨勢圖表卡片 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>新聞趨勢
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="trendsChart" style="height: 300px;" class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/analysis/trends" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-chart-area me-1"></i>詳細趨勢分析
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 情感分析卡片 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-smile me-2"></i>情感分析
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="sentimentChart" style="height: 300px;" class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/analysis/sentiment" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-heart me-1"></i>詳細情感分析
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分類統計卡片 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>文章聚類
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="clusteringChart" style="height: 300px;" class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/analysis/clustering" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-project-diagram me-1"></i>詳細聚類分析
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分析摘要 -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>分析摘要
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border-start border-primary border-4 mb-3">
+                        <h6 class="fw-bold">近期熱門議題</h6>
+                        <p>保險業數位轉型、COVID-19保單理賠、新型醫療保險商品等議題受到高度關注。</p>
+                    </div>
+                    
+                    <div class="alert alert-light border-start border-success border-4 mb-3">
+                        <h6 class="fw-bold">市場情感趨勢</h6>
+                        <p>整體保險市場新聞情感偏向中性偏正面，近期關於保險科技創新的報導呈現明顯正面趨勢。</p>
+                    </div>
+                    
+                    <div class="alert alert-light border-start border-info border-4">
+                        <h6 class="fw-bold">數據建議</h6>
+                        <p>建議關注健康保險和投資型保險的相關新聞，這兩個領域呈現明顯增長趨勢。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+// 模擬載入分析資料 (因為API可能尚未完整實現)
+document.addEventListener('DOMContentLoaded', function() {
+    // 顯示模擬資料，實際上應該從API獲取
+    setTimeout(() => {
+        try {
+            renderMockData();
+        } catch (err) {
+            console.error('無法渲染分析儀表板:', err);
+            showFallbackData();
+        }
+    }, 1000);
+});
+
+// 渲染模擬資料
+function renderMockData() {
+    // 關鍵詞雲
+    const keywordsContainer = document.getElementById('keywordsCloud');
+    keywordsContainer.innerHTML = `
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <span class="badge bg-primary fs-5 p-2">保險科技</span>
+            <span class="badge bg-info fs-6 p-2">健康保險</span>
+            <span class="badge bg-success fs-4 p-2">數位轉型</span>
+            <span class="badge bg-warning text-dark fs-6 p-2">車險</span>
+            <span class="badge bg-danger fs-5 p-2">理賠</span>
+            <span class="badge bg-secondary fs-6 p-2">保險法規</span>
+            <span class="badge bg-primary fs-6 p-2">保障</span>
+            <span class="badge bg-info fs-5 p-2">投資型保險</span>
+            <span class="badge bg-success fs-6 p-2">保險公司</span>
+            <span class="badge bg-dark fs-4 p-2">金管會</span>
+        </div>
+    `;
+    
+    // 趨勢圖表
+    const trendsChart = document.getElementById('trendsChart');
+    trendsChart.innerHTML = '<canvas></canvas>';
+    const trendsCtx = trendsChart.querySelector('canvas').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            datasets: [{
+                label: '新聞量',
+                data: [65, 59, 80, 81, 56, 85],
+                borderColor: 'rgba(40, 167, 69, 0.8)',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // 情感分析
+    const sentimentChart = document.getElementById('sentimentChart');
+    sentimentChart.innerHTML = '<canvas></canvas>';
+    const sentimentCtx = sentimentChart.querySelector('canvas').getContext('2d');
+    new Chart(sentimentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['正面', '中性', '負面'],
+            datasets: [{
+                data: [45, 40, 15],
+                backgroundColor: ['#28a745', '#17a2b8', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // 聚類分析
+    const clusteringChart = document.getElementById('clusteringChart');
+    clusteringChart.innerHTML = '<canvas></canvas>';
+    const clusteringCtx = clusteringChart.querySelector('canvas').getContext('2d');
+    new Chart(clusteringCtx, {
+        type: 'bar',
+        data: {
+            labels: ['產險', '壽險', '健康險', '投資型', '法規', '其他'],
+            datasets: [{
+                label: '文章數量',
+                data: [25, 30, 15, 20, 10, 5],
+                backgroundColor: [
+                    '#007bff', '#28a745', '#17a2b8', 
+                    '#ffc107', '#dc3545', '#6c757d'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// 顯示後備數據
+function showFallbackData() {
+    const containers = [
+        'keywordsCloud', 'trendsChart', 'sentimentChart', 'clusteringChart'
+    ];
+    
+    containers.forEach(id => {
+        const container = document.getElementById(id);
+        container.innerHTML = `
+            <div class="text-center p-4">
+                <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
+                <p class="mb-0">資料載入失敗，請稍後再試</p>
+            </div>
+        `;
+    });
+}
+</script>
+{% endblock %}

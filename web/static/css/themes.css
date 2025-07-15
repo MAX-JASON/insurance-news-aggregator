@@ -1,0 +1,246 @@
+/**
+ * 主題樣式 - 保險新聞聚合平台
+ * Theme Styles - Insurance News Aggregator
+ */
+
+/* 基本樣式重置和變量 */
+:root {
+    --primary: #0d6efd;
+    --secondary: #6c757d;
+    --success: #198754;
+    --info: #0dcaf0;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --body-bg: #ffffff;
+    --body-color: #212529;
+    --header-bg: var(--primary);
+    --header-color: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #dee2e6;
+    --hover-bg: #f8f9fa;
+    --sidebar-bg: #f8f9fa;
+    --footer-bg: #f8f9fa;
+    --footer-color: #6c757d;
+    --font-base: 16px;
+    --border-radius: 0.25rem;
+    --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+    --shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+    --transition-speed: 0.3s;
+}
+
+/* 淺色主題 */
+.theme-light {
+    --body-bg: #ffffff;
+    --body-color: #212529;
+    --header-bg: #0d6efd;
+    --header-color: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #dee2e6;
+    --hover-bg: #f8f9fa;
+    --sidebar-bg: #f8f9fa;
+    --footer-bg: #f8f9fa;
+    --footer-color: #6c757d;
+}
+
+/* 深色主題 */
+.theme-dark {
+    --body-bg: #212529;
+    --body-color: #f8f9fa;
+    --header-bg: #343a40;
+    --header-color: #ffffff;
+    --card-bg: #2c3034;
+    --card-border: #495057;
+    --hover-bg: #343a40;
+    --sidebar-bg: #343a40;
+    --footer-bg: #343a40;
+    --footer-color: #adb5bd;
+}
+
+/* 藍色主題 */
+.theme-blue {
+    --body-bg: #f0f8ff;
+    --body-color: #212529;
+    --header-bg: #0055a4;
+    --header-color: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #b6d4fe;
+    --hover-bg: #e6f2ff;
+    --sidebar-bg: #e6f2ff;
+    --footer-bg: #cfe2ff;
+    --footer-color: #084298;
+}
+
+/* 專業主題 */
+.theme-professional {
+    --body-bg: #ecf0f1;
+    --body-color: #2c3e50;
+    --header-bg: #2c3e50;
+    --header-color: #ecf0f1;
+    --card-bg: #ffffff;
+    --card-border: #bdc3c7;
+    --hover-bg: #f5f9fa;
+    --sidebar-bg: #f5f9fa;
+    --footer-bg: #2c3e50;
+    --footer-color: #ecf0f1;
+}
+
+/* 應用主題變量到元素 */
+body {
+    background-color: var(--body-bg);
+    color: var(--body-color);
+    font-size: var(--font-base);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.navbar {
+    background-color: var(--header-bg) !important;
+    color: var(--header-color);
+}
+
+.navbar-brand {
+    color: var(--header-color) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--header-color) !important;
+}
+
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+}
+
+.dropdown-item {
+    color: var(--body-color);
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: var(--hover-bg);
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.list-group-item {
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    color: var(--body-color);
+}
+
+.table {
+    color: var(--body-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--body-color);
+}
+
+.modal-header, .modal-footer {
+    border-color: var(--card-border);
+}
+
+.theme-dark .btn-close {
+    filter: invert(1);
+}
+
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-color);
+}
+
+/* 緊湊視圖 */
+.compact-view .card-body {
+    padding: 0.75rem;
+}
+
+.compact-view .table td, 
+.compact-view .table th {
+    padding: 0.5rem;
+}
+
+.compact-view .form-control {
+    padding: 0.25rem 0.5rem;
+}
+
+.compact-view .mb-3, 
+.compact-view .mb-4 {
+    margin-bottom: 0.5rem !important;
+}
+
+/* 高對比度模式 */
+.high-contrast-mode {
+    --primary: #0000ff;
+    --danger: #ff0000;
+    --success: #008000;
+    --warning: #ff8c00;
+    --info: #0066cc;
+    --body-bg: #ffffff;
+    --body-color: #000000;
+    --card-bg: #ffffff;
+    --card-border: #000000;
+}
+
+.high-contrast-mode .card,
+.high-contrast-mode .btn {
+    border-width: 2px;
+}
+
+.high-contrast-mode .text-muted {
+    color: #404040 !important;
+}
+
+/* 主題選擇器樣式 */
+.theme-option {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.theme-option:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.theme-option.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* 設置頁面專用樣式 */
+.settings-tab-content {
+    min-height: 300px;
+}
+
+/* 全局通知樣式 */
+#global-toast-container {
+    z-index: 1090;
+}
+
+/* 全局動畫效果 */
+.animate-fade {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

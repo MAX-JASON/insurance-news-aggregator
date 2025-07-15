@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爬蟲控制面板 - 保險新聞聚合器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-running { background-color: #28a745; }
+        .status-idle { background-color: #6c757d; }
+        .status-error { background-color: #dc3545; }
+        
+        .metric-card {
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .log-entry {
+            border-left: 3px solid #e9ecef;
+            margin-bottom: 10px;
+        }
+        .log-entry.success { border-left-color: #28a745; }
+        .log-entry.error { border-left-color: #dc3545; }
+        
+        .btn-crawler {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3">
+                        <i class="fas fa-robot me-2"></i>
+                        爬蟲控制面板
+                    </h1>
+                    <div>
+                        <a href="/" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-home"></i> 返回首頁
+                        </a>
+                        <button class="btn btn-primary" onclick="refreshAll()">
+                            <i class="fas fa-sync-alt"></i> 重新整理
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制區域 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-play-circle me-2"></i>
+                            爬蟲控制
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <span class="status-indicator status-idle" id="crawler-status-indicator"></span>
+                                    <span id="crawler-status-text">待機中</span>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-success btn-crawler" onclick="startCrawler(true)">
+                                        <i class="fas fa-play"></i> 啟動模擬爬蟲
+                                    </button>
+                                    <button type="button" class="btn btn-info btn-crawler" onclick="startCrawler(false)">
+                                        <i class="fas fa-rss"></i> 啟動RSS爬蟲
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="last-crawl-info">
+                                    <small class="text-muted">最後爬取時間: 無</small>
+                                </div>
+                                <div id="crawler-stats" class="mt-2">
+                                    <!-- 統計信息 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 統計信息 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                        <h3 class="mb-0" id="total-news">-</h3>
+                        <p class="text-muted mb-0">總新聞數</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-rss fa-2x text-info mb-2"></i>
+                        <h3 class="mb-0" id="total-sources">-</h3>
+                        <p class="text-muted mb-0">新聞來源</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tags fa-2x text-warning mb-2"></i>
+                        <h3 class="mb-0" id="total-categories">-</h3>
+                        <p class="text-muted mb-0">新聞分類</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus-circle fa-2x text-success mb-2"></i>
+                        <h3 class="mb-0" id="today-news">-</h3>
+                        <p class="text-muted mb-0">今日新增</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 爬取日誌 -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-alt me-2"></i>
+                            爬取日誌
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="crawl-logs">
+                            <p class="text-muted">載入中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong class="me-auto">通知</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-body">
+                <!-- 通知內容 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 顯示通知
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastBody = document.getElementById('toast-body');
+            toastBody.textContent = message;
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // 啟動爬蟲
+        async function startCrawler(useMock) {
+            try {
+                updateCrawlerStatus(true, '爬取中...');
+                
+                const response = await fetch('/api/v1/crawler/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        use_mock: useMock
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showToast(`爬蟲啟動成功！${result.data.message}`, 'success');
+                    setTimeout(refreshAll, 2000); // 2秒後刷新數據
+                } else {
+                    showToast(`爬蟲啟動失敗：${result.message}`, 'error');
+                }
+                
+                updateCrawlerStatus(false, '待機中');
+                
+            } catch (error) {
+                console.error('啟動爬蟲失敗:', error);
+                showToast('啟動爬蟲失敗：網絡錯誤', 'error');
+                updateCrawlerStatus(false, '待機中');
+            }
+        }
+
+        // 更新爬蟲狀態顯示
+        function updateCrawlerStatus(isRunning, statusText) {
+            const indicator = document.getElementById('crawler-status-indicator');
+            const text = document.getElementById('crawler-status-text');
+            
+            indicator.className = `status-indicator ${isRunning ? 'status-running' : 'status-idle'}`;
+            text.textContent = statusText;
+        }
+
+        // 載入統計信息
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/v1/stats');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    document.getElementById('total-news').textContent = data.total_news;
+                    document.getElementById('total-sources').textContent = data.total_sources;
+                    document.getElementById('total-categories').textContent = data.total_categories;
+                    document.getElementById('today-news').textContent = data.today_news;
+                }
+            } catch (error) {
+                console.error('載入統計信息失敗:', error);
+            }
+        }
+
+        // 載入爬取日誌
+        async function loadCrawlLogs() {
+            try {
+                const response = await fetch('/api/v1/stats');
+                const result = await response.json();
+                
+                if (result.status === 'success' && result.data.recent_crawls) {
+                    const logs = result.data.recent_crawls;
+                    const container = document.getElementById('crawl-logs');
+                    
+                    if (logs.length === 0) {
+                        container.innerHTML = '<p class="text-muted">暫無爬取記錄</p>';
+                        return;
+                    }
+                    
+                    container.innerHTML = logs.map(log => `
+                        <div class="log-entry ${log.success ? 'success' : 'error'} p-3 bg-white rounded mb-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>${log.source}</strong>
+                                <small class="text-muted">${new Date(log.created_at).toLocaleString('zh-TW')}</small>
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge ${log.success ? 'bg-success' : 'bg-danger'}">
+                                    ${log.success ? '成功' : '失敗'}
+                                </span>
+                                ${log.success ? 
+                                    `發現 ${log.news_found} 則新聞，新增 ${log.news_new} 則` :
+                                    `錯誤: ${log.error_message || '未知錯誤'}`
+                                }
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('載入爬取日誌失敗:', error);
+                document.getElementById('crawl-logs').innerHTML = '<p class="text-danger">載入失敗</p>';
+            }
+        }
+
+        // 刷新所有數據
+        function refreshAll() {
+            loadStats();
+            loadCrawlLogs();
+        }
+
+        // 頁面載入完成後執行
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAll();
+            
+            // 每30秒自動刷新一次
+            setInterval(refreshAll, 30000);
+        });
+    </script>
+</body>
+</html>

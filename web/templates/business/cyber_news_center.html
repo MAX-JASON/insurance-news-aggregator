@@ -1,0 +1,913 @@
+{% extends "business/base.html" %}
+
+{% block title %}業務員新聞中心 - 賽博朋克風格{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyber_crawler.css') }}">
+<style>
+/* 業務員專用布局 */
+.business-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr 250px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+        "header header header"
+        "sidebar main aside";
+    height: 100vh;
+    gap: 1px;
+}
+
+.cyber-header {
+    grid-area: header;
+    background: rgba(0, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cyber-main {
+    grid-area: main;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+    background: var(--bg-primary);
+}
+
+.cyber-aside {
+    grid-area: aside;
+    background: var(--bg-secondary);
+    backdrop-filter: blur(15px);
+    border-left: 1px solid rgba(0, 212, 255, 0.3);
+    padding: var(--spacing-md);
+    overflow-y: auto;
+}
+
+/* 客戶列表 */
+.client-list {
+    margin-bottom: var(--spacing-lg);
+}
+
+.client-item {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    cursor: pointer;
+    transition: all var(--transition-normal) ease;
+    position: relative;
+}
+
+.client-item:hover {
+    background: rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+.client-item.active {
+    border-color: var(--neon-green);
+    background: rgba(57, 255, 20, 0.1);
+}
+
+.client-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    margin-right: var(--spacing-sm);
+}
+
+/* 新聞優先級指示器 */
+.priority-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+}
+
+.priority-critical {
+    background: var(--neon-pink);
+    animation: criticalPulse 1s ease-in-out infinite;
+}
+
+.priority-high {
+    background: var(--neon-orange);
+}
+
+.priority-medium {
+    background: var(--neon-blue);
+}
+
+.priority-low {
+    background: var(--neon-green);
+}
+
+@keyframes criticalPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+/* 業務機會提醒 */
+.opportunity-alert {
+    background: linear-gradient(45deg, var(--neon-pink), var(--neon-orange));
+    border: none;
+    color: white;
+    padding: var(--spacing-sm);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-md);
+    animation: opportunityGlow 2s ease-in-out infinite;
+}
+
+@keyframes opportunityGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 7, 58, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(255, 7, 58, 0.6); }
+}
+
+/* 快速操作面板 */
+.quick-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.action-button {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: var(--spacing-sm);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-normal) ease;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.action-button:hover {
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+/* 拖拽效果 */
+.news-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    z-index: 1000;
+}
+
+.drop-zone {
+    border: 2px dashed var(--neon-green);
+    background: rgba(57, 255, 20, 0.1);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+    text-align: center;
+    color: var(--neon-green);
+    margin-bottom: var(--spacing-md);
+    opacity: 0;
+    transition: opacity var(--transition-normal) ease;
+}
+
+.drop-zone.active {
+    opacity: 1;
+}
+
+/* 統計儀表板 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+}
+
+.stat-trend {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    font-size: 0.8rem;
+}
+
+.trend-up {
+    color: var(--neon-green);
+}
+
+.trend-down {
+    color: var(--neon-pink);
+}
+
+/* 響應式設計 */
+@media (max-width: 1200px) {
+    .business-layout {
+        grid-template-columns: 250px 1fr;
+        grid-template-areas: 
+            "header header"
+            "sidebar main";
+    }
+    
+    .cyber-aside {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .business-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "header"
+            "main";
+    }
+    
+    .cyber-sidebar {
+        display: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}
+
+{% block business_content %}
+<div class="business-layout">
+    <!-- 頁面標題 -->
+    <div class="cyber-header">
+        <div class="d-flex align-items-center">
+            <h1 class="nav-brand" data-typing>業務員新聞中心</h1>
+            <span class="badge bg-primary ms-3">CYBER MODE</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="search-container">
+                <input type="text" class="form-control bg-transparent text-light border-info" 
+                       placeholder="智能搜索..." id="globalSearch">
+            </div>
+            <button class="neon-btn purple" onclick="toggleFullscreen()">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="neon-btn green" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 左側邊欄 - 客戶管理 -->
+    <div class="cyber-sidebar">
+        <h3 class="text-cyan mb-3">
+            <i class="fas fa-users me-2"></i>客戶列表
+        </h3>
+        
+        <!-- 客戶統計 -->
+        <div class="glass-card mb-3">
+            <div class="d-flex justify-content-between">
+                <span>活躍客戶</span>
+                <span class="text-success">24</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>待跟進</span>
+                <span class="text-warning">8</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>本週新增</span>
+                <span class="text-info">3</span>
+            </div>
+        </div>
+        
+        <!-- 客戶列表 -->
+        <div class="client-list">
+            <div class="client-item active" data-client-id="1">
+                <div class="client-avatar">張</div>
+                <span>張美玲</span>
+                <div class="priority-indicator priority-high"></div>
+            </div>
+            <div class="client-item" data-client-id="2">
+                <div class="client-avatar">李</div>
+                <span>李志明</span>
+                <div class="priority-indicator priority-medium"></div>
+            </div>
+            <div class="client-item" data-client-id="3">
+                <div class="client-avatar">王</div>
+                <span>王小華</span>
+                <div class="priority-indicator priority-critical"></div>
+            </div>
+        </div>
+        
+        <!-- 快速篩選 -->
+        <h4 class="text-cyan mb-2">快速篩選</h4>
+        <div class="d-grid gap-2">
+            <button class="action-button" data-filter="today">今日新聞</button>
+            <button class="action-button" data-filter="important">重要新聞</button>
+            <button class="action-button" data-filter="opportunity">商機新聞</button>
+            <button class="action-button" data-filter="saved">已收藏</button>
+        </div>
+    </div>
+    
+    <!-- 主要內容區 -->
+    <div class="cyber-main">
+        <!-- 業務機會提醒 -->
+        <div class="opportunity-alert" id="opportunityAlert" style="display: none;">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>業務機會提醒</h5>
+            <p id="opportunityText"></p>
+        </div>
+        
+        <!-- 統計面板 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">156</div>
+                <div class="stat-label">今日新聞</div>
+                <div class="stat-trend trend-up">+12%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">23</div>
+                <div class="stat-label">重要新聞</div>
+                <div class="stat-trend trend-up">+8%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">業務機會</div>
+                <div class="stat-trend trend-down">-2</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">45</div>
+                <div class="stat-label">已分享</div>
+                <div class="stat-trend trend-up">+15%</div>
+            </div>
+        </div>
+        
+        <!-- 快速操作 -->
+        <div class="quick-actions">
+            <button class="action-button" onclick="selectAll()">全選</button>
+            <button class="action-button" onclick="shareSelected()">批量分享</button>
+            <button class="action-button" onclick="markImportant()">標記重要</button>
+            <button class="action-button" onclick="exportPDF()">匯出PDF</button>
+        </div>
+        
+        <!-- 拖拽區域 -->
+        <div class="drop-zone" id="shareDropZone">
+            <i class="fas fa-share-alt fa-2x mb-2"></i>
+            <div>拖拽新聞到此處快速分享</div>
+        </div>
+        
+        <!-- 新聞列表 -->
+        <div id="newsList">
+            <!-- 新聞項目會通過JavaScript動態載入 -->
+        </div>
+        
+        <!-- 載入更多 -->
+        <div class="text-center mt-4">
+            <button class="neon-btn" id="loadMoreBtn">載入更多</button>
+        </div>
+    </div>
+    
+    <!-- 右側邊欄 - 快速工具 -->
+    <div class="cyber-aside">
+        <h4 class="text-cyan mb-3">
+            <i class="fas fa-tools me-2"></i>快速工具
+        </h4>
+        
+        <!-- 新聞預覽 -->
+        <div class="glass-card mb-3" id="newsPreview" style="display: none;">
+            <h5 class="text-info">新聞預覽</h5>
+            <div id="previewContent"></div>
+            <div class="mt-2">
+                <button class="neon-btn btn-sm green" onclick="sharePreview()">分享</button>
+                <button class="neon-btn btn-sm purple" onclick="savePreview()">收藏</button>
+            </div>
+        </div>
+        
+        <!-- AI助手 -->
+        <div class="glass-card mb-3">
+            <h5 class="text-purple">
+                <i class="fas fa-robot me-2"></i>AI助手
+            </h5>
+            <div class="mb-2">
+                <small class="text-secondary">智能分析建議</small>
+            </div>
+            <div id="aiSuggestions">
+                <div class="alert alert-info">
+                    <small>基於客戶張美玲的投保記錄，建議關注醫療險相關新聞</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 今日任務 -->
+        <div class="glass-card">
+            <h5 class="text-orange">
+                <i class="fas fa-tasks me-2"></i>今日任務
+            </h5>
+            <div class="task-list">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>跟進王小華</span>
+                    <input type="checkbox" class="form-check-input">
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>準備提案書</span>
+                    <input type="checkbox" class="form-check-input" checked>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>客戶回訪</span>
+                    <input type="checkbox" class="form-check-input">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cyberpunk-effects.js') }}"></script>
+<script src="{{ url_for('static', filename='js/cyber_crawler.js') }}"></script>
+<script>
+// 業務員新聞中心管理器
+class BusinessNewsCenter {
+    constructor() {
+        this.selectedNews = new Set();
+        this.currentClient = null;
+        this.newsData = [];
+        this.init();
+    }
+    
+    init() {
+        this.loadNews();
+        this.bindEvents();
+        this.startRealTimeUpdates();
+    }
+    
+    async loadNews() {
+        try {
+            // 模擬API調用
+            const response = await fetch('/business/api/cyber-news');
+            if (response.ok) {
+                this.newsData = await response.json();
+            } else {
+                // 使用模擬數據
+                this.newsData = this.generateMockNews();
+            }
+            this.renderNews();
+        } catch (error) {
+            console.error('載入新聞失敗:', error);
+            this.newsData = { news: this.generateMockNews() };
+            this.renderNews();
+        }
+    }
+    
+    generateMockNews() {
+        const mockNews = [];
+        const titles = [
+            '金管會發布新版保險商品管理辦法',
+            '數位保險平台使用率創新高',
+            '醫療險理賠爭議案例分析',
+            '退休規劃：年金保險趨勢觀察',
+            '保險科技FinTech最新發展'
+        ];
+        
+        for (let i = 0; i < 20; i++) {
+            mockNews.push({
+                id: i + 1,
+                title: titles[i % titles.length] + ` ${i + 1}`,
+                summary: '這是一條重要的保險業新聞摘要，對業務員和客戶都有重要參考價值...',
+                priority: ['low', 'medium', 'high', 'critical'][Math.floor(Math.random() * 4)],
+                timestamp: new Date(Date.now() - Math.random() * 86400000),
+                source: '工商時報',
+                tags: ['醫療險', '數位保險', '法規'],
+                business_impact: Math.random() > 0.5 ? '高' : '中',
+                relevant_clients: ['張美玲', '李志明'].slice(0, Math.floor(Math.random() * 2) + 1)
+            });
+        }
+        return mockNews;
+    }
+    
+    renderNews() {
+        const newsList = document.getElementById('newsList');
+        newsList.innerHTML = '';
+        
+        const newsArray = this.newsData.news || this.newsData;
+        newsArray.forEach(news => {
+            const newsCard = this.createNewsCard(news);
+            newsList.appendChild(newsCard);
+        });
+    }
+    
+    createNewsCard(news) {
+        const card = document.createElement('div');
+        card.className = `news-card news-priority-${news.priority} fade-in`;
+        card.draggable = true;
+        card.dataset.newsId = news.id;
+        
+        card.innerHTML = `
+            <div class="d-flex align-items-start gap-3">
+                <input type="checkbox" class="form-check-input news-checkbox" 
+                       data-news-id="${news.id}">
+                <div class="flex-grow-1">
+                    <h5 class="news-title">${news.title}</h5>
+                    <p class="news-summary text-secondary">${news.summary}</p>
+                    <div class="news-meta">
+                        <span class="text-info">${news.source}</span>
+                        <span class="text-muted">•</span>
+                        <span class="text-muted">${this.formatTime(news.timestamp)}</span>
+                        <span class="text-muted">•</span>
+                        <span class="text-warning">業務影響: ${news.businessImpact}</span>
+                    </div>
+                    <div class="news-tags mt-2">
+                        ${news.tags.map(tag => `<span class="news-tag">${tag}</span>`).join('')}
+                    </div>
+                    ${news.relevantClients.length > 0 ? `
+                        <div class="mt-2">
+                            <small class="text-success">
+                                <i class="fas fa-user-tie me-1"></i>
+                                相關客戶: ${news.relevantClients.join(', ')}
+                            </small>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="news-actions">
+                    <button class="neon-btn btn-sm" onclick="previewNews(${news.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="neon-btn btn-sm green" onclick="shareNews(${news.id})">
+                        <i class="fas fa-share"></i>
+                    </button>
+                    <button class="neon-btn btn-sm purple" onclick="saveNews(${news.id})">
+                        <i class="fas fa-star"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    bindEvents() {
+        // 拖拽事件
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('news-card')) {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.newsId);
+            }
+        });
+        
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('news-card')) {
+                e.target.classList.remove('dragging');
+            }
+        });
+        
+        // 拖拽區域
+        const dropZone = document.getElementById('shareDropZone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            const newsId = e.dataTransfer.getData('text/plain');
+            this.shareNews(newsId);
+        });
+        
+        // 客戶選擇
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.client-item')) {
+                const clientItem = e.target.closest('.client-item');
+                document.querySelectorAll('.client-item').forEach(item => 
+                    item.classList.remove('active'));
+                clientItem.classList.add('active');
+                this.currentClient = clientItem.dataset.clientId;
+                this.updateNewsRelevance();
+            }
+        });
+        
+        // 新聞懸停預覽
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.news-card')) {
+                const newsId = e.target.closest('.news-card').dataset.newsId;
+                this.showQuickPreview(newsId);
+            }
+        });
+        
+        // 全局搜索
+        document.getElementById('globalSearch').addEventListener('input', (e) => {
+            this.filterNews(e.target.value);
+        });
+    }
+    
+    showQuickPreview(newsId) {
+        const news = this.newsData.find(n => n.id == newsId);
+        if (!news) return;
+        
+        const preview = document.getElementById('newsPreview');
+        const content = document.getElementById('previewContent');
+        
+        content.innerHTML = `
+            <h6>${news.title}</h6>
+            <p class="small">${news.summary}</p>
+            <div class="text-muted small">
+                優先級: ${news.priority} | 業務影響: ${news.businessImpact}
+            </div>
+        `;
+        
+        preview.style.display = 'block';
+        preview.dataset.newsId = newsId;
+    }
+    
+    shareNews(newsId) {
+        const news = this.newsData.find(n => n.id == newsId);
+        if (!news) return;
+        
+        // 顯示分享對話框
+        const modal = document.createElement('div');
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-info">
+                        <h5 class="modal-title text-info">分享新聞</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="text-white">${news.title}</h6>
+                        <div class="mt-3">
+                            <label class="form-label text-white">選擇分享方式:</label>
+                            <div class="d-grid gap-2">
+                                <button class="neon-btn" onclick="shareViaLine(${newsId})">
+                                    <i class="fab fa-line me-2"></i>LINE分享
+                                </button>
+                                <button class="neon-btn purple" onclick="shareViaEmail(${newsId})">
+                                    <i class="fas fa-envelope me-2"></i>Email分享
+                                </button>
+                                <button class="neon-btn green" onclick="shareViaPDF(${newsId})">
+                                    <i class="fas fa-file-pdf me-2"></i>PDF匯出
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    updateNewsRelevance() {
+        // 根據選中的客戶更新新聞相關性顯示
+        document.querySelectorAll('.news-card').forEach(card => {
+            const newsId = card.dataset.newsId;
+            const news = this.newsData.find(n => n.id == newsId);
+            
+            if (news && news.relevantClients.includes(this.getClientName(this.currentClient))) {
+                card.style.borderLeft = '4px solid var(--neon-green)';
+                card.style.background = 'rgba(57, 255, 20, 0.05)';
+            } else {
+                card.style.borderLeft = '';
+                card.style.background = '';
+            }
+        });
+    }
+    
+    getClientName(clientId) {
+        const clientNames = {
+            '1': '張美玲',
+            '2': '李志明',
+            '3': '王小華'
+        };
+        return clientNames[clientId] || '';
+    }
+    
+    filterNews(searchTerm) {
+        const filteredNews = this.newsData.filter(news => 
+            news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            news.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            news.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        
+        document.querySelectorAll('.news-card').forEach(card => {
+            const newsId = card.dataset.newsId;
+            const isVisible = filteredNews.some(news => news.id == newsId);
+            card.style.display = isVisible ? 'block' : 'none';
+        });
+    }
+    
+    formatTime(timestamp) {
+        const now = new Date();
+        const diff = now - timestamp;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        
+        if (hours < 1) return '剛剛';
+        if (hours < 24) return `${hours}小時前`;
+        return timestamp.toLocaleDateString();
+    }
+    
+    startRealTimeUpdates() {
+        // 模擬實時更新
+        setInterval(() => {
+            this.checkForBusinessOpportunities();
+        }, 30000); // 每30秒檢查一次
+    }
+    
+    checkForBusinessOpportunities() {
+        // 隨機顯示業務機會提醒
+        if (Math.random() > 0.8) {
+            const alert = document.getElementById('opportunityAlert');
+            const text = document.getElementById('opportunityText');
+            
+            const opportunities = [
+                '檢測到醫療險新聞，建議聯繫關注健康保障的客戶',
+                '退休規劃相關新聞增加，適合推廣年金商品',
+                '數位保險話題熱度上升，可向年輕客戶推薦線上投保'
+            ];
+            
+            text.textContent = opportunities[Math.floor(Math.random() * opportunities.length)];
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 10000);
+        }
+    }
+}
+
+// 全局函數
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function refreshData() {
+    window.businessCenter.loadNews();
+    window.cyberpunkSound.sounds.notification();
+}
+
+function previewNews(newsId) {
+    window.businessCenter.showQuickPreview(newsId);
+}
+
+function shareNews(newsId) {
+    window.businessCenter.shareNews(newsId);
+}
+
+function saveNews(newsId) {
+    // 實現收藏功能
+    console.log('收藏新聞:', newsId);
+    window.cyberpunkSound.sounds.click();
+}
+
+function selectAll() {
+    document.querySelectorAll('.news-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function shareSelected() {
+    const selected = Array.from(document.querySelectorAll('.news-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.newsId);
+    
+    if (selected.length > 0) {
+        alert(`已選擇 ${selected.length} 條新聞進行分享`);
+    }
+}
+
+function markImportant() {
+    const selected = Array.from(document.querySelectorAll('.news-checkbox:checked'));
+    selected.forEach(checkbox => {
+        const card = checkbox.closest('.news-card');
+        card.classList.add('news-priority-high');
+    });
+}
+
+function exportPDF() {
+    const selected = Array.from(document.querySelectorAll('.news-checkbox:checked'))
+        .map(checkbox => checkbox.dataset.newsId);
+    
+    if (selected.length > 0) {
+        alert(`正在匯出 ${selected.length} 條新聞為PDF...`);
+    }
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    window.businessCenter = new BusinessNewsCenter();
+    
+    // 初始化賽博朋克效果
+    console.log('🤖 啟動賽博朋克視覺效果系統...');
+    
+    // 確保載入賽博朋克特效
+    if (typeof CyberpunkParticleSystem !== 'undefined') {
+        window.cyberpunkParticles = new CyberpunkParticleSystem();
+        console.log('✅ 賽博朋克粒子系統已啟動');
+    } else {
+        console.warn('⚠️ 賽博朋克粒子系統未載入，手動載入...');
+        // 動態載入賽博朋克特效
+        const script = document.createElement('script');
+        script.src = '/static/js/cyberpunk-effects.js';
+        script.onload = () => {
+            window.cyberpunkParticles = new CyberpunkParticleSystem();
+            console.log('✅ 賽博朋克粒子系統已動態載入並啟動');
+        };
+        document.head.appendChild(script);
+    }
+    
+    // 添加賽博朋克背景網格
+    const body = document.body;
+    if (!body.classList.contains('cyber-grid')) {
+        body.classList.add('cyber-grid');
+        console.log('✅ 賽博朋克網格背景已應用');
+    }
+    
+    // 創建額外的網格背景元素
+    if (!document.querySelector('.cyber-grid-overlay')) {
+        const gridOverlay = document.createElement('div');
+        gridOverlay.className = 'cyber-grid-overlay';
+        gridOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.4) 1px, transparent 1px),
+                linear-gradient(rgba(139, 95, 191, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 95, 191, 0.3) 1px, transparent 1px);
+            background-size: 
+                50px 50px,
+                50px 50px,
+                10px 10px,
+                10px 10px;
+            background-position:
+                0 0,
+                0 0,
+                25px 25px,
+                25px 25px;
+            animation: gridPulse 3s ease-in-out infinite, gridShift 8s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+            pointer-events: none;
+        `;
+        document.body.appendChild(gridOverlay);
+        console.log('✅ 強化網格背景覆蓋層已添加');
+    }
+    
+    // 添加玻璃形態效果到所有卡片
+    const cards = document.querySelectorAll('.news-card, .client-card, .action-card');
+    cards.forEach(card => {
+        if (!card.classList.contains('glass-morphism')) {
+            card.classList.add('glass-morphism');
+        }
+    });
+    console.log(`✅ 玻璃形態效果已應用到 ${cards.length} 個元件`);
+    
+    // 添加霓虹發光效果
+    const buttons = document.querySelectorAll('.btn, .nav-link, .action-button');
+    buttons.forEach(btn => {
+        if (!btn.classList.contains('neon-border')) {
+            btn.classList.add('neon-border');
+        }
+    });
+    console.log(`✅ 霓虹發光效果已應用到 ${buttons.length} 個按鈕`);
+});
+</script>
+
+<!-- 賽博朋克特效腳本 -->
+<script src="{{ url_for('static', filename='js/cyberpunk-effects.js') }}"></script>
+{% endblock %}

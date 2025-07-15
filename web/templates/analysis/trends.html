@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}趨勢分析 - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5">
+                <i class="fas fa-chart-area text-success me-3"></i>
+                保險新聞趨勢分析
+            </h1>
+            <p class="lead text-muted">
+                透過數據分析，掌握台灣保險市場的最新趨勢變化
+            </p>
+        </div>
+    </div>
+
+    <!-- 篩選選項 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label">時間範圍</label>
+                            <select class="form-select" id="timeRangeFilter">
+                                <option value="7">過去7天</option>
+                                <option value="30" selected>過去30天</option>
+                                <option value="90">過去90天</option>
+                                <option value="180">過去半年</option>
+                                <option value="365">過去一年</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label">趨勢類型</label>
+                            <select class="form-select" id="trendTypeFilter">
+                                <option value="volume" selected>新聞數量</option>
+                                <option value="sentiment">情感分析</option>
+                                <option value="keywords">關鍵詞熱度</option>
+                                <option value="sources">來源分佈</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">分類篩選</label>
+                            <select class="form-select" id="categoryFilter">
+                                <option value="all" selected>所有分類</option>
+                                <option value="life">壽險新聞</option>
+                                <option value="property">產險新聞</option>
+                                <option value="health">健康保險</option>
+                                <option value="investment">投資型保險</option>
+                                <option value="regulation">保險法規</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary" id="applyFiltersBtn">
+                            <i class="fas fa-filter me-2"></i>套用篩選
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 趨勢圖表 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>新聞趨勢圖
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="mainTrendChart" style="height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">載入中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 趨勢摘要 -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>趨勢分析摘要
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h6 class="fw-bold"><i class="fas fa-arrow-up me-2"></i>上升趨勢</h6>
+                        <ul class="mb-0">
+                            <li>健康保險相關新聞增長54%</li>
+                            <li>保險科技話題熱度提升32%</li>
+                            <li>保險公司數位轉型討論增加28%</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <h6 class="fw-bold"><i class="fas fa-arrow-down me-2"></i>下降趨勢</h6>
+                        <ul class="mb-0">
+                            <li>傳統壽險產品討論減少12%</li>
+                            <li>車險理賠相關新聞減少18%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>來源分佈
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="sourcePieChart" style="height: 270px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">載入中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// 頁面載入時的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 渲染圖表
+    renderMainTrendChart();
+    renderSourcePieChart();
+    
+    // 添加篩選器事件處理
+    document.getElementById('applyFiltersBtn').addEventListener('click', function() {
+        renderMainTrendChart();
+        renderSourcePieChart();
+    });
+});
+
+// 渲染主趨勢圖表
+function renderMainTrendChart() {
+    // 獲取篩選值
+    const timeRange = document.getElementById('timeRangeFilter').value;
+    const trendType = document.getElementById('trendTypeFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    
+    // 清空圖表容器
+    const chartContainer = document.getElementById('mainTrendChart');
+    chartContainer.innerHTML = '<canvas></canvas>';
+    
+    // 根據篩選條件生成模擬數據
+    const dates = generateDateLabels(parseInt(timeRange));
+    const data = generateTrendData(dates.length, trendType, category);
+    
+    // 創建圖表
+    const ctx = chartContainer.querySelector('canvas').getContext('2d');
+    
+    // 根據趨勢類型選擇顏色和標題
+    let colors, title;
+    switch (trendType) {
+        case 'sentiment':
+            colors = ['rgba(40, 167, 69, 0.7)', 'rgba(0, 123, 255, 0.7)', 'rgba(220, 53, 69, 0.7)'];
+            title = '情感分析趨勢';
+            break;
+        case 'keywords':
+            colors = ['rgba(255, 193, 7, 0.7)', 'rgba(23, 162, 184, 0.7)', 'rgba(111, 66, 193, 0.7)'];
+            title = '關鍵詞熱度趨勢';
+            break;
+        case 'sources':
+            colors = ['rgba(23, 162, 184, 0.7)', 'rgba(102, 16, 242, 0.7)', 'rgba(40, 167, 69, 0.7)'];
+            title = '來源分佈趨勢';
+            break;
+        case 'volume':
+        default:
+            colors = ['rgba(40, 167, 69, 0.7)'];
+            title = '新聞數量趨勢';
+            break;
+    }
+    
+    // 創建數據集
+    const datasets = [];
+    
+    // 根據趨勢類型創建不同的數據集
+    if (trendType === 'sentiment') {
+        datasets.push({
+            label: '正面',
+            data: data.positive,
+            borderColor: colors[0],
+            backgroundColor: colors[0].replace('0.7', '0.1'),
+            fill: true
+        });
+        datasets.push({
+            label: '中性',
+            data: data.neutral,
+            borderColor: colors[1],
+            backgroundColor: colors[1].replace('0.7', '0.1'),
+            fill: true
+        });
+        datasets.push({
+            label: '負面',
+            data: data.negative,
+            borderColor: colors[2],
+            backgroundColor: colors[2].replace('0.7', '0.1'),
+            fill: true
+        });
+    } else if (trendType === 'keywords' || trendType === 'sources') {
+        datasets.push({
+            label: '前三名平均',
+            data: data.top,
+            borderColor: colors[0],
+            backgroundColor: colors[0].replace('0.7', '0.1'),
+            fill: true
+        });
+        datasets.push({
+            label: '中間三名平均',
+            data: data.mid,
+            borderColor: colors[1],
+            backgroundColor: colors[1].replace('0.7', '0.1'),
+            fill: true
+        });
+        datasets.push({
+            label: '後三名平均',
+            data: data.bottom,
+            borderColor: colors[2],
+            backgroundColor: colors[2].replace('0.7', '0.1'),
+            fill: true
+        });
+    } else {
+        datasets.push({
+            label: '新聞數量',
+            data: data,
+            borderColor: colors[0],
+            backgroundColor: colors[0].replace('0.7', '0.1'),
+            fill: true
+        });
+    }
+    
+    // 創建圖表
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: title
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// 渲染來源餅圖
+function renderSourcePieChart() {
+    // 清空圖表容器
+    const chartContainer = document.getElementById('sourcePieChart');
+    chartContainer.innerHTML = '<canvas></canvas>';
+    
+    // 創建模擬數據
+    const labels = ['工商時報', '經濟日報', '金管會', '保發中心', '人壽公會', '產險公會', '其他'];
+    const data = [25, 20, 15, 10, 10, 8, 12];
+    const backgroundColors = [
+        '#007bff', '#28a745', '#fd7e14', 
+        '#dc3545', '#6f42c1', '#17a2b8', '#6c757d'
+    ];
+    
+    // 創建圖表
+    const ctx = chartContainer.querySelector('canvas').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                title: {
+                    display: true,
+                    text: '新聞來源分佈'
+                }
+            }
+        }
+    });
+}
+
+// 生成日期標籤
+function generateDateLabels(days) {
+    const result = [];
+    const today = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        result.push(`${date.getMonth() + 1}/${date.getDate()}`);
+    }
+    
+    return result;
+}
+
+// 生成趨勢數據
+function generateTrendData(length, trendType, category) {
+    // 根據趨勢類型生成不同的數據
+    if (trendType === 'sentiment') {
+        // 情感分析數據有正面、中性、負面三組
+        const positive = Array.from({length}, () => Math.floor(Math.random() * 30) + 30);
+        const neutral = Array.from({length}, () => Math.floor(Math.random() * 20) + 40);
+        const negative = Array.from({length}, () => Math.floor(Math.random() * 15) + 10);
+        
+        // 添加趨勢
+        for (let i = 1; i < length; i++) {
+            positive[i] = positive[i-1] + (Math.random() * 10 - 4);
+            neutral[i] = neutral[i-1] + (Math.random() * 8 - 4);
+            negative[i] = negative[i-1] + (Math.random() * 6 - 3);
+            
+            // 確保值在合理範圍內
+            positive[i] = Math.min(Math.max(positive[i], 20), 60);
+            neutral[i] = Math.min(Math.max(neutral[i], 30), 60);
+            negative[i] = Math.min(Math.max(negative[i], 5), 30);
+        }
+        
+        return { positive, neutral, negative };
+    } else if (trendType === 'keywords' || trendType === 'sources') {
+        // 關鍵詞和來源數據分為top、mid、bottom三組
+        const top = Array.from({length}, () => Math.floor(Math.random() * 20) + 60);
+        const mid = Array.from({length}, () => Math.floor(Math.random() * 15) + 30);
+        const bottom = Array.from({length}, () => Math.floor(Math.random() * 10) + 10);
+        
+        // 添加趨勢
+        for (let i = 1; i < length; i++) {
+            top[i] = top[i-1] + (Math.random() * 10 - 4);
+            mid[i] = mid[i-1] + (Math.random() * 8 - 4);
+            bottom[i] = bottom[i-1] + (Math.random() * 6 - 3);
+            
+            // 確保值在合理範圍內
+            top[i] = Math.min(Math.max(top[i], 40), 80);
+            mid[i] = Math.min(Math.max(mid[i], 20), 50);
+            bottom[i] = Math.min(Math.max(bottom[i], 5), 25);
+        }
+        
+        return { top, mid, bottom };
+    } else {
+        // 新聞數量數據只有一組
+        let baseValue = 50;
+        
+        // 根據分類調整基準值
+        if (category === 'life') baseValue = 60;
+        else if (category === 'property') baseValue = 45;
+        else if (category === 'health') baseValue = 30;
+        else if (category === 'investment') baseValue = 35;
+        else if (category === 'regulation') baseValue = 25;
+        
+        // 生成數據
+        const data = [baseValue];
+        
+        // 添加趨勢
+        for (let i = 1; i < length; i++) {
+            // 增加一些隨機波動
+            data[i] = data[i-1] + (Math.random() * 16 - 8);
+            
+            // 確保值在合理範圍內
+            data[i] = Math.min(Math.max(data[i], 10), 100);
+        }
+        
+        return data;
+    }
+}
+</script>
+{% endblock %}

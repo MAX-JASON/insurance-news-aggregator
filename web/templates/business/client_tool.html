@@ -1,0 +1,1267 @@
+{% extends "business/base.html" %}
+
+{% block title %}客戶互動工具 - 賽博朋克風格{% endblock %}
+
+{% block business_content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-cyan glitch-text"><i class="fas fa-users me-2"></i>賽博客戶中心</h2>
+        <div>
+            <button type="button" class="neon-btn purple me-2" id="btn-save-template">
+                <i class="fas fa-save me-1"></i>儲存模板
+            </button>
+            <button type="button" class="neon-btn" id="btn-add-client">
+                <i class="fas fa-user-plus me-1"></i>新增客戶
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 左側：客戶列表和新聞選擇 -->
+        <div class="col-md-4">
+            <!-- 客戶列表 -->
+            <div class="glass-card">
+                <h4 class="text-cyan mb-3"><i class="fas fa-user-friends me-2"></i>我的客戶</h4>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control cyber-input" placeholder="搜尋客戶..." id="client-search">
+                    <button class="neon-btn" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="client-list">
+                    <div class="cyber-card client-card mb-2" data-client="張先生">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 text-white">張先生</h6>
+                                <span class="badge bg-primary">VIP</span>
+                            </div>
+                            <small class="text-secondary">車險, 壽險 | 上次聯絡: 2025/06/28</small>
+                        </div>
+                    </div>
+                    <div class="cyber-card client-card mb-2 selected" data-client="王小姐">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 text-white">王小姐</h6>
+                                <span class="badge bg-success">定期</span>
+                            </div>
+                            <small class="text-secondary">健康險, 投資型保險 | 上次聯絡: 2025/07/01</small>
+                        </div>
+                    </div>
+                    <div class="cyber-card client-card mb-2" data-client="林董事長">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 text-white">林董事長</h6>
+                                <span class="badge bg-warning text-dark">潛在</span>
+                            </div>
+                            <small class="text-secondary">企業保險, 高資產保障 | 新客戶</small>
+                        </div>
+                    </div>
+                    <div class="cyber-card client-card mb-2" data-client="陳太太">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 text-white">陳太太</h6>
+                                <span class="badge bg-info">定期</span>
+                            </div>
+                            <small class="text-secondary">醫療險, 儲蓄險 | 上次聯絡: 2025/06/15</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 相關新聞選擇 -->
+            <div class="glass-card mt-4">
+                <h4 class="text-cyan mb-3"><i class="fas fa-newspaper me-2"></i>新聞資料庫</h4>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control cyber-input" placeholder="搜尋新聞..." id="news-search">
+                    <button class="neon-btn" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="form-group mb-3">
+                    <select class="form-select cyber-select" id="news-filter">
+                        <option value="all">全部新聞</option>
+                        <option value="health">健康保險相關</option>
+                        <option value="investment">投資型保險相關</option>
+                        <option value="life">壽險相關</option>
+                        <option value="property">產險相關</option>
+                        <option value="favorite" selected>我的收藏</option>
+                    </select>
+                </div>
+                <div class="news-list">
+                    <div class="cyber-card news-card mb-3 importance-high" data-news="1">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1 text-white">健康保險理賠條款大修改！7月起生效</h6>
+                            <p class="card-text small mb-2 text-secondary">金管會公佈新版健康保險理賠條款，對慢性病理賠有重大影響...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/07/02</small>
+                                <span class="badge bg-danger">高關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cyber-card news-card mb-3 importance-medium" data-news="2">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1 text-white">投資型保險稅制優惠再延長五年</h6>
+                            <p class="card-text small mb-2 text-secondary">立法院三讀通過投資型保險稅制優惠再延長五年，業界看好後市...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/07/01</small>
+                                <span class="badge bg-warning text-dark">中關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cyber-card news-card mb-3 importance-low" data-news="3">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1 text-white">保險科技新創募資達10億</h6>
+                            <p class="card-text small mb-2 text-secondary">國內保險科技新創公司宣佈完成10億元募資，將用於開發AI理賠系統...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/06/30</small>
+                                <span class="badge bg-info">低關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右側：互動內容編輯 -->
+        <div class="col-md-8">
+            <div class="glass-card">
+                <!-- 客戶資料摘要 -->
+                <div class="cyber-info-panel mb-4">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="mb-2 text-cyan">王小姐 <span class="badge bg-success">定期客戶</span></h4>
+                        <button class="neon-btn purple" id="btn-view-details">
+                            <i class="fas fa-user me-1"></i>檢視完整資料
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-shield-alt me-2 text-cyan"></i><strong>已投保:</strong> 健康險、投資型保險</p>
+                            <p class="mb-1"><i class="fas fa-calendar-alt me-2 text-cyan"></i><strong>客戶年齡:</strong> 38歲</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-phone me-2 text-cyan"></i><strong>聯絡方式:</strong> Line、電子郵件</p>
+                            <p class="mb-1"><i class="fas fa-star me-2 text-warning"></i><strong>關注議題:</strong> 醫療保障、退休規劃</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 互動內容編輯 -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-cyan"><i class="fas fa-edit me-2"></i>客製化互動訊息</h4>
+                        <div class="template-select">
+                            <select class="form-select cyber-select" id="template-select">
+                                <option value="default" selected>預設模板</option>
+                                <option value="health">健康保險模板</option>
+                                <option value="investment">投資理財模板</option>
+                                <option value="follow-up">定期追蹤模板</option>
+                                <option value="custom">我的自訂模板</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="cyber-card mb-3">
+                        <div class="card-header cyber-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-cyan">郵件主旨</h5>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input cyber-switch" type="checkbox" id="ai-subject" checked>
+                                    <label class="form-check-label text-white" for="ai-subject">AI優化</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <input type="text" class="form-control cyber-input" id="email-subject" value="重要健康保險政策變更通知 - 您的保單可能受影響">
+                        </div>
+                    </div>
+                    
+                    <div class="cyber-card mb-3">
+                        <div class="card-header cyber-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-cyan">郵件內容</h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check form-switch me-2">
+                                        <input class="form-check-input cyber-switch" type="checkbox" id="ai-content" checked>
+                                        <label class="form-check-label text-white" for="ai-content">AI輔助</label>
+                                    </div>
+                                    <button class="neon-btn green" id="btn-format">
+                                        <i class="fas fa-magic me-1"></i>格式美化
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control cyber-textarea" id="email-content" rows="8">親愛的王小姐，
+
+希望您一切安好。我是您的保險顧問，今天想與您分享一則重要的保險新聞，可能會影響到您現有的健康保險計劃。
+
+根據最新消息，金管會已公佈新版健康保險理賠條款，將於7月起生效。這次修改主要涉及慢性病理賠範圍的調整，特別是對於糖尿病、高血壓等慢性疾病的理賠認定有了新的標準。
+
+考慮到您目前持有的健康保險計劃，我建議我們安排一次簡短的會談，我可以為您詳細解釋這些變更如何影響您的保障，並提供相應的調整建議，確保您的保障不受影響。
+
+您有空的話，我們可以約在下週二(7/8)下午3點進行視訊會議或電話溝通，時間約20分鐘。如果時間不方便，請告知您的可行時間。
+
+期待您的回覆，謝謝！
+
+祝  健康愉快
+
+王保險顧問
+電話: 0912-345-678
+Line ID: wangadvisor</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 附加新聞區塊 -->
+                    <div class="cyber-card mb-3">
+                        <div class="card-header cyber-header">
+                            <h5 class="mb-0 text-cyan">附加新聞</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="selected-news p-3 border-neon rounded" id="selected-news">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="text-white mb-2">請從左側選擇要附加的新聞</h6>
+                                        <p class="text-secondary mb-0">點擊左側新聞列表中的新聞項目來添加到此處</p>
+                                    </div>
+                                    <i class="fas fa-plus text-cyan fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 發送選項 -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="sharing-efficiency">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 text-white">預估效果：</span>
+                                <div class="progress cyber-progress" style="width: 150px;">
+                                    <div class="progress-bar bg-cyan" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">85%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sharing-options d-flex gap-2">
+                            <button type="button" class="neon-btn" id="btn-save-draft">
+                                <i class="fas fa-save me-1"></i>儲存草稿
+                            </button>
+                            <button type="button" class="neon-btn purple" id="btn-schedule">
+                                <i class="far fa-clock me-1"></i>預約發送
+                            </button>
+                            <button type="button" class="neon-btn green" id="btn-send-now">
+                                <i class="fas fa-paper-plane me-1"></i>立即發送
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增客戶模態框 -->
+<div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark border-neon">
+            <div class="modal-header border-cyan">
+                <h5 class="modal-title text-cyan" id="addClientModalLabel">新增客戶</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="clientName" class="form-label text-white">客戶姓名</label>
+                        <input type="text" class="form-control cyber-input" id="clientName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientType" class="form-label text-white">客戶類型</label>
+                        <select class="form-select cyber-select" id="clientType">
+                            <option value="regular">定期客戶</option>
+                            <option value="vip">VIP客戶</option>
+                            <option value="potential">潛在客戶</option>
+                            <option value="new">新客戶</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientInsurance" class="form-label text-white">已投保險種</label>
+                        <select class="form-select cyber-select" id="clientInsurance" multiple>
+                            <option value="health">健康險</option>
+                            <option value="life">壽險</option>
+                            <option value="investment">投資型保險</option>
+                            <option value="property">產險</option>
+                            <option value="accident">意外險</option>
+                        </select>
+                        <small class="form-text text-secondary">按住Ctrl鍵可多選</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientAge" class="form-label text-white">客戶年齡</label>
+                        <input type="number" class="form-control cyber-input" id="clientAge">
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientContact" class="form-label text-white">主要聯絡方式</label>
+                        <div class="form-check">
+                            <input class="form-check-input cyber-checkbox" type="checkbox" value="phone" id="contactPhone" checked>
+                            <label class="form-check-label text-white" for="contactPhone">電話</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input cyber-checkbox" type="checkbox" value="email" id="contactEmail" checked>
+                            <label class="form-check-label text-white" for="contactEmail">電子郵件</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input cyber-checkbox" type="checkbox" value="line" id="contactLine" checked>
+                            <label class="form-check-label text-white" for="contactLine">Line</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientInterest" class="form-label text-white">關注議題</label>
+                        <input type="text" class="form-control cyber-input" id="clientInterest" placeholder="例：醫療保障、退休規劃">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-cyan">
+                <button type="button" class="neon-btn" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="neon-btn green" id="btn-save-client">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 檢視客戶詳情模態框 -->
+<div class="modal fade" id="viewClientModal" tabindex="-1" aria-labelledby="viewClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark border-neon">
+            <div class="modal-header border-cyan">
+                <h5 class="modal-title text-cyan" id="viewClientModalLabel">客戶詳細資料</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom border-cyan pb-2 text-cyan">基本資料</h5>
+                        <p class="text-white"><strong>姓名：</strong> 王小姐</p>
+                        <p class="text-white"><strong>年齡：</strong> 38歲</p>
+                        <p class="text-white"><strong>職業：</strong> 會計師</p>
+                        <p class="text-white"><strong>家庭狀況：</strong> 已婚，1子1女</p>
+                        <p class="text-white"><strong>客戶類型：</strong> 定期客戶 (2018年開始)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom border-cyan pb-2 text-cyan">聯絡資訊</h5>
+                        <p class="text-white"><strong>電話：</strong> 0923-456-789</p>
+                        <p class="text-white"><strong>Email：</strong> wang@example.com</p>
+                        <p class="text-white"><strong>Line：</strong> wang_client</p>
+                        <p class="text-white"><strong>首選聯絡方式：</strong> Line > Email > 電話</p>
+                        <p class="text-white"><strong>最佳聯絡時段：</strong> 週間下午或晚上</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom border-cyan pb-2 text-cyan">保單資訊</h5>
+                        <p class="text-white"><strong>現有保單：</strong> 3份</p>
+                        <ul class="text-white">
+                            <li>全家醫療險 (2018年投保)</li>
+                            <li>重大傷病險 (2019年投保)</li>
+                            <li>投資型保險 (2022年投保)</li>
+                        </ul>
+                        <p class="text-white"><strong>年繳保費總額：</strong> NT$ 24,000</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom border-cyan pb-2 text-cyan">互動記錄</h5>
+                        <div class="small text-white">
+                            <p class="mb-1"><strong>2025/07/01</strong> - 季度保單檢視通話</p>
+                            <p class="mb-1"><strong>2025/06/15</strong> - 發送健康險更新資訊</p>
+                            <p class="mb-1"><strong>2025/05/20</strong> - 保費繳納提醒</p>
+                            <p class="mb-1"><strong>2025/04/10</strong> - 生日祝賀訊息</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5 class="border-bottom border-cyan pb-2 text-cyan">備註與關注議題</h5>
+                        <p class="text-white">關注退休規劃與子女教育基金，考慮明年增加儲蓄型保險。家中長輩有慢性病史，對醫療保障需求較高。喜歡收取保險相關教育資訊。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-cyan">
+                <button type="button" class="neon-btn" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="neon-btn purple">編輯資料</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block business_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🤖 初始化賽博客戶工具...');
+    
+    // 客戶卡片點擊事件
+    document.querySelectorAll('.client-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // 移除其他選中狀態
+            document.querySelectorAll('.client-card').forEach(c => c.classList.remove('selected'));
+            // 添加選中狀態
+            this.classList.add('selected');
+            
+            // 更新客戶資訊顯示
+            const clientName = this.dataset.client;
+            updateClientInfo(clientName);
+            
+            // 添加賽博朋克效果
+            this.style.boxShadow = '0 0 20px rgba(0, 212, 255, 0.5)';
+            setTimeout(() => {
+                this.style.boxShadow = '';
+            }, 1000);
+        });
+    });
+    
+    // 新聞卡片點擊事件
+    document.querySelectorAll('.news-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const title = this.querySelector('.card-title').textContent;
+            const content = this.querySelector('.card-text').textContent;
+            const date = this.querySelector('small').textContent;
+            const importance = this.querySelector('.badge').textContent;
+            
+            // 更新附加新聞區塊
+            updateSelectedNews(title, content, date, importance);
+            
+            // 添加賽博朋克效果
+            this.style.boxShadow = '0 0 20px rgba(57, 255, 20, 0.5)';
+            setTimeout(() => {
+                this.style.boxShadow = '';
+            }, 1000);
+            
+            showNotification('新聞已添加到郵件中', 'success');
+        });
+    });
+    
+    // 模板選擇事件
+    document.getElementById('template-select').addEventListener('change', function() {
+        const templateType = this.value;
+        loadTemplate(templateType);
+        showNotification('模板已載入', 'info');
+    });
+    
+    // 按鈕點擊事件
+    document.getElementById('btn-add-client').addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('addClientModal'));
+        modal.show();
+    });
+    
+    document.getElementById('btn-view-details').addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('viewClientModal'));
+        modal.show();
+    });
+    
+    document.getElementById('btn-save-template').addEventListener('click', function() {
+        showNotification('模板已儲存', 'success');
+        addButtonEffect(this);
+    });
+    
+    document.getElementById('btn-format').addEventListener('click', function() {
+        beautifyContent();
+        showNotification('內容已美化', 'success');
+        addButtonEffect(this);
+    });
+    
+    document.getElementById('btn-save-draft').addEventListener('click', function() {
+        saveDraft();
+        showNotification('草稿已儲存', 'success');
+        addButtonEffect(this);
+    });
+    
+    document.getElementById('btn-schedule').addEventListener('click', function() {
+        scheduleEmail();
+        addButtonEffect(this);
+    });
+    
+    document.getElementById('btn-send-now').addEventListener('click', function() {
+        sendEmail();
+        addButtonEffect(this);
+    });
+    
+    document.getElementById('btn-save-client').addEventListener('click', function() {
+        saveNewClient();
+        addButtonEffect(this);
+    });
+    
+    // AI 功能開關
+    document.querySelectorAll('.cyber-switch').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                showNotification('AI ' + this.nextElementSibling.textContent + ' 已啟用', 'info');
+            } else {
+                showNotification('AI ' + this.nextElementSibling.textContent + ' 已停用', 'warning');
+            }
+        });
+    });
+});
+
+// 更新客戶資訊
+function updateClientInfo(clientName) {
+    const clientData = {
+        '張先生': {
+            name: '張先生',
+            type: 'VIP',
+            insurance: '車險, 壽險',
+            age: '45歲',
+            contact: '電話、Email',
+            interests: '車險保障、家庭保險'
+        },
+        '王小姐': {
+            name: '王小姐',
+            type: '定期',
+            insurance: '健康險、投資型保險',
+            age: '38歲',
+            contact: 'Line、電子郵件',
+            interests: '醫療保障、退休規劃'
+        },
+        '林董事長': {
+            name: '林董事長',
+            type: '潛在',
+            insurance: '企業保險、高資產保障',
+            age: '52歲',
+            contact: '電話、Email',
+            interests: '企業保險、高端醫療'
+        },
+        '陳太太': {
+            name: '陳太太',
+            type: '定期',
+            insurance: '醫療險、儲蓄險',
+            age: '42歲',
+            contact: 'Line、電話',
+            interests: '子女教育、醫療保障'
+        }
+    };
+    
+    const client = clientData[clientName];
+    if (client) {
+        // 更新客戶資訊面板
+        document.querySelector('.cyber-info-panel h4').innerHTML = `${client.name} <span class="badge bg-success">${client.type}客戶</span>`;
+        document.querySelector('.cyber-info-panel .row').innerHTML = `
+            <div class="col-md-6">
+                <p class="mb-1"><i class="fas fa-shield-alt me-2 text-cyan"></i><strong>已投保:</strong> ${client.insurance}</p>
+                <p class="mb-1"><i class="fas fa-calendar-alt me-2 text-cyan"></i><strong>客戶年齡:</strong> ${client.age}</p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><i class="fas fa-phone me-2 text-cyan"></i><strong>聯絡方式:</strong> ${client.contact}</p>
+                <p class="mb-1"><i class="fas fa-star me-2 text-warning"></i><strong>關注議題:</strong> ${client.interests}</p>
+            </div>
+        `;
+    }
+}
+
+// 更新選中的新聞
+function updateSelectedNews(title, content, date, importance) {
+    const newsPanel = document.getElementById('selected-news');
+    newsPanel.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <h6 class="text-white mb-2">${title}</h6>
+                <p class="text-secondary mb-2">${content}</p>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">${date}</small>
+                    <span class="badge bg-info">${importance}</span>
+                </div>
+            </div>
+            <button class="neon-btn btn-sm ms-2" onclick="removeSelectedNews()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+}
+
+// 移除選中的新聞
+function removeSelectedNews() {
+    const newsPanel = document.getElementById('selected-news');
+    newsPanel.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <h6 class="text-white mb-2">請從左側選擇要附加的新聞</h6>
+                <p class="text-secondary mb-0">點擊左側新聞列表中的新聞項目來添加到此處</p>
+            </div>
+            <i class="fas fa-plus text-cyan fa-2x"></i>
+        </div>
+    `;
+    showNotification('新聞已移除', 'info');
+}
+
+// 載入模板
+function loadTemplate(templateType) {
+    const templates = {
+        'health': {
+            subject: '重要健康保險政策變更通知 - 您的保單可能受影響',
+            content: `親愛的客戶，
+
+希望您一切安好。我是您的保險顧問，今天想與您分享一則重要的保險新聞，可能會影響到您現有的健康保險計劃。
+
+根據最新消息，金管會已公佈新版健康保險理賠條款，將於7月起生效。這次修改主要涉及慢性病理賠範圍的調整，特別是對於糖尿病、高血壓等慢性疾病的理賠認定有了新的標準。
+
+考慮到您目前持有的健康保險計劃，我建議我們安排一次簡短的會談，我可以為您詳細解釋這些變更如何影響您的保障，並提供相應的調整建議。
+
+期待您的回覆，謝謝！
+
+祝  健康愉快
+
+您的保險顧問`
+        },
+        'investment': {
+            subject: '投資型保險重要稅制變更 - 為您的財富規劃帶來新優勢',
+            content: `親愛的客戶，
+
+希望您近來一切順利。作為您的保險財務顧問，我很高興與您分享一個可能對您的財務規劃產生積極影響的重要消息。
+
+立法院已三讀通過投資型保險稅制優惠再延長五年的法案。這意味著您目前持有的投資型保單將繼續享有稅務優惠，同時也為您提供了優化財務配置的新機會。
+
+考慮到您對退休規劃的關注，這次稅制變更可能對您的長期財富積累策略有所幫助。我建議我們安排一次投資配置檢視會議。
+
+期待您的回覆！
+
+敬祝 財富增長
+
+您的保險顧問`
+        },
+        'follow-up': {
+            subject: '定期保單健康檢視 - 確保您的保障持續最佳化',
+            content: `親愛的客戶，
+
+希望您和家人一切都好。感謝您一直以來的信任，作為您的保險顧問，我定期為您檢視保單是我的責任。
+
+距離我們上次的保單檢視已經過了三個月，我想藉此機會與您確認：
+1. 您的聯絡資訊是否有任何變更
+2. 家庭狀況是否有任何重大變化
+3. 財務目標是否需要調整
+
+如果方便的話，我們可以安排一次短暫的視訊會議或電話溝通。
+
+期待您的回覆。
+
+祝  一切順利
+
+您的保險顧問`
+        }
+    };
+    
+    const template = templates[templateType];
+    if (template) {
+        document.getElementById('email-subject').value = template.subject;
+        document.getElementById('email-content').value = template.content;
+    }
+}
+
+// 美化內容
+function beautifyContent() {
+    const content = document.getElementById('email-content').value;
+    // 簡單的格式美化：添加適當的換行和間距
+    const beautified = content
+        .replace(/([。！？])/g, '$1\n\n')
+        .replace(/：\n\n/g, '：\n')
+        .replace(/\n{3,}/g, '\n\n');
+    
+    document.getElementById('email-content').value = beautified;
+}
+
+// 儲存草稿
+function saveDraft() {
+    const draft = {
+        subject: document.getElementById('email-subject').value,
+        content: document.getElementById('email-content').value,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('emailDraft', JSON.stringify(draft));
+}
+
+// 預約發送
+function scheduleEmail() {
+    const scheduleModal = document.createElement('div');
+    scheduleModal.className = 'modal fade show';
+    scheduleModal.style.display = 'block';
+    scheduleModal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark border-neon">
+                <div class="modal-header border-cyan">
+                    <h5 class="modal-title text-cyan">預約發送</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-white">發送日期</label>
+                        <input type="date" class="form-control cyber-input" id="schedule-date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">發送時間</label>
+                        <input type="time" class="form-control cyber-input" id="schedule-time">
+                    </div>
+                </div>
+                <div class="modal-footer border-cyan">
+                    <button type="button" class="neon-btn" onclick="this.closest('.modal').remove()">取消</button>
+                    <button type="button" class="neon-btn green" onclick="confirmSchedule()">確認預約</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(scheduleModal);
+}
+
+// 確認預約
+function confirmSchedule() {
+    const date = document.getElementById('schedule-date').value;
+    const time = document.getElementById('schedule-time').value;
+    
+    if (date && time) {
+        showNotification(`郵件已預約於 ${date} ${time} 發送`, 'success');
+        document.querySelector('.modal.show').remove();
+    } else {
+        showNotification('請選擇日期和時間', 'warning');
+    }
+}
+
+// 立即發送
+function sendEmail() {
+    const subject = document.getElementById('email-subject').value;
+    const content = document.getElementById('email-content').value;
+    
+    if (subject && content) {
+        showNotification('郵件發送中...', 'info');
+        
+        // 模擬發送過程
+        setTimeout(() => {
+            showNotification('郵件已成功發送！', 'success');
+        }, 2000);
+    } else {
+        showNotification('請填寫主旨和內容', 'warning');
+    }
+}
+
+// 儲存新客戶
+function saveNewClient() {
+    const name = document.getElementById('clientName').value;
+    const type = document.getElementById('clientType').value;
+    
+    if (name) {
+        showNotification(`客戶 ${name} 已新增`, 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addClientModal'));
+        modal.hide();
+    } else {
+        showNotification('請填寫客戶姓名', 'warning');
+    }
+}
+
+// 添加按鈕效果
+function addButtonEffect(button) {
+    button.style.transform = 'scale(0.95)';
+    button.style.boxShadow = '0 0 15px rgba(0, 212, 255, 0.8)';
+    
+    setTimeout(() => {
+        button.style.transform = '';
+        button.style.boxShadow = '';
+    }, 200);
+}
+
+// 顯示通知
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible cyber-notification`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        background: rgba(11, 15, 25, 0.9);
+        border: 1px solid rgba(0, 212, 255, 0.5);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 自動移除通知
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-users me-2"></i>客戶互動工具</h2>
+        <div>
+            <button type="button" class="btn btn-outline-primary me-2" id="btn-save-template">
+                <i class="fas fa-save me-1"></i> 儲存當前模板
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-add-client">
+                <i class="fas fa-user-plus me-1"></i> 新增客戶
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 左側：客戶列表和新聞選擇 -->
+        <div class="col-md-4">
+            <!-- 客戶列表 -->
+            <div class="tool-section">
+                <h4><i class="fas fa-user-friends me-2"></i>我的客戶</h4>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="搜尋客戶..." id="client-search">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="list-group client-list">
+                    <div class="card client-card mb-2">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">張先生</h6>
+                                <span class="badge bg-primary">VIP</span>
+                            </div>
+                            <small class="text-muted">車險, 壽險 | 上次聯絡: 2025/06/28</small>
+                        </div>
+                    </div>
+                    <div class="card client-card mb-2 selected">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">王小姐</h6>
+                                <span class="badge bg-success">定期</span>
+                            </div>
+                            <small class="text-muted">健康險, 投資型保險 | 上次聯絡: 2025/07/01</small>
+                        </div>
+                    </div>
+                    <div class="card client-card mb-2">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">林董事長</h6>
+                                <span class="badge bg-warning text-dark">潛在</span>
+                            </div>
+                            <small class="text-muted">企業保險, 高資產保障 | 新客戶</small>
+                        </div>
+                    </div>
+                    <div class="card client-card mb-2">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">陳太太</h6>
+                                <span class="badge bg-info text-dark">定期</span>
+                            </div>
+                            <small class="text-muted">醫療險, 儲蓄險 | 上次聯絡: 2025/06/15</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 相關新聞選擇 -->
+            <div class="tool-section">
+                <h4><i class="fas fa-newspaper me-2"></i>相關新聞</h4>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="搜尋新聞..." id="news-search">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="form-group mb-3">
+                    <select class="form-select" id="news-filter">
+                        <option value="all">全部新聞</option>
+                        <option value="health">健康保險相關</option>
+                        <option value="investment">投資型保險相關</option>
+                        <option value="life">壽險相關</option>
+                        <option value="property">產險相關</option>
+                        <option value="favorite" selected>我的收藏</option>
+                    </select>
+                </div>
+                <div class="news-list">
+                    <div class="card news-card mb-3 importance-high">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">健康保險理賠條款大修改！7月起生效</h6>
+                            <p class="card-text small mb-2 text-truncate">金管會公佈新版健康保險理賠條款，對慢性病理賠有重大影響...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/07/02</small>
+                                <span class="badge bg-danger">高關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card news-card mb-3 importance-medium">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">投資型保險稅制優惠再延長五年</h6>
+                            <p class="card-text small mb-2 text-truncate">立法院三讀通過投資型保險稅制優惠再延長五年，業界看好後市...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/07/01</small>
+                                <span class="badge bg-warning text-dark">中關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card news-card mb-3 importance-low">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-1">保險科技新創募資達10億</h6>
+                            <p class="card-text small mb-2 text-truncate">國內保險科技新創公司宣佈完成10億元募資，將用於開發AI理賠系統...</p>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">2025/06/30</small>
+                                <span class="badge bg-info">低關聯</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右側：互動內容編輯 -->
+        <div class="col-md-8">
+            <div class="tool-section">
+                <!-- 客戶資料摘要 -->
+                <div class="client-info">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="mb-2">王小姐 <span class="badge bg-success">定期客戶</span></h4>
+                        <button class="btn btn-sm btn-outline-primary" id="btn-view-details">
+                            <i class="fas fa-user me-1"></i> 檢視完整資料
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-shield-alt me-2 text-primary"></i><strong>已投保:</strong> 健康險、投資型保險</p>
+                            <p class="mb-1"><i class="fas fa-calendar-alt me-2 text-primary"></i><strong>客戶年齡:</strong> 38歲</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-phone me-2 text-primary"></i><strong>聯絡方式:</strong> Line、電子郵件</p>
+                            <p class="mb-1"><i class="fas fa-star me-2 text-warning"></i><strong>關注議題:</strong> 醫療保障、退休規劃</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 互動內容編輯 -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4><i class="fas fa-edit me-2"></i>客製化互動訊息</h4>
+                        <div class="template-select">
+                            <select class="form-select" id="template-select">
+                                <option value="default" selected>預設模板</option>
+                                <option value="health">健康保險模板</option>
+                                <option value="investment">投資理財模板</option>
+                                <option value="follow-up">定期追蹤模板</option>
+                                <option value="custom">我的自訂模板</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header card-header-custom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">郵件主旨</h5>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="ai-subject" checked>
+                                    <label class="form-check-label" for="ai-subject">AI優化</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <input type="text" class="form-control" id="email-subject" value="重要健康保險政策變更通知 - 您的保單可能受影響">
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header card-header-custom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">郵件內容</h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check form-switch me-2">
+                                        <input class="form-check-input" type="checkbox" id="ai-content" checked>
+                                        <label class="form-check-label" for="ai-content">AI輔助</label>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" id="btn-format">
+                                        <i class="fas fa-magic me-1"></i> 格式美化
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control template-textarea" id="email-content">親愛的王小姐，
+
+希望您一切安好。我是您的保險顧問，今天想與您分享一則重要的保險新聞，可能會影響到您現有的健康保險計劃。
+
+根據最新消息，金管會已公佈新版健康保險理賠條款，將於7月起生效。這次修改主要涉及慢性病理賠範圍的調整，特別是對於糖尿病、高血壓等慢性疾病的理賠認定有了新的標準。
+
+考慮到您目前持有的健康保險計劃，我建議我們安排一次簡短的會談，我可以為您詳細解釋這些變更如何影響您的保障，並提供相應的調整建議，確保您的保障不受影響。
+
+您有空的話，我們可以約在下週二(7/8)下午3點進行視訊會議或電話溝通，時間約20分鐘。如果時間不方便，請告知您的可行時間。
+
+期待您的回覆，謝謝！
+
+祝  健康愉快
+
+王保險顧問
+電話: 0912-345-678
+Line ID: wangadvisor</textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 附加新聞區塊 -->
+                    <div class="card mb-3">
+                        <div class="card-header card-header-custom">
+                            <h5 class="mb-0">附加新聞</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="selected-news p-3 border rounded">
+                                <h5>健康保險理賠條款大修改！7月起生效</h5>
+                                <p class="mb-2">金管會公佈新版健康保險理賠條款，對慢性病理賠有重大影響，包含糖尿病、高血壓等慢性疾病的理賠認定標準都將調整。新規定明確了長期用藥與併發症的理賠範圍，同時放寬了部分特定疾病的等待期，讓消費者更容易取得保障。保險專家建議，民眾應儘速檢視自身保單，了解是否受到影響...</p>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">來源：財經日報 | 2025/07/02</small>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times me-1"></i> 移除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 發送選項 -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="sharing-efficiency">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">預估效果：</span>
+                                <div class="progress flex-grow-1" style="width: 150px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">85%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sharing-options">
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="fas fa-save me-1"></i> 儲存草稿
+                            </button>
+                            <button type="button" class="btn btn-outline-primary">
+                                <i class="far fa-clock me-1"></i> 預約發送
+                            </button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> 立即發送
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增客戶模態框 -->
+<div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClientModalLabel">新增客戶</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="clientName" class="form-label">客戶姓名</label>
+                        <input type="text" class="form-control" id="clientName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientType" class="form-label">客戶類型</label>
+                        <select class="form-select" id="clientType">
+                            <option value="regular">定期客戶</option>
+                            <option value="vip">VIP客戶</option>
+                            <option value="potential">潛在客戶</option>
+                            <option value="new">新客戶</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientInsurance" class="form-label">已投保險種</label>
+                        <select class="form-select" id="clientInsurance" multiple>
+                            <option value="health">健康險</option>
+                            <option value="life">壽險</option>
+                            <option value="investment">投資型保險</option>
+                            <option value="property">產險</option>
+                            <option value="accident">意外險</option>
+                        </select>
+                        <small class="form-text text-muted">按住Ctrl鍵可多選</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientAge" class="form-label">客戶年齡</label>
+                        <input type="number" class="form-control" id="clientAge">
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientContact" class="form-label">主要聯絡方式</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="phone" id="contactPhone" checked>
+                            <label class="form-check-label" for="contactPhone">電話</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="email" id="contactEmail" checked>
+                            <label class="form-check-label" for="contactEmail">電子郵件</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="line" id="contactLine" checked>
+                            <label class="form-check-label" for="contactLine">Line</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientInterest" class="form-label">關注議題</label>
+                        <input type="text" class="form-control" id="clientInterest" placeholder="例：醫療保障、退休規劃">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 檢視客戶詳情模態框 -->
+<div class="modal fade" id="viewClientModal" tabindex="-1" aria-labelledby="viewClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewClientModalLabel">客戶詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">基本資料</h5>
+                        <p><strong>姓名：</strong> 王小姐</p>
+                        <p><strong>年齡：</strong> 38歲</p>
+                        <p><strong>職業：</strong> 會計師</p>
+                        <p><strong>家庭狀況：</strong> 已婚，1子1女</p>
+                        <p><strong>客戶類型：</strong> 定期客戶 (2018年開始)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">聯絡資訊</h5>
+                        <p><strong>電話：</strong> 0923-456-789</p>
+                        <p><strong>Email：</strong> wang@example.com</p>
+                        <p><strong>Line：</strong> wang_client</p>
+                        <p><strong>首選聯絡方式：</strong> Line > Email > 電話</p>
+                        <p><strong>最佳聯絡時段：</strong> 週間下午或晚上</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">保單資訊</h5>
+                        <p><strong>現有保單：</strong> 3份</p>
+                        <ul>
+                            <li>全家醫療險 (2018年投保)</li>
+                            <li>重大傷病險 (2019年投保)</li>
+                            <li>投資型保險 (2022年投保)</li>
+                        </ul>
+                        <p><strong>年繳保費總額：</strong> NT$ 24,000</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">互動記錄</h5>
+                        <div class="small">
+                            <p class="mb-1"><strong>2025/07/01</strong> - 季度保單檢視通話</p>
+                            <p class="mb-1"><strong>2025/06/15</strong> - 發送健康險更新資訊</p>
+                            <p class="mb-1"><strong>2025/05/20</strong> - 保費繳納提醒</p>
+                            <p class="mb-1"><strong>2025/04/10</strong> - 生日祝賀訊息</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2">備註與關注議題</h5>
+                        <p>關注退休規劃與子女教育基金，考慮明年增加儲蓄型保險。家中長輩有慢性病史，對醫療保障需求較高。喜歡收取保險相關教育資訊。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary">編輯資料</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    // 客戶卡片點擊事件
+    $('.client-card').click(function() {
+        $('.client-card').removeClass('selected');
+        $(this).addClass('selected');
+        // 這裡可以添加加載客戶資料的AJAX請求
+    });
+    
+    // 新聞卡片點擊事件
+    $('.news-card').click(function() {
+        // 模擬將新聞添加到附加新聞區塊的功能
+        // 實際應用中應該有更詳細的處理邏輯
+        const title = $(this).find('.card-title').text();
+        const preview = $(this).find('.card-text').text();
+        
+        // 這裡可以添加顯示新聞詳情或添加到郵件的邏輯
+        alert(`已選擇新聞: ${title}`);
+    });
+    
+    // 模板選擇事件
+    $('#template-select').change(function() {
+        const templateType = $(this).val();
+        let subjectText = '';
+        let contentText = '';
+        
+        // 根據選擇的模板類型設置不同的內容
+        switch(templateType) {
+            case 'health':
+                subjectText = '重要健康保險政策變更通知 - 您的保單可能受影響';
+                contentText = `親愛的王小姐，\n\n希望您一切安好。我是您的保險顧問，今天想與您分享一則重要的保險新聞，可能會影響到您現有的健康保險計劃。\n\n根據最新消息，金管會已公佈新版健康保險理賠條款，將於7月起生效。這次修改主要涉及慢性病理賠範圍的調整，特別是對於糖尿病、高血壓等慢性疾病的理賠認定有了新的標準。\n\n考慮到您目前持有的健康保險計劃，我建議我們安排一次簡短的會談，我可以為您詳細解釋這些變更如何影響您的保障，並提供相應的調整建議，確保您的保障不受影響。\n\n您有空的話，我們可以約在下週二(7/8)下午3點進行視訊會議或電話溝通，時間約20分鐘。如果時間不方便，請告知您的可行時間。\n\n期待您的回覆，謝謝！\n\n祝  健康愉快\n\n王保險顧問\n電話: 0912-345-678\nLine ID: wangadvisor`;
+                break;
+            case 'investment':
+                subjectText = '投資型保險重要稅制變更 - 為您的財富規劃帶來新優勢';
+                contentText = `親愛的王小姐，\n\n希望您近來一切順利。作為您的保險財務顧問，我很高興與您分享一個可能對您的財務規劃產生積極影響的重要消息。\n\n立法院已三讀通過投資型保險稅制優惠再延長五年的法案。這意味著您目前持有的投資型保單將繼續享有稅務優惠，同時也為您提供了優化財務配置的新機會。\n\n考慮到您對退休規劃的關注，這次稅制變更可能對您的長期財富積累策略有所幫助。我建議我們安排一次投資配置檢視會議，討論如何利用這次政策變更為您創造最大價值。\n\n如果您有時間，我們可以安排在下週四(7/10)上午10點進行約30分鐘的會談。若時間不便，請告知您的可行時間。\n\n期待您的回覆！\n\n敬祝 財富增長\n\n王保險顧問\n電話: 0912-345-678\nLine ID: wangadvisor`;
+                break;
+            case 'follow-up':
+                subjectText = '定期保單健康檢視 - 確保您的保障持續最佳化';
+                contentText = `親愛的王小姐，\n\n希望您和家人一切都好。感謝您一直以來的信任，作為您的保險顧問，我定期為您檢視保單是我的責任。\n\n距離我們上次的保單檢視已經過了三個月，我想藉此機會與您確認：\n1. 您的聯絡資訊是否有任何變更\n2. 家庭狀況是否有任何重大變化\n3. 財務目標是否需要調整\n\n同時，我也注意到保險市場有一些新產品可能適合您目前的需求，特別是針對您關注的子女教育基金和退休規劃。\n\n如果方便的話，我們可以安排一次短暫的視訊會議或電話溝通，時間約15-20分鐘。請告知您的可行時間。\n\n期待您的回覆。\n\n祝  一切順利\n\n王保險顧問\n電話: 0912-345-678\nLine ID: wangadvisor`;
+                break;
+            // 可添加更多模板類型
+            default:
+                // 使用當前編輯框中的內容
+                subjectText = $('#email-subject').val();
+                contentText = $('#email-content').val();
+        }
+        
+        // 更新編輯框內容
+        $('#email-subject').val(subjectText);
+        $('#email-content').val(contentText);
+    });
+    
+    // 新增客戶按鈕點擊事件
+    $('#btn-add-client').click(function() {
+        $('#addClientModal').modal('show');
+    });
+    
+    // 查看客戶詳情按鈕點擊事件
+    $('#btn-view-details').click(function() {
+        $('#viewClientModal').modal('show');
+    });
+    
+    // AI優化按鈕事件
+    $('#ai-subject, #ai-content').change(function() {
+        if($(this).is(':checked')) {
+            // 模擬AI優化效果
+            alert('AI優化功能已啟用，將自動優化您的文字內容');
+        }
+    });
+    
+    // 格式美化按鈕點擊事件
+    $('#btn-format').click(function() {
+        // 模擬格式美化功能
+        alert('內容已美化格式');
+    });
+    
+    // 儲存模板按鈕點擊事件
+    $('#btn-save-template').click(function() {
+        // 模擬儲存模板功能
+        alert('當前模板已儲存');
+    });
+});
+</script>
+{% endblock %}
