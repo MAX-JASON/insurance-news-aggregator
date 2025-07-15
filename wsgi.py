@@ -31,7 +31,7 @@ db = SQLAlchemy()
 def create_app():
     """創建簡化的雲端應用"""
     # 設置模板和靜態文件目錄
-    template_dir = os.path.join(current_dir, 'web', 'templates')
+    template_dir = os.path.join(current_dir, 'templates')  # 簡化模板路徑
     static_dir = os.path.join(current_dir, 'web', 'static')
     
     app = Flask(__name__, 
@@ -144,7 +144,17 @@ def register_routes(app, News):
     @app.route('/')
     def index():
         """首頁"""
-        return render_template('index.html')
+        return render_template('simple_index.html')
+    
+    @app.route('/business')
+    def business_dashboard():
+        """業務員儀表板"""
+        return render_template('simple_index.html')
+    
+    @app.route('/analysis')
+    def analysis_dashboard():
+        """分析儀表板"""
+        return render_template('simple_index.html')
     
     @app.route('/api/health')
     def api_health():
@@ -222,16 +232,6 @@ def register_routes(app, News):
                 'sources': [{'name': source, 'count': count} for source, count in sources]
             }
         })
-    
-    @app.route('/business')
-    def business_dashboard():
-        """業務員儀表板"""
-        return render_template('business/index.html')
-    
-    @app.route('/analysis')
-    def analysis_dashboard():
-        """分析儀表板"""
-        return render_template('analysis/index.html')
     
     @app.errorhandler(404)
     def not_found(error):

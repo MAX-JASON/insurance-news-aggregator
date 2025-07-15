@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣保險新聞聚合器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 70px; }
+        .navbar-brand { font-weight: bold; }
+        .news-card { 
+            border-left: 4px solid #007bff; 
+            transition: transform 0.2s;
+        }
+        .news-card:hover { transform: translateY(-2px); }
+        .importance-high { border-left-color: #dc3545; }
+        .importance-medium { border-left-color: #ffc107; }
+        .importance-low { border-left-color: #28a745; }
+        .category-badge { font-size: 0.8rem; }
+        .loading { text-align: center; padding: 2rem; }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .footer { background-color: #f8f9fa; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>台灣保險新聞聚合器
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">
+                            <i class="fas fa-home me-1"></i>首頁
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/business">
+                            <i class="fas fa-briefcase me-1"></i>業務員工具
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analysis">
+                            <i class="fas fa-chart-line me-1"></i>智能分析
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/health">
+                            <i class="fas fa-heartbeat me-1"></i>API狀態
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <div class="container">
+        <!-- 歡迎橫幅 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="jumbotron bg-light p-4 rounded">
+                    <h1 class="display-4">
+                        <i class="fas fa-newspaper text-primary"></i>
+                        歡迎使用台灣保險新聞聚合器
+                    </h1>
+                    <p class="lead">即時聚合台灣保險業相關新聞，提供智能分析與業務工具</p>
+                    <hr class="my-4">
+                    <p>專為保險從業人員設計的新聞分析平台</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 統計概覽 -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card stat-card text-center p-3">
+                    <h3 id="totalNews" class="mb-1">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </h3>
+                    <small>總新聞數</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card stat-card text-center p-3">
+                    <h3 id="todayNews" class="mb-1">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </h3>
+                    <small>今日新增</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card stat-card text-center p-3">
+                    <h3 id="totalSources" class="mb-1">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </h3>
+                    <small>新聞來源</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card stat-card text-center p-3">
+                    <h3 id="totalCategories" class="mb-1">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </h3>
+                    <small>分類數量</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 新聞列表 -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-newspaper text-primary me-2"></i>最新保險新聞
+                            </h5>
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadNews()">
+                                <i class="fas fa-sync-alt"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="news-container" class="loading">
+                            <div class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">載入中...</span>
+                                </div>
+                                <p class="mt-2 mb-0">正在載入最新新聞...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 側邊欄 -->
+            <div class="col-lg-4">
+                <!-- 快速功能 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-rocket text-primary me-2"></i>快速功能
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/business" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-briefcase me-2"></i>業務員儀表板
+                            </a>
+                            <a href="/analysis" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-chart-line me-2"></i>數據分析中心
+                            </a>
+                            <a href="/api/news" class="btn btn-outline-success btn-sm" target="_blank">
+                                <i class="fas fa-code me-2"></i>API 接口
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系統狀態 -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-heartbeat text-primary me-2"></i>系統狀態
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">資料庫連接</span>
+                            <span class="badge bg-success">正常</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">API 服務</span>
+                            <span class="badge bg-success">運行中</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small">最後更新</span>
+                            <span class="small text-muted" id="lastUpdateTime">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁腳 -->
+    <footer class="footer py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0 text-muted">
+                <i class="fas fa-shield-alt me-1"></i>
+                台灣保險新聞聚合器 © 2025 | 
+                <a href="/api/health" class="text-decoration-none">系統狀態</a> | 
+                <a href="https://github.com/MAX-JASON/insurance-news-aggregator" target="_blank" class="text-decoration-none">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 載入新聞
+        async function loadNews() {
+            try {
+                const response = await fetch('/api/news');
+                const result = await response.json();
+                
+                const container = document.getElementById('news-container');
+                
+                if (result.status === 'success' && result.data.news.length > 0) {
+                    container.innerHTML = result.data.news.map(news => {
+                        const importanceClass = news.importance_score > 8 ? 'importance-high' : 
+                                              news.importance_score > 6 ? 'importance-medium' : 'importance-low';
+                        const publishedDate = news.published_date ? 
+                            new Date(news.published_date).toLocaleString('zh-TW') : '未知時間';
+                        
+                        return `
+                            <div class="card news-card ${importanceClass} mb-3 mx-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">${news.title}</h6>
+                                        <span class="badge bg-secondary category-badge">${news.category || '未分類'}</span>
+                                    </div>
+                                    <p class="card-text small">${news.content ? news.content.substring(0, 150) + '...' : '無內容摘要'}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>${publishedDate}
+                                            <br><i class="fas fa-newspaper me-1"></i>${news.source || '未知來源'}
+                                        </small>
+                                        <div>
+                                            <span class="badge bg-info">重要度: ${news.importance_score ? news.importance_score.toFixed(1) : 'N/A'}</span>
+                                            ${news.url ? `<a href="${news.url}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">閱讀原文</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="alert alert-info m-3">
+                            <h6><i class="fas fa-info-circle me-2"></i>暫無新聞數據</h6>
+                            <p class="mb-0">系統正在收集最新的保險新聞，請稍後再試。</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('載入新聞失敗:', error);
+                document.getElementById('news-container').innerHTML = `
+                    <div class="alert alert-danger m-3">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>載入失敗</h6>
+                        <p class="mb-0">無法載入新聞數據，請檢查網路連接或稍後再試。</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 載入統計
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    document.getElementById('totalNews').textContent = data.total_news;
+                    document.getElementById('todayNews').textContent = data.today_news;
+                    document.getElementById('totalSources').textContent = data.sources.length;
+                    document.getElementById('totalCategories').textContent = data.categories.length;
+                    document.getElementById('lastUpdateTime').textContent = new Date().toLocaleString('zh-TW');
+                }
+            } catch (error) {
+                console.error('載入統計失敗:', error);
+                ['totalNews', 'todayNews', 'totalSources', 'totalCategories'].forEach(id => {
+                    document.getElementById(id).innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                });
+            }
+        }
+
+        // 頁面載入後執行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNews();
+            loadStats();
+            
+            // 每5分鐘自動重新載入
+            setInterval(() => {
+                loadNews();
+                loadStats();
+            }, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
